@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
-const template = require('../static/config');
+const templateB = require('../static/config');
 
 class CreateConfiguration {
   constructor(IPs) {
@@ -40,7 +40,7 @@ class CreateConfiguration {
   createTemplate = (ips) => {
     let finalTemplate = '';
     for (const ip of ips) {
-      let temp = template.replaceAll('-:-', ip[0]);
+      let temp = templateB.replaceAll('-:-', ip[0]);
       temp = temp.replaceAll('-+++-', ip[1]);
       finalTemplate = finalTemplate + temp;
     }
