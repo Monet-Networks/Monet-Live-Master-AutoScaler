@@ -10,12 +10,17 @@ const PORT = process.env.PORT || 3000;
 
 new db();
 
-admin.get('/new-instance', async (req, res) => {
+admin.get('/configure-instances', async (req, res) => {
   const ips = await getInstances();
   // const IPs = ips.map(({ publicIP }) => publicIP);
   console.log('IPS : ', ips);
   new CreateConfiguration(ips);
-  res.send('Hello world. I am mayank.');
+  res.json({
+    code: 200,
+    error: false,
+    message: 'IPs configured',
+    response: ips,
+  });
 });
 
 admin.listen(PORT, () => log(`Server listening on port : ${PORT}`));
