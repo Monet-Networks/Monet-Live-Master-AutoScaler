@@ -1,0 +1,33 @@
+{
+  "name": "automaster",
+  "version": "1.0.0",
+  "description": "master instance controller",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "start:dev": "nodemon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mayamalkoti-ashmar/congenial-guacamole.git"
+  },
+  "keywords": [
+    "master",
+    "instance",
+    "controller"
+  ],
+  "author": "mayank malkoti",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mayamalkoti-ashmar/congenial-guacamole/issues"
+  },
+  "homepage": "https://github.com/mayamalkoti-ashmar/congenial-guacamole#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
