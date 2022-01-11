@@ -11,9 +11,8 @@ const PORT = process.env.PORT || 3000;
 new db();
 
 admin.get('/configure-instances', async (req, res) => {
+  log('configure instance call.');
   const ips = await getInstances();
-  // const IPs = ips.map(({ publicIP }) => publicIP);
-  console.log('IPS : ', ips);
   new CreateConfiguration(ips);
   res.json({
     code: 200,
