@@ -50,7 +50,7 @@ const templateA = `
 
 const templateB = `
     location /-:-/rtc/ {
-      proxy_pass http://-+++-/rtc/;
+      proxy_pass http://-+++-/rtc;
       proxy_redirect off;
       proxy_set_header Access-Control-Allow-Origin *;
       proxy_http_version 1.1;
@@ -62,7 +62,7 @@ const templateB = `
     }
 
     location /-:-/many/ {
-      proxy_pass http://-+++-/many/;
+      proxy_pass http://-+++-/many;
       proxy_redirect off;
       proxy_set_header Access-Control-Allow-Origin *;
       proxy_http_version 1.1;
