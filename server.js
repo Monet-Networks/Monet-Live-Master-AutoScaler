@@ -31,7 +31,7 @@ admin.get('/register-instance', async (req, res) => {
     );
   createOneInstance({
     InstanceNo: 0,
-    InstanceRoute: ,
+    InstanceRoute: `call.monetanalytics.com/${req.query.publicIP.replaceAll('.','_')}/`,
     publicIP: req.query.publicIP,
     privateIP: req.query.privateIP,
   });
