@@ -1,12 +1,14 @@
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 const template = require('../static/config');
 
-class createConfiguration {
+class CreateConfiguration {
   constructor(IPs) {
     this.config = this.confCreate(IPs);
-    // this.writeToFile(this.config);
-    console.log(this.config);
+    this.writeToFile(this.config);
+    this.restartNGINXServer();
+    // console.log(this.config);
   }
 
   writeToFile = (config) => {
@@ -15,6 +17,10 @@ class createConfiguration {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  restartNGINXServer = () => {
+    exec('sudo service nginx reload');
   };
 
   confCreate = (IPs) => {
@@ -44,4 +50,4 @@ class createConfiguration {
   restartNginx = () => {};
 }
 
-const newConfig = new createConfiguration(['127.0.0.1', '0.0.0.0']);
+module.exports = CreateConfiguration;
