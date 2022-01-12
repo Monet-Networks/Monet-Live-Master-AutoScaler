@@ -5,7 +5,7 @@ exports.getInstances = async () => {
   return instanceIps.map(({ publicIP }) => publicIP);
 };
 
-exports.createOneInstance = async ({ publicIP, privateIP, InstanceNo, InstanceRoute }, callback) => {
+exports.createOneInstance = async ({ publicIP, privateIP, InstanceNo, InstanceRoute, type }, callback) => {
   const existingInstance = await Instance.findOne({ publicIP, privateIP });
   if (existingInstance)
     return callback({
@@ -17,6 +17,7 @@ exports.createOneInstance = async ({ publicIP, privateIP, InstanceNo, InstanceRo
     publicIP,
     privateIP,
     occupied: false,
+    type
   });
   await instance.save((err) => {
     if (err) return callback(err);
