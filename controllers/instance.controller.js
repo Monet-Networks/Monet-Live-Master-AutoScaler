@@ -1,7 +1,9 @@
 const Instance = require('../models/instance.model');
+const ErrorHandler = require('../util/ErrorHandler');
+const SuccessHandler = require('../util/SuccessHandler');
 
 exports.getInstances = async () => {
-  const instanceIps = await Instance.find({}, 'publicIP');
+  const instanceIps = await Instance.find({ type: 'auto' }, 'publicIP');
   return instanceIps.map(({ publicIP }) => publicIP);
 };
 
@@ -17,11 +19,16 @@ exports.createOneInstance = async ({ publicIP, privateIP, InstanceNo, InstanceRo
     publicIP,
     privateIP,
     occupied: false,
-    type
+    type,
   });
   await instance.save((err) => {
     if (err) return callback(err);
     return callback(null, { msg: 'success' });
   });
+};
+
+exports.getInstance = async (req, res) => {
+  const getFreeInstance = await Instance.findOne({ type: 'auto', occupied: false }).lean();
+  return new SuccessHandler(res, 200, 'success', getFreeInstance)
 };
 
