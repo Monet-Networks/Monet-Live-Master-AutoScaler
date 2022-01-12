@@ -28,8 +28,8 @@ exports.createOneInstance = async ({ publicIP, privateIP, InstanceNo, InstanceRo
 };
 
 exports.getInstance = async (req, res) => {
-  const getFreeInstance = await Instance.findOne({ type: 'auto', occupied: false }, 'InstanceRoute').lean();
-  if (getFreeInstance) return new SuccessHandler(res, 200, 'success', { route: getFreeInstance.InstanceRoute });
+  const getFreeInstance = await Instance.find({ type: 'auto', occupied: false }, 'InstanceRoute').lean();
+  if (getFreeInstance.length !== 0) return new SuccessHandler(res, 200, 'success', { route: getFreeInstance.pop().InstanceRoute });
   else return new ErrorHandler(res, 400, 'error', 'no instance available');
 };
 
