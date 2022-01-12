@@ -28,7 +28,7 @@ exports.createOneInstance = async ({ publicIP, privateIP, InstanceNo, InstanceRo
 };
 
 exports.getInstance = async (req, res) => {
-  const getFreeInstance = await Instance.findOne({ type: 'auto', occupied: false }).lean();
+  const getFreeInstance = await Instance.findOne({ type: 'auto', occupied: false }, 'InstanceRoute').lean();
   return new SuccessHandler(res, 200, 'success', getFreeInstance)
 };
 
