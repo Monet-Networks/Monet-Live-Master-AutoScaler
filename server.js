@@ -39,11 +39,11 @@ admin.get('/register-instance', (req, res) => {
     },
     (err, doc) => {
       if (err) {
-        console.log(colors.red('DB instance error : ' + err.message));
+        console.log('DB instance error : ' + err.message);
         return new AdminAPIError(res, err.message);
       }
       if (res) {
-        console.log(colors.green('DB instance entry created : ' + doc.msg));
+        console.log('DB instance entry created : ' + doc.msg);
         return res.json({
           code: 200,
           error: false,
