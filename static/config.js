@@ -98,4 +98,4 @@ const templateB = `
     }
 `;
 
-module.exports = templateB;
+module.exports = templateA;
