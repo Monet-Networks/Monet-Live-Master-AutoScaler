@@ -54,7 +54,7 @@ exports.getInstance = async (req, res) => {
   const getFreeInstance = await Instance.find({ type: 'auto', occupied: false }, 'InstanceRoute publicIP').lean();
   if (getFreeInstance.length !== 0) {
     const instance = getFreeInstance.pop();
-    return new SuccessHandler(res, 200, 'success', { route: instance.InstanceRoute, ip: instance.publicIP });
+    return new SuccessHandler(res, 200, 'success', { route: instance.InstanceRoute, ip: instance.publicIP, response: 'Instance Alloted' });
   }
   else return new ErrorHandler(res, 400, 'error', 'No instances available.');
 };
