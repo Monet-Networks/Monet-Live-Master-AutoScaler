@@ -68,4 +68,4 @@ admin.get('/get-link', (req, res) => {
 
 admin.get('/free-all-instances', freeAllInstances);
 
-admin.listen(PORT, () => log(`Server listening on port : ${PORT}`));
+admin.listen(PORT, () => log(`[Server OK]`));
