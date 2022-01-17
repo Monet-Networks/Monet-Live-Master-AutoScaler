@@ -33,3 +33,20 @@ exports.getInstance = async (req, res) => {
   else return new ErrorHandler(res, 400, 'error', 'no instance available');
 };
 
+exports.freeAllInstances = async (req, res) => {
+  if (!req.query.secret) return new ErrorHandler(res, 400, 'missing parameter');
+  if (req.query.secret !== process.env.SECRET)
+      return new ErrorHandler(
+        res,
+        400,
+        `Don't try to be smart. You haven't provided valid secret. Please don't try again unless you are admin. I know your address.`,
+        'authentication error'
+      );
+  const upInstance = await Instance.updateMany({ occupied: true }, { occupied: false });
+  return res.send({
+    code: 200,
+    error: false,
+    message: 'success',
+    response: upInstance,
+  });
+};
