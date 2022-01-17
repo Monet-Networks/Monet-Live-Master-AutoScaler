@@ -24,7 +24,7 @@ exports.createOneInstance = async (req, res) => {
     });
   const instance = new Instance({
     InstanceNo: 0,
-    InstanceRoute: `call.monetanalytics.com/${req.query.publicIP.replaceAll('.', '_')}/`,
+    InstanceRoute: `/${req.query.publicIP.replaceAll('.', '_')}/`,
     publicIP: req.query.publicIP,
     privateIP: req.query.privateIP,
     occupied: false,
