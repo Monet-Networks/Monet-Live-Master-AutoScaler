@@ -52,9 +52,10 @@ exports.getInstance = async (req, res) => {
       'authentication error'
     );
   const getFreeInstance = await Instance.find({ type: 'auto', occupied: false }, 'InstanceRoute publicIP').lean();
+  if (getFreeInstance.length !== 0) {
   const instance = getFreeInstance.pop();
-  if (getFreeInstance.length !== 0)
     return new SuccessHandler(res, 200, 'success', { route: instance.InstanceRoute, ip: instance.publicIP });
+  }
   else return new ErrorHandler(res, 400, 'error', 'no instance available');
 };
 
