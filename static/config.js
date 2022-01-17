@@ -24,7 +24,7 @@ const templateA = `
     }
 
     location /-:-/sock/ {
-      proxy_pass http://-+++-:8666;
+      proxy_pass http://-+++-:8666$request_uri;
       proxy_redirect off;
       proxy_set_header Access-Control-Allow-Origin *;
       proxy_http_version 1.1;
