@@ -17,7 +17,7 @@ exports.createOneInstance = async (req, res) => {
       `Don't try to be smart. You haven't provided valid secret. Please don't try again unless you are admin. I know your address.`,
       'authentication error'
     );
-  const existingInstance = await Instance.findOne({ req.query.publicIP, req.query.privateIP });
+  const existingInstance = await Instance.findOne({ publicIP: req.query.publicIP, privateIP: req.query.privateIP });
   if (existingInstance)
     return callback({
       message: 'The entry for this instance exist with flag ' + existingInstance.occupied + ' kindly update if needed.',
