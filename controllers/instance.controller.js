@@ -51,9 +51,10 @@ exports.getInstance = async (req, res) => {
       `Don't try to be smart. You haven't provided valid secret. Please don't try again unless you are admin. I know your address.`,
       'authentication error'
     );
-  const getFreeInstance = await Instance.find({ type: 'auto', occupied: false }, 'InstanceRoute').lean();
+  const getFreeInstance = await Instance.find({ type: 'auto', occupied: false }, 'InstanceRoute publicIP').lean();
+  const instance = getFreeInstance.pop();
   if (getFreeInstance.length !== 0)
-    return new SuccessHandler(res, 200, 'success', { route: getFreeInstance.pop().InstanceRoute });
+    return new SuccessHandler(res, 200, 'success', { route: instance.InstanceRoute, ip: instance.publicIP });
   else return new ErrorHandler(res, 400, 'error', 'no instance available');
 };
 
