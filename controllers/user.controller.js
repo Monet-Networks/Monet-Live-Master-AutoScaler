@@ -182,3 +182,13 @@ exports.resetPassword = (req, res) => {
     }
   });
 };
+
+/* Checks whether a user exists and creates one if not */
+const checkExistence = async (email, ID, name) => {
+  const user = await UserModel.findOne({ email });
+  if (!user) {
+    await UserModel.create({ ID, name, email });
+    return false;
+  }
+  return true;
+};
