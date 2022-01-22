@@ -4,7 +4,7 @@ const UserModel = require('../models/user.model');
 
 /* Google's Authentication Controller */
 exports.googleAuth = async (req, res) => {
-  console.log(req.body);
+  console.log(req);
   if (!req.body['token']) return new ErrorHandler(res, 'No token provided.');
   const { token } = req.body;
   const client = new OAuth2Client({
