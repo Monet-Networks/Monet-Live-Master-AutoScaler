@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 new db();
 
-admin.post('api/auth/google', googleAuth);
+admin.post('/auth/google', googleAuth);
 
 admin.get('/configure-instances', async (req, res) => {
   log('configure instance call.');
