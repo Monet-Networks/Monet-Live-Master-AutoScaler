@@ -3,6 +3,7 @@ const express = require('express');
 const admin = express();
 const db = require('./modules/db');
 const { log } = require('console');
+const { googleAuth } = require('./controllers/user.controller');
 const { getInstances, createOneInstance, getInstance, freeAllInstances } = require('./controllers/instance.controller');
 const CreateConfiguration = require('./modules/createConfig');
 const ErrorHandler = require('./util/ErrorHandler');
@@ -11,6 +12,8 @@ const SuccessHandler = require('./util/SuccessHandler');
 const PORT = process.env.PORT || 3000;
 
 new db();
+
+admin.post('api/auth/google', googleAuth);
 
 admin.get('/configure-instances', async (req, res) => {
   log('configure instance call.');
