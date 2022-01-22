@@ -2,6 +2,7 @@ const { OAuth2Client } = require('google-auth-library');
 const ErrorHandler = require('../util/ErrorHandler');
 const SuccessHandler = require('../util/SuccessHandler');
 const UserModel = require('../models/user.model');
+const { authenticate, generateToken } = require('../util/auth');
 
 /* Google's Authentication Controller */
 exports.googleAuth = async (req, res) => {
