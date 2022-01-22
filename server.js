@@ -28,4 +28,6 @@ admin.get('/get-link', getInstance);
 
 admin.get('/free-all-instances', freeAllInstances);
 
+admin.use(express.urlencoded({ extended: true }));
+
 admin.listen(PORT, () => log(`[Server OK]`));
