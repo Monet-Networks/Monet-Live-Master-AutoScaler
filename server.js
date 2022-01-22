@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const bodyParser = require('body-parser');
 const admin = express();
 const db = require('./modules/db');
 const { log } = require('console');
@@ -13,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 new db();
 
-admin.use(express.bodyParser());
+admin.use(bodyParser());
 
 admin.post('/auth/google', googleAuth);
 
