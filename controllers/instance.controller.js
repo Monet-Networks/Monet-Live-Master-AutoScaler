@@ -19,9 +19,7 @@ exports.createOneInstance = async (req, res) => {
     );
   const existingInstance = await Instance.findOne({ publicIP: req.query.publicIP, privateIP: req.query.privateIP });
   if (existingInstance)
-    return callback({
-      message: 'The entry for this instance exist with flag ' + existingInstance.occupied + ' kindly update if needed.',
-    });
+    return new ErrorHandler(res, 400, 'The entry for this instance exist with flag ' + existingInstance.occupied + ' kindly update if needed.');
   const instance = new Instance({
     InstanceNo: 0,
     InstanceRoute: `/${req.query.publicIP.replaceAll('.', '_')}/`,
@@ -51,12 +49,15 @@ exports.getInstance = async (req, res) => {
       `Don't try to be smart. You haven't provided valid secret. Please don't try again unless you are admin. I know your address.`,
       'authentication error'
     );
-  const getFreeInstance = await Instance.find({ type: 'auto', occupied: false }, 'InstanceRoute publicIP').lean();
+  const getFreeInstance = await Instance.find({ type: 'auto', occupied: false }, 'InstanceRoute publicIP').lean(); // false || true -> CPU usage or network load?
   if (getFreeInstance.length !== 0) {
     const instance = getFreeInstance.pop();
-    return new SuccessHandler(res, 200, 'success', { route: instance.InstanceRoute, ip: instance.publicIP, response: 'Instance Alloted' });
-  }
-  else return new ErrorHandler(res, 400, 'error', 'No instances available.');
+    return new SuccessHandler(res, 200, 'success', {
+      route: instance.InstanceRoute,
+      ip: instance.publicIP,
+      response: 'Instance Alloted',
+    });
+  } else return new ErrorHandler(res, 400, 'error', 'No instances available.');
 };
 
 exports.freeAllInstances = async (req, res) => {
