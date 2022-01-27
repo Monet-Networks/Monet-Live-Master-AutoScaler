@@ -22,7 +22,7 @@ exports.createOneInstance = async (req, res) => {
     return new ErrorHandler(res, 400, 'The entry for this instance exist with flag ' + existingInstance.occupied + ' kindly update if needed.');
   const instance = new Instance({
     InstanceNo: 0,
-    InstanceRoute: `/${req.query.publicIP.replaceAll('.', '_')}/`,
+    InstanceRoute: `${req.query.publicIP.replaceAll('.', '_')}`,
     publicIP: req.query.publicIP,
     privateIP: req.query.privateIP,
     occupied: false,
