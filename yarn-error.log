@@ -1,0 +1,72 @@
+Arguments: 
+  /usr/bin/node /snap/node/5770/bin/yarn.js global dir --json
+
+PATH: 
+  /usr/local/go/bin:/home/mayamalkoti/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+
+Yarn version: 
+  1.22.17
+
+Node version: 
+  10.19.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: EACCES: permission denied, write
+      at writeSync (fs.js:573:3)
+      at SyncWriteStream._write (internal/fs/sync_write_stream.js:22:3)
+      at doWrite (_stream_writable.js:415:12)
+      at writeOrBuffer (_stream_writable.js:399:5)
+      at SyncWriteStream.Writable.write (_stream_writable.js:299:11)
+      at JSONReporter._dump (/snap/node/5770/lib/cli.js:49950:12)
+      at JSONReporter.log (/snap/node/5770/lib/cli.js:49978:10)
+      at dir (/snap/node/5770/lib/cli.js:36299:14)
+      at Object.<anonymous> (/snap/node/5770/lib/cli.js:25983:25)
+      at Generator.next (<anonymous>)
+
+npm manifest: 
+  {
+    "name": "automaster",
+    "version": "1.0.0",
+    "description": "master instance controller",
+    "main": "server.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "node server.js",
+      "start:dev": "nodemon"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/mayamalkoti-ashmar/congenial-guacamole.git"
+    },
+    "keywords": [
+      "master",
+      "instance",
+      "controller"
+    ],
+    "author": "mayank malkoti",
+    "license": "ISC",
+    "bugs": {
+      "url": "https://github.com/mayamalkoti-ashmar/congenial-guacamole/issues"
+    },
+    "homepage": "https://github.com/mayamalkoti-ashmar/congenial-guacamole#readme",
+    "dependencies": {
+      "body-parser": "^1.19.1",
+      "dotenv": "^10.0.0",
+      "express": "^4.17.2",
+      "google-auth-library": "^7.11.0",
+      "jsonwebtoken": "^8.5.1",
+      "mongoose": "^6.1.6"
+    },
+    "devDependencies": {
+      "nodemon": "^2.0.15"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

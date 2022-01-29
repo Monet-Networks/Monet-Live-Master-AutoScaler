@@ -1746,9 +1746,9 @@ const fetchAvailableInstance = (link, ip, callback = () => {}) => {
   if (link && ip) {
     dynamoIp = ip;
     dynamoLink = link;
-    socket = io(`http://call.monetanalytics.com`, {
+    socket = io(`https://call.monetanalytics.com`, {
       query: { uuid, name },
-      path: `/${ip.replaceAll('.', '_')}/sock`,
+      path: `/${link}/sock`,
       transports: ['websocket'],
       reconnect: true,
     });
@@ -1764,10 +1764,11 @@ const fetchAvailableInstance = (link, ip, callback = () => {}) => {
         dynamoLink = `https://call.monetanalytics.com`;
         socket = io(dynamoLink, {
           query: { uuid, name },
-          path: `${data.route}sock`,
+          path: `/${data.route}/sock`,
           transports: ['websocket'],
           reconnect: true,
         });
+        socket.emit('I-AM-ADMIN');
         dynamoLink = data.route;
         registerSocketEvents();
         if (typeof data.response === 'string')
