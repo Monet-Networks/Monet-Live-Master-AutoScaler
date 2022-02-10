@@ -8,6 +8,7 @@ const { googleAuth } = require('./controllers/user.controller');
 const { getInstances, createOneInstance, getInstance, freeAllInstances } = require('./controllers/instance.controller');
 const { getRoom } = require('./controllers/room.controller');
 const CreateConfiguration = require('./modules/createConfig');
+const AWSConfiguration = require("./modules/awsConfig");
 const ErrorHandler = require('./util/ErrorHandler');
 const SuccessHandler = require('./util/SuccessHandler');
 
@@ -15,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 new db();
 
-admin.use(bodyParser());
+// admin.use(bodyParser());
 
 admin.post('/auth/google', googleAuth);
 
