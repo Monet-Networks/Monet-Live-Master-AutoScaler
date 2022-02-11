@@ -1,23 +1,22 @@
 require('dotenv').config();
 const express = require('express');
-const bodyParser = require('body-parser');
 const admin = express();
-const db = require('./modules/db');
 const { log } = require('console');
+const db = require('./modules/db');
+const Engine = require('./modules/engine');
 const { googleAuth } = require('./controllers/user.controller');
 const { getInstances, createOneInstance, getInstance, freeAllInstances } = require('./controllers/instance.controller');
 const { getRoom } = require('./controllers/room.controller');
 const CreateConfiguration = require('./modules/createConfig');
-const AWSConfiguration = require("./modules/awsConfig");
-const ErrorHandler = require('./util/ErrorHandler');
+const AWSConfiguration = require('./modules/awsConfig');
 const SuccessHandler = require('./util/SuccessHandler');
+const ErrorHandler = require('./util/ErrorHandler');
 
 const PORT = process.env.PORT || 3000;
 
+/* Instantiate the engine class */
+const engine = new Engine();
 new db();
-
-// admin.use(bodyParser());
-
 admin.post('/auth/google', googleAuth);
 
 admin.get('/configure-instances', async (req, res) => {
@@ -30,16 +29,21 @@ admin.get('/configure-instances', async (req, res) => {
 admin.get('/getRoomIp', async (req, res) => {
   const { roomid } = req.query;
   const room = await getRoom(roomid);
-  if (!room) {
+  if (!room)
     return res.json({ code: 404, error: true, message: 'Room not found' });
-  }
   res.json({ code: 200, error: false, message: 'Room found', room });
 });
 
-admin.get('/register-instance', createOneInstance);
+admin.get('/register-instance', instanceRegistrationHandle);
 
 admin.get('/get-link', getInstance);
 
 admin.get('/free-all-instances', freeAllInstances);
 
 admin.listen(PORT, () => log(`[Server OK]`));
+
+const instanceRegistrationHandle = async (req, res) => {
+  const instance = await createOneInstance(req, res);
+  console.log('Instance Register', instance);
+  if (req.query.publicIP && instance) engine.addInstanceIP(instance);
+};

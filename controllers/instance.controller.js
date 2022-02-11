@@ -32,11 +32,12 @@ exports.createOneInstance = async (req, res) => {
     if (err) {
       return new ErrorHandler(res, 400, 'error', err.message);
     }
-    return res.json({
+    res.json({
       code: 200,
       error: false,
       message: 'Instance entry created : success',
     });
+    return instance;
   });
 };
 
