@@ -104,7 +104,7 @@ class Engine {
       }
 
       clear();
-      log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> '), cyan(this.Instances));
+      log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
     }
 
     /* First ask db for empty entry data if available */
@@ -162,7 +162,6 @@ class Engine {
                   red(error)
                 );
               }
-              log(cyan(`res : ${ip} : `), r);
             })
             .catch((e) => {
               log('error : ', e.code);
