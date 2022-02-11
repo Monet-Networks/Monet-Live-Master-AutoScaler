@@ -1,7 +1,7 @@
 const db = require('./db');
 const hyperReq = require('http');
 const { log, clear } = require('console');
-const { green, red, blue, cyan } = require('colors');
+const { green, red, cyan } = require('colors');
 // const { getGenInstances } = require('../controllers/instance.controller');
 
 new db();
@@ -90,7 +90,7 @@ class Engine {
       const instanceCountChanged = this.state.TotalInstances !== currentInstances.length;
       if (instanceCountChanged) {
         this.state.TotalInstances = currentInstances.length;
-        log(blue('The number of instances changed. '), this.state);
+        log(cyan('The number of instances changed. '), this.state);
       }
       /* Take tab of total no. of occupied instances */
       let totalOccupancy = 0;
@@ -100,7 +100,7 @@ class Engine {
       const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
       if (occupancyCountChanged) {
         this.state.TotalOccupancy = totalOccupancy;
-        log(blue('The number of occupied changed. '), this.state);
+        log(cyan('The number of occupied changed. '), this.state);
       }
 
       clear();
@@ -162,7 +162,7 @@ class Engine {
                   red(error)
                 );
               }
-              log(blue(`res : ${ip} : `), r);
+              log(cyan(`res : ${ip} : `), r);
             })
             .catch((e) => {
               log('error : ', e.code);
