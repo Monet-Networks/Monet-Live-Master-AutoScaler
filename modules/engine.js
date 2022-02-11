@@ -1,6 +1,6 @@
 const db = require('./db');
 const hyperReq = require('http');
-const { log, clear } = require('console');
+const { log } = require('console');
 const { green, red, cyan } = require('colors');
 // const { getGenInstances } = require('../controllers/instance.controller');
 
@@ -102,39 +102,15 @@ class Engine {
         this.state.TotalOccupancy = totalOccupancy;
         log(cyan('The number of occupied changed. '), this.state);
       }
-
-      clear();
-      log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
+      // log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
     }
-
     /* First ask db for empty entry data if available */
     // const dbInstaEntries = await getGenInstances(pendingInstanceList);
     // if (dbInstaEntries.length !== 0)
     //   dbInstaEntries.forEach((entry) => {
     //     this.Instances[entry.publicIP] = { ...this.Instances[entry.publicIP], ...entry };
     //   });
-    this.state.phase = 2;
-    this.Invoker('internal');
-  };
 
-  /* This ought to check how all the instances are performing directly from the slave instances */
-  stateTwo = async (data) => {
-    /* check for engine stop signal */
-    if (this.state.phase === 0) {
-      this.Invoker('engine-stopped');
-      return log(green('>>>>>>>>>>> Engine Stopped >>>>>>>>>>>'));
-    }
-
-    /* check the phase the engine is in */
-    if (this.state.phase !== 2) {
-      log('>>>>>>>>>>> This state does not authorize execution of state two >>>>>>>>>>>');
-      return this.Invoker('internal', this.state.phaseData, 5000);
-    }
-
-    /* check for data in params */
-    if (data) {
-      /* There is data. Do something with it if needed. */
-    }
     // Now we have updated list of all the instances from DB atleast, if it's updated.
     // Check whether db provides whileworthy entries for new spun instances.
     const ips = Object.keys(this.Instances);
@@ -170,6 +146,30 @@ class Engine {
         }
       }
 
+    this.state.phase = 2;
+    this.Invoker('internal');
+  };
+
+  /* This ought to check how all the instances are performing directly from the slave instances */
+  stateTwo = async (data) => {
+    /* check for engine stop signal */
+    if (this.state.phase === 0) {
+      this.Invoker('engine-stopped');
+      return log(green('>>>>>>>>>>> Engine Stopped >>>>>>>>>>>'));
+    }
+
+    /* check the phase the engine is in */
+    if (this.state.phase !== 2) {
+      log('>>>>>>>>>>> This state does not authorize execution of state two >>>>>>>>>>>');
+      return this.Invoker('internal', this.state.phaseData, 5000);
+    }
+
+    /* check for data in params */
+    if (data) {
+      /* There is data. Do something with it if needed. */
+    }
+
+    /*  */
     // this is default phase cycle
     this.state.phase = 1;
     this.Invoker('internal');
@@ -189,6 +189,9 @@ class Engine {
     if (!this.Instances[IP]) return log(red(`there is no entry with this IP. Shall I add ${IP} ?`));
     switch (errorCode) {
       case 'ETIMEDOUT':
+        if (this.Instances[IP]['live'] > -7) --this.Instances[IP]['live'];
+        break;
+      case 'ECONNREFUSED':
         if (this.Instances[IP]['live'] > -7) --this.Instances[IP]['live'];
         break;
       default:
