@@ -86,7 +86,6 @@ class Engine {
 
     /* Take tab of total no. of Instances here as well */
     const currentInstances = Object.keys(this.Instances);
-    log('currentInstances : ', currentInstances);
     if (currentInstances.length > 0) {
       const instanceCountChanged = this.state.TotalInstances !== currentInstances.length;
       if (instanceCountChanged) {
@@ -103,10 +102,10 @@ class Engine {
         this.state.TotalOccupancy = totalOccupancy;
         log(blue('The number of occupied changed. '), this.state);
       }
-    }
 
-    clear();
-    log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> '), cyan(this.Instances));
+      clear();
+      log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> '), cyan(this.Instances));
+    }
 
     /* First ask db for empty entry data if available */
     // const dbInstaEntries = await getGenInstances(pendingInstanceList);
