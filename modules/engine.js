@@ -1,7 +1,7 @@
 const db = require('./db');
 const hyperReq = require('http');
-const { log } = require('console');
-const { green, red, blue } = require('colors');
+const { log, clear } = require('console');
+const { green, red, blue, magenta } = require('colors');
 // const { getGenInstances } = require('../controllers/instance.controller');
 
 new db();
@@ -11,7 +11,6 @@ new db();
  *  Instance should be created when all the instances have occupied flag on.
  */
 class Engine {
-
   on = (event, callback, overwrite = false) => {
     if (typeof event !== 'string' && typeof callback !== 'function')
       return log(`The provided params is not of valid acceptable format : ${typeof event} , ${typeof callback}`);
@@ -36,7 +35,7 @@ class Engine {
   constructor() {
     this.init();
     this.start();
-  };
+  }
 
   start = () => {
     log(green('Engine goes brrrrrrrrr......'));
@@ -105,7 +104,8 @@ class Engine {
       }
     }
 
-    log(blue('Instances >>>>>>>>>>> '), this.Instances);
+    clear();
+    log(magenta('>>>>>>>>>>> Instances >>>>>>>>>>> '), this.Instances);
 
     /* First ask db for empty entry data if available */
     // const dbInstaEntries = await getGenInstances(pendingInstanceList);
@@ -138,37 +138,38 @@ class Engine {
     // Now we have updated list of all the instances from DB atleast, if it's updated.
     // Check whether db provides whileworthy entries for new spun instances.
     const ips = Object.keys(this.Instances);
-    if(ips.lengh !== 0) for (let ip of ips) {
-      /* Initiate if does not exist */
-      if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
-      if (this.Instances[ip][this.reqKeyName] === 'completed') {
-        this.Instances[ip][this.reqKeyName] = 'pending';
-        this.sentReq(ip)
-          .then((r) => {
-            let response = '';
-            try {
-              response = JSON.parse(r);
-              this.ipSuccessHandle(response, ip);
-            } catch (error) {
-              this.Instances[ip][this.reqKeyName] = 'completed';
-              response = r;
-              log(
-                red('There is an issue with IP response. Shall I count this as instance failure : '),
-                red(ip),
-                ' -:- ',
-                red(response),
-                ' -:- ',
-                red(error)
-              );
-            }
-            log(blue(`res : ${ip} : `), r);
-          })
-          .catch((e) => {
-            log('error : ', e.code);
-            this.ipErrHandle(e.code, ip);
-          });
+    if (ips.lengh !== 0)
+      for (let ip of ips) {
+        /* Initiate if does not exist */
+        if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
+        if (this.Instances[ip][this.reqKeyName] === 'completed') {
+          this.Instances[ip][this.reqKeyName] = 'pending';
+          this.sentReq(ip)
+            .then((r) => {
+              let response = '';
+              try {
+                response = JSON.parse(r);
+                this.ipSuccessHandle(response, ip);
+              } catch (error) {
+                this.Instances[ip][this.reqKeyName] = 'completed';
+                response = r;
+                log(
+                  red('There is an issue with IP response. Shall I count this as instance failure : '),
+                  red(ip),
+                  ' -:- ',
+                  red(response),
+                  ' -:- ',
+                  red(error)
+                );
+              }
+              log(blue(`res : ${ip} : `), r);
+            })
+            .catch((e) => {
+              log('error : ', e.code);
+              this.ipErrHandle(e.code, ip);
+            });
+        }
       }
-    }
 
     // this is default phase cycle
     this.state.phase = 1;
@@ -180,9 +181,7 @@ class Engine {
     if (!this.Instances[IP]) return log(red(`there is no entry with this IP. Shall I add ${IP} ?`));
     this.Instances[IP]['live'] = 1;
     if (data.result === 200 && data.state) {
-      log(green('Updating instance stats : '), this.Instances[IP]);
       this.Instances[IP] = { ...this.Instances[IP], ...data.state };
-      log(green('Updated instance : '), this.Instances[IP]);
     }
   };
 
@@ -269,7 +268,6 @@ class Engine {
     const CB = typeof this.CBDict[event] === 'function' ? this.CBDict[event] : () => {};
     CB(data || {});
   };
-
 }
 
 // const engine = new Engine();
