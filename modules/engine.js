@@ -24,11 +24,28 @@ class Engine {
     this.CBDict[event] = callback;
   };
 
-  addInstanceIP = (Instance) => {
-    if (Instance && Instance.publicIP) {
+  /* We will get this data sooner than the instance information */
+  addInternalIpImageId = (entry) => {
+    if (entry['PrivateIpAddress'] && entry['InstanceId'])
+      this.InternalIpImageIdMapping[entry['PrivateIpAddress']] = entry;
+  };
+
+  addInstance = (Instance) => {
+    if (Instance && Instance.publicIP && Instance.privateIP) {
       const InstanceIP = Instance.publicIP;
       const exists = this.Instances[InstanceIP];
-      if (!exists) this.Instances[InstanceIP] = { live: 0, ...Instance };
+      if (!this.InternalIpImageIdMapping[Instance.privateIP]) {
+        if (!exists)
+          this.Instances[InstanceIP] = {
+            ImageId: this.InternalIpImageIdMapping[Instance.privateIP]['InstanceId'],
+            Request: 'pending',
+            deleteIteration: 0,
+            live: 0,
+            ...Instance,
+          };
+      }
+    } else {
+      return log(red('The instance structure does not exists or is missing publicIP or privateIP key : '), Instance);
     }
   };
 
@@ -51,8 +68,15 @@ class Engine {
     this.reservedEvent = ['internal'];
     this.reqKeyName = 'Request';
     this.CBDict = {};
+    this.InternalIpImageIdMapping = {};
     this.Instances = {};
+    /* task flag
+        0 - idle
+        1 - creating
+        2 - deleting
+     */
     this.state = {
+      task:0,
       phase: 0,
       Count: 0,
       phaseData: {},
@@ -60,7 +84,10 @@ class Engine {
       TotalOccupied: 0,
       TotalCalls: 0,
       TotalParticipants: 0,
+      ScaleUp: false,
+      ScaleOut: false,
     };
+    this.deleteCandidate = 'NaN';
   };
 
   /* This method will check whether we have empty entries in Instances object */
@@ -150,7 +177,7 @@ class Engine {
     this.Invoker('internal');
   };
 
-  /* This ought to check how all the instances are performing directly from the slave instances */
+  /* This method shall decide whether scaling up or down is needed? */
   stateTwo = async (data) => {
     /* check for engine stop signal */
     if (this.state.phase === 0) {
@@ -169,10 +196,92 @@ class Engine {
       /* There is data. Do something with it if needed. */
     }
 
-    /*  */
+    /*
+      Scaling :
+      Scale Up should never contradict. Scale down
+     */
+
+    /* decision : whether we need a new instance or not? Scale up ?
+        1. check occupancy;
+        2. check number of calls/total instances ratio; (optional)
+        3. check number of participants/total instances ratio; (optional)
+    */
+
+    // check occupancy -> if all the instances are occupied;
+    if(this.state.TotalInstances <= 5)
+    if (this.state.TotalOccupied === this.state.TotalInstances) this.scaleUp();
+
+    /* decision : whether we need to delete an instance or not? Scale Out?
+     ***check difference between occupied instances and total instances -> OcuDiff.
+     ***check if total number unoccupied of instances. If they exceed more than two.
+     ***find an unoccupied instance and watch for it's occupancy(candidate)
+     ***for certain length of iterations. If it's occupancy doesn't get filled.
+     ***check OcuDiff, if it's still greater than two. send signal for deletion of candidate.
+     */
+
+    if(this.state.TotalInstances > 1)
+    if (this.state.TotalOccupied !== this.state.TotalInstances) this.scaleOut();
+    else this.deleteCandidate = 'NaN';
+
     // this is default phase cycle
     this.state.phase = 1;
     this.Invoker('internal');
+  };
+
+  scaleUp = () => {
+    this.Invoker('create-instance');
+  };
+
+  scaleOut = () => {
+    const OcuDiff = this.state.TotalOccupied - this.state.TotalInstances; // Total instances should always be greater than occupied ones
+    if (OcuDiff >= 1) {
+      // If scaleUp flag is true, then rule out the possibility of Scaling Out.
+      this.state.ScaleOut = this.state.ScaleUp ? false : true;
+      if (!this.state.ScaleOut)
+        return log(red('Currently engine is scaling up. Ruling out possibility of scaling out'));
+      /* Find Candidate
+         If Candidate already exists and have required keys
+         a. deleteIteration -> for how man cycles this instance is being watched.
+         b. publicIP -> to check whether it has been deleted already by the ipErrorHandle or any for any other reason.
+            We do not wish to send any unnecessary signal if the candidate doesn't exist in Instances Collection.
+      */
+      if (this.deleteCandidate === 'NaN') {
+        // Find the suitable candidate and add it with deleteIteration key to deleteCandidate.
+        for (let key in this.Instances) {
+          const instaObj = this.Instances[key];
+          if (!instaObj.occupied && instaObj['Calls'] === 0 && instaObj['Participants'] === 0 && instaObj['CPU'] < 20) {
+            /* This candidate has been selected for deletion */
+            this.deleteCandidate = instaObj;
+          }
+        }
+      } else if (
+        typeof this.deleteCandidate === 'object' &&
+        this.deleteCandidate['deleteIteration'] &&
+        this.deleteCandidate['publicIP']
+      ) {
+        if (this.Instances[this.deleteCandidate['publicIP']]) {
+          // watch this instance for 5 more iterations before deleting it as it might be used in certain threshhold of time
+          if (this.deleteCandidate['deleteIteration'] > 5) {
+            // Check whether scaleOut has reached it's threshhold.
+            this.deleteInstance(this.deleteCandidate['publicIP']);
+          } else ++this.deleteCandidate['deleteIteration'];
+        } else {
+          // set the candidate back to it's default value. And retry
+          this.deleteCandidate = 'NaN';
+        }
+      } else {
+        log(
+          red(
+            'Check what is missing. Candidate to be deleted does not have any valid entries or required keys in it to be suitable for deletion.'
+          )
+        );
+      }
+    } else {
+      /* No need to scale down */
+      this.state.ScaleOut = false;
+      // check whether candidate has been initialized
+      if (this.deleteCandidate !== 'NaN') this.deleteCandidate = 'NaN';
+    }
   };
 
   ipSuccessHandle = (data, IP) => {
@@ -239,11 +348,12 @@ class Engine {
   deleteInstance = (IP) => {
     log(green(`>>>>>>>>>>> Delete signal for ${IP} >>>>>>>>>>>`));
     /* delete entry from instances dictionary */
+    this.Invoker('delete-instance', this.Instances[IP]);
+    this.deleteCandidate = 'NaN';
+    delete this.InternalIpImageIdMapping[this.Instances[IP].privateIP];
     delete this.Instances[IP];
-    this.Invoker('delete-instance', { IP });
-
-    /* dummy signal to test engine stop */
-    this.state.phase = 0;
+    /* dummy signal to test engine stop. could be used in future to check fatal condition */
+    // this.state.phase = 0;
   };
 
   Invoker = (event, data, timeout) => {

@@ -21,7 +21,7 @@ new db();
 const instanceRegistrationHandle = async (req, res) => {
   const instance = await createOneInstance(req, res);
   if (instance['code'] && instance['code'] === 400) return;
-  if (req.query.publicIP && instance) engine.addInstanceIP(instance);
+  if (req.query.publicIP && instance) engine.addInstance(instance);
 };
 
 admin.post('/auth/google', googleAuth);

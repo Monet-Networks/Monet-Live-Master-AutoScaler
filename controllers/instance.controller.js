@@ -27,6 +27,11 @@ exports.createOneInstance = async (req, res) => {
       privateIP: req.query.privateIP,
       occupied: false,
       type: 'auto',
+      CPU: 0,
+      Upload: '0',
+      Download: '0',
+      Calls: 0,
+      Participants: 0
     };
   const instance = new Instance(entry);
   await instance.save((err) => {
