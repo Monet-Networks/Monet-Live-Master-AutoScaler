@@ -86,16 +86,16 @@ class Engine {
     // }
 
     /* Take tab of total no. of Instances here as well */
-    const currentInstanceLength = Object.keys(this.Instances).length;
-    if(currentInstanceLength !== 0) {
-      const instanceCountChanged = this.state.TotalInstances !== currentInstanceLength;
+    const currentInstances = Object.keys(this.Instances);
+    if (currentInstances.length !== 0) {
+      const instanceCountChanged = this.state.TotalInstances !== currentInstances.length;
       if (instanceCountChanged) {
-        this.state.TotalInstances = currentInstanceLength;
+        this.state.TotalInstances = currentInstances.length;
         log(blue('The number of instances changed. '), this.state);
       }
       /* Take tab of total no. of occupied instances */
       let totalOccupancy = 0;
-      this.Instances.forEach((Instance) => {
+      currentInstances.forEach((Instance) => {
         if (Instance.occupied && Instance.occupied === true) ++totalOccupancy;
       });
       const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
