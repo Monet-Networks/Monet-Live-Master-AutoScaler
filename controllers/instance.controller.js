@@ -20,14 +20,15 @@ exports.createOneInstance = async (req, res) => {
   const existingInstance = await Instance.findOne({ publicIP: req.query.publicIP, privateIP: req.query.privateIP });
   if (existingInstance)
     return new ErrorHandler(res, 400, 'The entry for this instance exist with flag ' + existingInstance.occupied + ' kindly update if needed.');
-  const instance = new Instance({
-    InstanceNo: 0,
-    InstanceRoute: `${req.query.publicIP.replaceAll('.', '_')}`,
-    publicIP: req.query.publicIP,
-    privateIP: req.query.privateIP,
-    occupied: false,
-    type: 'auto',
-  });
+  const entry = {
+      InstanceNo: 0,
+      InstanceRoute: `${req.query.publicIP.replaceAll('.', '_')}`,
+      publicIP: req.query.publicIP,
+      privateIP: req.query.privateIP,
+      occupied: false,
+      type: 'auto',
+    };
+  const instance = new Instance(entry);
   await instance.save((err) => {
     if (err) {
       return new ErrorHandler(res, 400, 'error', err.message);
@@ -38,7 +39,7 @@ exports.createOneInstance = async (req, res) => {
       message: 'Instance entry created : success',
     });
   });
-  return instance;
+  return entry;
 };
 
 exports.getInstance = async (req, res) => {
