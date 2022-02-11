@@ -102,7 +102,7 @@ class Engine {
         this.state.TotalOccupancy = totalOccupancy;
         log(cyan('The number of occupied changed. '), this.state);
       }
-      // log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
+      log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
     }
     /* First ask db for empty entry data if available */
     // const dbInstaEntries = await getGenInstances(pendingInstanceList);
