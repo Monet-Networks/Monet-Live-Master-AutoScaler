@@ -17,6 +17,13 @@ const PORT = process.env.PORT || 3000;
 /* Instantiate the engine class */
 const engine = new Engine();
 new db();
+
+const instanceRegistrationHandle = async (req, res) => {
+  const instance = await createOneInstance(req, res);
+  console.log('Instance Register', instance);
+  if (req.query.publicIP && instance) engine.addInstanceIP(instance);
+};
+
 admin.post('/auth/google', googleAuth);
 
 admin.get('/configure-instances', async (req, res) => {
@@ -41,9 +48,3 @@ admin.get('/get-link', getInstance);
 admin.get('/free-all-instances', freeAllInstances);
 
 admin.listen(PORT, () => log(`[Server OK]`));
-
-const instanceRegistrationHandle = async (req, res) => {
-  const instance = await createOneInstance(req, res);
-  console.log('Instance Register', instance);
-  if (req.query.publicIP && instance) engine.addInstanceIP(instance);
-};
