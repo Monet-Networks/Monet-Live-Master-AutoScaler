@@ -229,10 +229,13 @@ class Engine {
   };
 
   scaleUp = () => {
+    // set task to creation
+    this.state.task = 1;
     this.Invoker('create-instance');
   };
 
   scaleOut = () => {
+    if (this.state.task !== 0) return log('state not in idle condition : ', this.state.task);
     const OcuDiff = this.state.TotalOccupied - this.state.TotalInstances; // Total instances should always be greater than occupied ones
     if (OcuDiff >= 1) {
       // If scaleUp flag is true, then rule out the possibility of Scaling Out.
