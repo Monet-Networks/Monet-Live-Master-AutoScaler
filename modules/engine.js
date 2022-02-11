@@ -1,8 +1,8 @@
 const db = require('./db');
 const hyperReq = require('http');
 const { log } = require('console');
-const { getGenInstances } = require('../controllers/instance.controller');
 const { green, red, blue } = require('colors');
+// const { getGenInstances } = require('../controllers/instance.controller');
 
 new db();
 
@@ -11,6 +11,7 @@ new db();
  *  Instance should be created when all the instances have occupied flag on.
  */
 class Engine {
+
   on = (event, callback, overwrite = false) => {
     if (typeof event !== 'string' && typeof callback !== 'function')
       return log(`The provided params is not of valid acceptable format : ${typeof event} , ${typeof callback}`);
@@ -35,7 +36,7 @@ class Engine {
   constructor() {
     this.init();
     this.start();
-  }
+  };
 
   start = () => {
     log(green('Engine goes brrrrrrrrr......'));
@@ -268,6 +269,7 @@ class Engine {
     const CB = typeof this.CBDict[event] === 'function' ? this.CBDict[event] : () => {};
     CB(data || {});
   };
+
 }
 
 // const engine = new Engine();
