@@ -1,7 +1,7 @@
 const db = require('./db');
 const hyperReq = require('http');
 const { log, clear } = require('console');
-const { green, red, blue, magenta } = require('colors');
+const { green, red, blue, cyan } = require('colors');
 // const { getGenInstances } = require('../controllers/instance.controller');
 
 new db();
@@ -105,7 +105,7 @@ class Engine {
     }
 
     clear();
-    log(magenta('>>>>>>>>>>> Instances >>>>>>>>>>> '), this.Instances);
+    log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> '), cyan(this.Instances));
 
     /* First ask db for empty entry data if available */
     // const dbInstaEntries = await getGenInstances(pendingInstanceList);
