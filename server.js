@@ -21,8 +21,7 @@ new db();
 const instanceRegistrationHandle = async (req, res) => {
   const instance = await createOneInstance(req, res);
   if (instance['code'] && instance['code'] === 400) return;
-  console.log('Instance Register >>>>>>>>', instance);
-  delete instance['_id'];
+  console.log('Instance Register >>>>>>>>', instance.lean());
   if (req.query.publicIP && instance) engine.addInstanceIP(instance);
 };
 
