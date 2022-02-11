@@ -86,7 +86,8 @@ class Engine {
 
     /* Take tab of total no. of Instances here as well */
     const currentInstances = Object.keys(this.Instances);
-    if (currentInstances.length !== 0) {
+    log('currentInstances : ', currentInstances);
+    if (currentInstances.length > 0) {
       const instanceCountChanged = this.state.TotalInstances !== currentInstances.length;
       if (instanceCountChanged) {
         this.state.TotalInstances = currentInstances.length;
