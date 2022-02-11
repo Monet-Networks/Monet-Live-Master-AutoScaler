@@ -37,8 +37,8 @@ exports.createOneInstance = async (req, res) => {
       error: false,
       message: 'Instance entry created : success',
     });
-    return instance;
   });
+  return instance;
 };
 
 exports.getInstance = async (req, res) => {
