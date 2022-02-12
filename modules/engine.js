@@ -114,52 +114,54 @@ class Engine {
     /* Take tab of total no. of Instances here as well */
     const currentInstances = Object.keys(this.Instances);
     const ILength = currentInstances.length;
-    if (ILength > 0) {
-      const instanceCountChanged = this.state.TotalInstances !== ILength;
-      if (instanceCountChanged) {
-        this.state.TotalInstances = currentInstances.length;
-        // log(cyan('The number of instances changed. '), this.state);
-      }
-      /* Take tab of total no. of occupied instances */
-      let totalOccupancy = 0;
-      currentInstances.forEach((Instance) => {
-        if (this.Instances[Instance].occupied && this.Instances[Instance].occupied === true) ++totalOccupancy;
-      });
-      const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
-      if (occupancyCountChanged) {
-        this.state.TotalOccupied = totalOccupancy;
-        // log(cyan('The number of occupied changed. '), this.state);
-      }
-      // log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
-      for (let ip of currentInstances) {
-        /* Initiate if does not exist */
-        if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
-        if (this.Instances[ip][this.reqKeyName] === 'completed') {
-          this.Instances[ip][this.reqKeyName] = 'pending';
-          this.sentReq(ip)
-            .then((r) => {
-              let response = '';
-              try {
-                response = JSON.parse(r);
-                this.ipSuccessHandle(response, ip);
-              } catch (error) {
-                this.Instances[ip][this.reqKeyName] = 'completed';
-                response = r;
-                log(
-                  red('There is an issue with IP response. Shall I count this as instance failure : '),
-                  red(ip),
-                  ' -:- ',
-                  red(response),
-                  ' -:- ',
-                  red(error)
-                );
-              }
-            })
-            .catch((e) => {
-              log('error : ', e.code);
-              this.ipErrHandle(e.code, ip);
-            });
-        }
+    const instanceCountChanged = this.state.TotalInstances !== ILength;
+    if (instanceCountChanged) {
+      this.state.TotalInstances = currentInstances.length;
+      // log(cyan('The number of instances changed. '), this.state);
+    }
+    if (ILength === 0) {
+      this.state.phase = 2;
+      return this.Invoker('internal');
+    }
+    /* Take tab of total no. of occupied instances */
+    let totalOccupancy = 0;
+    currentInstances.forEach((Instance) => {
+      if (this.Instances[Instance].occupied && this.Instances[Instance].occupied === true) ++totalOccupancy;
+    });
+    const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
+    if (occupancyCountChanged) {
+      this.state.TotalOccupied = totalOccupancy;
+      // log(cyan('The number of occupied changed. '), this.state);
+    }
+    // log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
+    for (let ip of currentInstances) {
+      /* Initiate if does not exist */
+      if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
+      if (this.Instances[ip][this.reqKeyName] === 'completed') {
+        this.Instances[ip][this.reqKeyName] = 'pending';
+        this.sentReq(ip)
+          .then((r) => {
+            let response = '';
+            try {
+              response = JSON.parse(r);
+              this.ipSuccessHandle(response, ip);
+            } catch (error) {
+              this.Instances[ip][this.reqKeyName] = 'completed';
+              response = r;
+              log(
+                red('There is an issue with IP response. Shall I count this as instance failure : '),
+                red(ip),
+                ' -:- ',
+                red(response),
+                ' -:- ',
+                red(error)
+              );
+            }
+          })
+          .catch((e) => {
+            log('error : ', e.code);
+            this.ipErrHandle(e.code, ip);
+          });
       }
     }
     /* First ask db for empty entry data if available */
@@ -173,7 +175,7 @@ class Engine {
     // Check whether db provides whileworthy entries for new spun instances.
 
     this.state.phase = 2;
-    this.Invoker('internal');
+    return this.Invoker('internal');
   };
 
   /* This method shall decide whether scaling up or down is needed? */
@@ -200,8 +202,7 @@ class Engine {
     if (this.state.TotalInstances === 0) {
       log(red('There are no known instances with me.'));
       this.state.phase = 1;
-      this.Invoker('internal');
-      return;
+      return this.Invoker('internal');
     }
 
     /*
@@ -234,7 +235,7 @@ class Engine {
 
     // this is default phase cycle
     this.state.phase = 1;
-    this.Invoker('internal');
+    return this.Invoker('internal');
   };
 
   scaleUp = () => {
