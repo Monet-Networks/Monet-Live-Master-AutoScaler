@@ -113,7 +113,7 @@ class Engine {
 
     /* Take tab of total no. of Instances here as well */
     const currentInstances = Object.keys(this.Instances);
-    const ILength = currentInstances.length
+    const ILength = currentInstances.length;
     if (ILength > 0) {
       const instanceCountChanged = this.state.TotalInstances !== ILength;
       if (instanceCountChanged) {
@@ -130,38 +130,38 @@ class Engine {
         this.state.TotalOccupancy = totalOccupancy;
         // log(cyan('The number of occupied changed. '), this.state);
       }
-      log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
+      // log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
       for (let ip of currentInstances) {
-         /* Initiate if does not exist */
-         if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
-         if (this.Instances[ip][this.reqKeyName] === 'completed') {
-           this.Instances[ip][this.reqKeyName] = 'pending';
-           this.sentReq(ip)
-             .then((r) => {
-               let response = '';
-               try {
-                 response = JSON.parse(r);
-                 this.ipSuccessHandle(response, ip);
-               } catch (error) {
-                 this.Instances[ip][this.reqKeyName] = 'completed';
-                 response = r;
-                 log(
-                   red('There is an issue with IP response. Shall I count this as instance failure : '),
-                   red(ip),
-                   ' -:- ',
-                   red(response),
-                   ' -:- ',
-                   red(error)
-                 );
-               }
-               //  log('Response : ', gray(r));
-             })
-             .catch((e) => {
-               log('error : ', e.code);
-               this.ipErrHandle(e.code, ip);
-             });
-         }
-       }
+        /* Initiate if does not exist */
+        if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
+        if (this.Instances[ip][this.reqKeyName] === 'completed') {
+          this.Instances[ip][this.reqKeyName] = 'pending';
+          this.sentReq(ip)
+            .then((r) => {
+              let response = '';
+              try {
+                response = JSON.parse(r);
+                this.ipSuccessHandle(response, ip);
+              } catch (error) {
+                this.Instances[ip][this.reqKeyName] = 'completed';
+                response = r;
+                log(
+                  red('There is an issue with IP response. Shall I count this as instance failure : '),
+                  red(ip),
+                  ' -:- ',
+                  red(response),
+                  ' -:- ',
+                  red(error)
+                );
+              }
+              //  log('Response : ', gray(r));
+            })
+            .catch((e) => {
+              log('error : ', e.code);
+              this.ipErrHandle(e.code, ip);
+            });
+        }
+      }
     }
     /* First ask db for empty entry data if available */
     // const dbInstaEntries = await getGenInstances(pendingInstanceList);
@@ -216,6 +216,7 @@ class Engine {
         3. check number of participants/total instances ratio; (optional)
     */
 
+    log(green(this.state));
     // check occupancy -> if all the instances are occupied;
     if (this.state.TotalInstances <= 5 && this.state.task === 0 && this.state.TotalInstances > 0)
       if (this.state.TotalOccupied === this.state.TotalInstances) this.scaleUp();
@@ -239,7 +240,7 @@ class Engine {
 
   scaleUp = () => {
     // set task to creation
-    log(green('>>>>>>>>>>> Instance creation signal >>>>>>>>>>>'));
+    log(green('>>>>>>>>>>> Instance Creation Signal >>>>>>>>>>>'));
     this.state.task = 1;
     this.Invoker('create-instance', { name: uniqueNamesGenerator() });
   };
