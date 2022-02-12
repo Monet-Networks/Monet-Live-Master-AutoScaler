@@ -154,7 +154,7 @@ class Engine {
                   red(error)
                 );
               }
-              //  log('Response : ', gray(r));
+               log('Response : ', gray(r));
             })
             .catch((e) => {
               log('error : ', e.code);
