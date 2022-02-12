@@ -1,7 +1,7 @@
 const db = require('./db');
 const hyperReq = require('http');
 const { log } = require('console');
-const { uniqueNamesGenerator } = require('unique-names-generator');
+const { uniqueNamesGenerator, adjectives, colors, animals } = require('unique-names-generator');
 const { green, red, cyan, gray } = require('colors');
 
 /** Condition for autoscaling
@@ -242,7 +242,7 @@ class Engine {
     // set task to creation
     log(green('>>>>>>>>>>> Instance Creation Signal >>>>>>>>>>>'));
     this.state.task = 1;
-    this.Invoker('create-instance', { name: uniqueNamesGenerator() });
+    this.Invoker('create-instance', { name: uniqueNamesGenerator({ dictionaries: [colors, adjectives, animals] }) });
   };
 
   scaleOut = () => {
