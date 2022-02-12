@@ -114,8 +114,9 @@ class Engine {
 
     /* Take tab of total no. of Instances here as well */
     const currentInstances = Object.keys(this.Instances);
-    if (currentInstances.length > 0) {
-      const instanceCountChanged = this.state.TotalInstances !== currentInstances.length;
+    const ILength = currentInstances.length
+    if (ILength > 0) {
+      const instanceCountChanged = this.state.TotalInstances !== ILength;
       if (instanceCountChanged) {
         this.state.TotalInstances = currentInstances.length;
         // log(cyan('The number of instances changed. '), this.state);
@@ -131,6 +132,39 @@ class Engine {
         // log(cyan('The number of occupied changed. '), this.state);
       }
       log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
+
+      for (let ip of currentInstances) {
+         /* Initiate if does not exist */
+         if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
+         if (this.Instances[ip][this.reqKeyName] === 'completed') {
+           this.Instances[ip][this.reqKeyName] = 'pending';
+           log('Sending request');
+           this.sentReq(ip)
+             .then((r) => {
+               let response = '';
+               try {
+                 response = JSON.parse(r);
+                 this.ipSuccessHandle(response, ip);
+               } catch (error) {
+                 this.Instances[ip][this.reqKeyName] = 'completed';
+                 response = r;
+                 log(
+                   red('There is an issue with IP response. Shall I count this as instance failure : '),
+                   red(ip),
+                   ' -:- ',
+                   red(response),
+                   ' -:- ',
+                   red(error)
+                 );
+               }
+               log('Response : ', gray(r));
+             })
+             .catch((e) => {
+               log('error : ', e.code);
+               this.ipErrHandle(e.code, ip);
+             });
+         }
+       }
     }
     /* First ask db for empty entry data if available */
     // const dbInstaEntries = await getGenInstances(pendingInstanceList);
@@ -141,40 +175,6 @@ class Engine {
 
     // Now we have updated list of all the instances from DB atleast, if it's updated.
     // Check whether db provides whileworthy entries for new spun instances.
-    const ips = Object.keys(this.Instances);
-    if (ips.lengh !== 0)
-      for (let ip of ips) {
-        /* Initiate if does not exist */
-        if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
-        if (this.Instances[ip][this.reqKeyName] === 'completed') {
-          this.Instances[ip][this.reqKeyName] = 'pending';
-          log("Sending request")
-          this.sentReq(ip)
-            .then((r) => {
-              let response = '';
-              try {
-                response = JSON.parse(r);
-                this.ipSuccessHandle(response, ip);
-              } catch (error) {
-                this.Instances[ip][this.reqKeyName] = 'completed';
-                response = r;
-                log(
-                  red('There is an issue with IP response. Shall I count this as instance failure : '),
-                  red(ip),
-                  ' -:- ',
-                  red(response),
-                  ' -:- ',
-                  red(error)
-                );
-              }
-              log("Response : ",gray(r));
-            })
-            .catch((e) => {
-              log('error : ', e.code);
-              this.ipErrHandle(e.code, ip);
-            });
-        }
-      }
 
     this.state.phase = 2;
     this.Invoker('internal');
