@@ -1,6 +1,7 @@
 const db = require('./db');
 const hyperReq = require('http');
 const { log } = require('console');
+const { uniqueNamesGenerator } = require('unique-names-generator');
 const { green, red, cyan } = require('colors');
 // const { getGenInstances } = require('../controllers/instance.controller');
 
@@ -34,8 +35,8 @@ class Engine {
     if (Instance && Instance.publicIP && Instance.privateIP) {
       const InstanceIP = Instance.publicIP;
       const exists = this.Instances[InstanceIP];
-      if (!this.InternalIpImageIdMapping[Instance.privateIP]) {
-        if (!exists)
+      if (!exists)
+        if (!this.InternalIpImageIdMapping[Instance.privateIP]) {
           this.Instances[InstanceIP] = {
             ImageId: this.InternalIpImageIdMapping[Instance.privateIP]['InstanceId'],
             Request: 'pending',
@@ -43,7 +44,8 @@ class Engine {
             live: 0,
             ...Instance,
           };
-      }
+          this.state.task = 0;
+        }
     } else {
       return log(red('The instance structure does not exists or is missing publicIP or privateIP key : '), Instance);
     }
@@ -76,7 +78,7 @@ class Engine {
         2 - deleting
      */
     this.state = {
-      task:0,
+      task: 0,
       phase: 0,
       Count: 0,
       phaseData: {},
@@ -84,8 +86,6 @@ class Engine {
       TotalOccupied: 0,
       TotalCalls: 0,
       TotalParticipants: 0,
-      ScaleUp: false,
-      ScaleOut: false,
     };
     this.deleteCandidate = 'NaN';
   };
@@ -208,8 +208,8 @@ class Engine {
     */
 
     // check occupancy -> if all the instances are occupied;
-    if(this.state.TotalInstances <= 5)
-    if (this.state.TotalOccupied === this.state.TotalInstances) this.scaleUp();
+    if (this.state.TotalInstances <= 5 && this.state.task === 0)
+      if (this.state.TotalOccupied === this.state.TotalInstances) this.scaleUp();
 
     /* decision : whether we need to delete an instance or not? Scale Out?
      ***check difference between occupied instances and total instances -> OcuDiff.
@@ -219,9 +219,9 @@ class Engine {
      ***check OcuDiff, if it's still greater than two. send signal for deletion of candidate.
      */
 
-    if(this.state.TotalInstances > 1)
-    if (this.state.TotalOccupied !== this.state.TotalInstances) this.scaleOut();
-    else this.deleteCandidate = 'NaN';
+    if (this.state.TotalInstances > 1 && this.state.task === 0)
+      if (this.state.TotalOccupied !== this.state.TotalInstances) this.scaleOut();
+      else this.deleteCandidate = 'NaN';
 
     // this is default phase cycle
     this.state.phase = 1;
@@ -231,17 +231,18 @@ class Engine {
   scaleUp = () => {
     // set task to creation
     this.state.task = 1;
-    this.Invoker('create-instance');
+    log(green('Instance creation signal'));
+    this.Invoker('create-instance', { name: uniqueNamesGenerator() });
   };
 
   scaleOut = () => {
-    if (this.state.task !== 0) return log('state not in idle condition : ', this.state.task);
+    this.state.task = 2;
     const OcuDiff = this.state.TotalOccupied - this.state.TotalInstances; // Total instances should always be greater than occupied ones
     if (OcuDiff >= 1) {
       // If scaleUp flag is true, then rule out the possibility of Scaling Out.
-      this.state.ScaleOut = this.state.ScaleUp ? false : true;
-      if (!this.state.ScaleOut)
-        return log(red('Currently engine is scaling up. Ruling out possibility of scaling out'));
+      // this.state.ScaleOut = this.state.ScaleUp ? false : true;
+      // if (!this.state.ScaleOut)
+      // return log(red('Currently engine is scaling up. Ruling out possibility of scaling out'));
       /* Find Candidate
          If Candidate already exists and have required keys
          a. deleteIteration -> for how man cycles this instance is being watched.
@@ -271,6 +272,7 @@ class Engine {
         } else {
           // set the candidate back to it's default value. And retry
           this.deleteCandidate = 'NaN';
+          this.state.task = 0;
         }
       } else {
         log(
@@ -278,10 +280,11 @@ class Engine {
             'Check what is missing. Candidate to be deleted does not have any valid entries or required keys in it to be suitable for deletion.'
           )
         );
+        this.state.task = 0;
       }
     } else {
       /* No need to scale down */
-      this.state.ScaleOut = false;
+      this.state.task = 0;
       // check whether candidate has been initialized
       if (this.deleteCandidate !== 'NaN') this.deleteCandidate = 'NaN';
     }

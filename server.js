@@ -16,6 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 /* Instantiate the engine class */
 const engine = new Engine();
+
 new db();
 
 const instanceRegistrationHandle = async (req, res) => {
