@@ -8,15 +8,20 @@ exports.getInstances = async () => {
 };
 
 exports.createOneInstance = async (req, res, CB) => {
-  if(typeof CB !== "function") return "NaN";
-  if (!req.query.publicIP || !req.query.privateIP || !req.query.secret) new ErrorHandler(res, 400, 'missing parameter');
-  if (req.query.secret !== process.env.SECRET)
+  if (typeof CB !== 'function') return;
+  if (!req.query.publicIP || !req.query.privateIP || !req.query.secret) {
+    new ErrorHandler(res, 400, 'missing parameter');
+    return CB({ error: 'param problem' });
+  }
+  if (req.query.secret !== process.env.SECRET) {
     new ErrorHandler(
       res,
       400,
       `Don't try to be smart. You haven't provided valid secret. Please don't try again unless you are admin. I know your address.`,
       'authentication error'
     );
+    return CB({ error: 'key problem' });
+  }
   const existingInstance = await Instance.findOne({
     publicIP: req.query.publicIP,
     privateIP: req.query.privateIP,
@@ -27,7 +32,7 @@ exports.createOneInstance = async (req, res, CB) => {
       400,
       'The entry for this instance exist with flag ' + existingInstance.occupied + ' kindly update if needed.'
     );
-    CB({error:null, success: existingInstance});
+    return CB({ error: null, success: existingInstance });
   }
   const entry = {
     InstanceNo: 0,
@@ -46,14 +51,14 @@ exports.createOneInstance = async (req, res, CB) => {
   await instance.save((err) => {
     if (err) {
       new ErrorHandler(res, 400, 'error', err.message);
-      CB({error: 'NaN'});
+      return CB({ error: 'Instance save error' });
     }
     res.json({
       code: 200,
       error: false,
       message: 'Instance entry created : success',
     });
-    CB({ error: null, success: entry });
+    return CB({ error: null, success: entry });
   });
 };
 
