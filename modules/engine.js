@@ -187,7 +187,7 @@ class Engine {
 
     /* check the phase the engine is in */
     if (this.state.phase !== 2) {
-      log('>>>>>>>>>>> This state does not authorize execution of state two >>>>>>>>>>>');
+      log(red('>>>>>>>>>>> This state does not authorize execution of state two >>>>>>>>>>>'));
       return this.Invoker('internal', this.state.phaseData, 5000);
     }
 
@@ -197,12 +197,12 @@ class Engine {
     }
 
     // Check if Instances dictionary is empty or not
-    if (this.state.Instances === 0) {
-      log(red('There are no known instances with me.'));
-      this.state.phase = 1;
-      this.Invoker('internal');
-      return;
-    }
+    // if (this.state.Instances === 0) {
+    //   log(red('There are no known instances with me.'));
+    //   this.state.phase = 1;
+    //   this.Invoker('internal');
+    //   return;
+    // }
 
     /*
       Scaling :
