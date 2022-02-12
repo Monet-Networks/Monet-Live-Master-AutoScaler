@@ -7,7 +7,7 @@ exports.getInstances = async () => {
   return instanceIps.map(({ publicIP }) => publicIP);
 };
 
-exports.createOneInstance = (req, res) => { return new Promise((resolve, reject) => {
+exports.createOneInstance = (req, res) =>  new Promise((resolve, reject) => {
    if (!req.query.publicIP || !req.query.privateIP || !req.query.secret)
      {
        new ErrorHandler(res, 400, 'missing parameter')
@@ -56,7 +56,6 @@ exports.createOneInstance = (req, res) => { return new Promise((resolve, reject)
      resolve(entry);
    });
 });
-};
 
 exports.getInstance = async (req, res) => {
   if (!req.query.secret) return new ErrorHandler(res, 400, 'missing parameter');
