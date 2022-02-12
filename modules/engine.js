@@ -132,7 +132,7 @@ class Engine {
         // log(cyan('The number of occupied changed. '), this.state);
       }
       log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
-
+      console.log(currentInstances);
       for (let ip of currentInstances) {
          /* Initiate if does not exist */
          if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
