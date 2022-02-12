@@ -34,7 +34,7 @@ new db();
 const instanceRegistrationHandle = async (req, res) => {
   const instance = await createOneInstance(req, res);
   if (instance === "NaN") return;
-  console.log('Adding new instance to engine : ', instance);
+  console.log('<Ad></Ad>ding new instance to engine : ', instance);
   if (instance.publicIP && instance) engine.addInstance(instance);
 };
 
