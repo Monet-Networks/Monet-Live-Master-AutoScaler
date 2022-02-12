@@ -230,9 +230,9 @@ class Engine {
 
   scaleUp = () => {
     // set task to creation
-    this.state.task = 1;
-    log(green('Instance creation signal'));
-    this.Invoker('create-instance', { name: uniqueNamesGenerator() });
+    log(green('>>>>>>>>>>> Instance creation signal >>>>>>>>>>>'));
+    // this.state.task = 1;
+    // this.Invoker('create-instance', { name: uniqueNamesGenerator() });
   };
 
   scaleOut = () => {
