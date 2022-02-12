@@ -34,7 +34,8 @@ new db();
 const instanceRegistrationHandle = async (req, res) => {
   const instance = await createOneInstance(req, res);
   if (instance === "NaN") return;
-  if (req.query.publicIP && instance) engine.addInstance(instance);
+  console.log('Adding new instance to engine : ', instance);
+  if (instance.publicIP && instance) engine.addInstance(instance);
 };
 
 admin.post('/auth/google', googleAuth);
