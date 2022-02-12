@@ -197,12 +197,12 @@ class Engine {
     }
 
     // Check if Instances dictionary is empty or not
-    // if (this.state.Instances === 0) {
-    //   log(red('There are no known instances with me.'));
-    //   this.state.phase = 1;
-    //   this.Invoker('internal');
-    //   return;
-    // }
+    if (this.state.TotalInstances === 0) {
+      log(red('There are no known instances with me.'));
+      this.state.phase = 1;
+      this.Invoker('internal');
+      return;
+    }
 
     /*
       Scaling :
