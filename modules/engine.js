@@ -196,6 +196,13 @@ class Engine {
       /* There is data. Do something with it if needed. */
     }
 
+    // Check if Instances dictionary is empty or not
+    if (this.state.Instances === 0) {
+      log(red('There are no known instances with me.'));
+      this.state.phase = 1;
+      this.Invoker('internal');
+    }
+
     /*
       Scaling :
       Scale Up should never contradict. Scale down
