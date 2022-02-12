@@ -217,7 +217,7 @@ class Engine {
 
     log(green(this.state));
     // check occupancy -> if all the instances are occupied;
-    if (this.state.TotalInstances <= 5 && this.state.task === 0 && this.state.TotalInstances > 0)
+    if (this.state.TotalInstances <= 5 && this.state.task === 0)
       if (this.state.TotalOccupied === this.state.TotalInstances) this.scaleUp();
 
     /* decision : whether we need to delete an instance or not? Scale Out?
