@@ -123,7 +123,7 @@ class Engine {
       /* Take tab of total no. of occupied instances */
       let totalOccupancy = 0;
       currentInstances.forEach((Instance) => {
-        if (Instance.occupied && Instance.occupied === true) ++totalOccupancy;
+        if (this.Instances[Instance].occupied && this.Instances[Instance].occupied === true) ++totalOccupancy;
       });
       const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
       if (occupancyCountChanged) {
