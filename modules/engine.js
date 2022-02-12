@@ -94,6 +94,7 @@ class Engine {
 
   /* This method will check whether we have empty entries in Instances object */
   stateOne = async (data) => {
+    log(green(this.state));
     /* check for engine stop signal */
     if (this.state.phase === 0) {
       this.Invoker('engine-stopped');
@@ -119,7 +120,7 @@ class Engine {
       const instanceCountChanged = this.state.TotalInstances !== currentInstances.length;
       if (instanceCountChanged) {
         this.state.TotalInstances = currentInstances.length;
-        log(cyan('The number of instances changed. '), this.state);
+        // log(cyan('The number of instances changed. '), this.state);
       }
       /* Take tab of total no. of occupied instances */
       let totalOccupancy = 0;
@@ -129,7 +130,7 @@ class Engine {
       const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
       if (occupancyCountChanged) {
         this.state.TotalOccupancy = totalOccupancy;
-        log(cyan('The number of occupied changed. '), this.state);
+        // log(cyan('The number of occupied changed. '), this.state);
       }
       log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
     }
@@ -181,6 +182,7 @@ class Engine {
 
   /* This method shall decide whether scaling up or down is needed? */
   stateTwo = async (data) => {
+    log(green(this.state));
     /* check for engine stop signal */
     if (this.state.phase === 0) {
       this.Invoker('engine-stopped');
