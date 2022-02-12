@@ -201,6 +201,7 @@ class Engine {
       log(red('There are no known instances with me.'));
       this.state.phase = 1;
       this.Invoker('internal');
+      return;
     }
 
     /*
