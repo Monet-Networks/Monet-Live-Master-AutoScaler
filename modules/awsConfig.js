@@ -3,15 +3,15 @@ const ec2Client = require('./awsEC2Cli');
 require('dotenv').config();
 
 class AWS {
-  constructor(IName, AmiId, key) {
-    this.init(IName, AmiId, key);
+  constructor(AmiId, key) {
+    this.init(AmiId, key);
   }
 
-  init = (IName, AmiId, key) => {
+  init = (AmiId, key) => {
     this.instances = [];
     this.state = 'create';
     this.prevInstanceName = 'previousName';
-    this.currentInstanceName = IName;
+    this.currentInstanceName = 'NaN';
     if (this.currentInstanceName === this.prevInstanceName) this.state = 'same';
     this.instanceParams = {
       ImageId: AmiId || 'ami-0c1c02750a1158a9b', //AMI_ID
@@ -44,16 +44,19 @@ class AWS {
    * @description Create an instance or multiple instances
    * @returns error || instance data
    */
-  async createInstance() {
-    return new Promise((resolve, reject) =>
-      this.client.runInstances(this.instanceParams, (error, data) => {
-        if (error) reject(error);
-        if (data) {
-          this.instances.push({ instanceId: data.Instances[0].InstanceId, data: data.Instances[0] });
-          resolve(data.Instances[0]);
-        }
-      })
-    );
+  async createInstance(name) {
+    if (name) this.currentInstanceName = name;
+    else return log('No name provided for this instance');
+    if (this.currentInstanceName !== 'NaN')
+      return new Promise((resolve, reject) =>
+        this.client.runInstances(this.instanceParams, (error, data) => {
+          if (error) reject(error);
+          if (data) {
+            this.instances.push({ instanceId: data.Instances[0].InstanceId, data: data.Instances[0] });
+            resolve(data.Instances[0]);
+          }
+        })
+      );
   }
 
   /**

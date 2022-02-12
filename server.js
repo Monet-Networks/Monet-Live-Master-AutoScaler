@@ -15,8 +15,9 @@ const {
 const { getRoom } = require('./controllers/room.controller');
 const CreateConfiguration = require('./modules/createConfig');
 const AWSConfiguration = require('./modules/awsConfig');
+const IController = new AWSConfiguration();
 const SuccessHandler = require('./util/SuccessHandler');
-const ErrorHandler = require('./util/ErrorHandler');
+// const ErrorHandler = require('./util/ErrorHandler');
 
 const PORT = process.env.PORT || 3000;
 
@@ -24,9 +25,18 @@ const PORT = process.env.PORT || 3000;
 const engine = new Engine();
 engine.on('create-instance', ({ name }) => {
   console.log('Instance creation signal with name : ', name);
+  /* Check whether this object needs to be recorded or not. */
+  IController.createInstance(name)
+    .then((data) => engine.addInternalIpImageId(data))
+    .catch((err) => console.log('An error occured while attempting to create instance. Kindly check. : ', err));
 });
-engine.on('delete-instance', (instance) => {
-  deleteInstance(instance.publicIP);
+engine.on('delete-instance', async (instance) => {
+  console.log(instance);
+  if (instance.ImageId !== 'NaN') {
+    IController.deleteInstance(instance.ImageId);
+  }
+  const deletionInfo = await deleteInstance(instance.publicIP);
+  console.log("deletion info : ",deletionInfo);
 });
 
 new db();
