@@ -5,7 +5,13 @@ const { log } = require('console');
 const db = require('./modules/db');
 const Engine = require('./modules/engine');
 const { googleAuth } = require('./controllers/user.controller');
-const { getInstances, createOneInstance, getInstance, freeAllInstances } = require('./controllers/instance.controller');
+const {
+  getInstances,
+  createOneInstance,
+  getInstance,
+  freeAllInstances,
+  deleteInstance,
+} = require('./controllers/instance.controller');
 const { getRoom } = require('./controllers/room.controller');
 const CreateConfiguration = require('./modules/createConfig');
 const AWSConfiguration = require('./modules/awsConfig');
@@ -16,6 +22,12 @@ const PORT = process.env.PORT || 3000;
 
 /* Instantiate the engine class */
 const engine = new Engine();
+engine.on('create-instance', ({ name }) => {
+  console.log('Instance creation signal with name : ', name);
+});
+engine.on('delete-instance', (instance) => {
+  deleteInstance(instance.publicIP);
+});
 
 new db();
 

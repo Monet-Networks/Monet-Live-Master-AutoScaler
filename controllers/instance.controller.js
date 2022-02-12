@@ -89,3 +89,7 @@ exports.freeAllInstances = async (req, res) => {
 exports.getGenInstances = (instanceIps) => {
   return Instance.find({ type: 'auto', publicIP: { $in: instanceIps } }).lean();
 };
+
+exports.deleteInstance = (publicIP) => {
+  return Instance.deleteOne({ publicIP });
+};

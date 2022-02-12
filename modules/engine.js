@@ -3,9 +3,6 @@ const hyperReq = require('http');
 const { log } = require('console');
 const { uniqueNamesGenerator } = require('unique-names-generator');
 const { green, red, cyan } = require('colors');
-// const { getGenInstances } = require('../controllers/instance.controller');
-
-new db();
 
 /** Condition for autoscaling
  *  Atleast one instance should be There.
@@ -35,17 +32,20 @@ class Engine {
     if (Instance && Instance.publicIP && Instance.privateIP) {
       const InstanceIP = Instance.publicIP;
       const exists = this.Instances[InstanceIP];
-      if (!exists)
-        if (!this.InternalIpImageIdMapping[Instance.privateIP]) {
+      if (!exists) {
+        let ImageId;
+        if (this.InternalIpImageIdMapping[Instance.privateIP]) {
+          ImageId =  this.InternalIpImageIdMapping[Instance.privateIP]['InstanceId']
+        }
           this.Instances[InstanceIP] = {
-            ImageId: this.InternalIpImageIdMapping[Instance.privateIP]['InstanceId'],
+            ImageId: ImageId || "NaN",
             Request: 'pending',
             deleteIteration: 0,
             live: 0,
             ...Instance,
           };
           this.state.task = 0;
-        }
+      }
     } else {
       return log(red('The instance structure does not exists or is missing publicIP or privateIP key : '), Instance);
     }
@@ -71,7 +71,9 @@ class Engine {
     this.reqKeyName = 'Request';
     this.CBDict = {};
     this.InternalIpImageIdMapping = {};
-    this.Instances = {};
+    this.Instances = {
+
+    };
     /* task flag
         0 - idle
         1 - creating
@@ -239,8 +241,8 @@ class Engine {
   scaleUp = () => {
     // set task to creation
     log(green('>>>>>>>>>>> Instance creation signal >>>>>>>>>>>'));
-    // this.state.task = 1;
-    // this.Invoker('create-instance', { name: uniqueNamesGenerator() });
+    this.state.task = 1;
+    this.Invoker('create-instance', { name: uniqueNamesGenerator() });
   };
 
   scaleOut = () => {
