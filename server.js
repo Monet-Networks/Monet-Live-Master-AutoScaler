@@ -33,7 +33,7 @@ new db();
 
 const instanceRegistrationHandle = async (req, res) => {
   const instance = await createOneInstance(req, res);
-  // if (instance['code'] && instance['code'] === 400) return;
+  if (instance === "NaN") return;
   if (req.query.publicIP && instance) engine.addInstance(instance);
 };
 

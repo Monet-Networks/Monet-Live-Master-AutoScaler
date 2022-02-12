@@ -8,35 +8,41 @@ exports.getInstances = async () => {
 };
 
 exports.createOneInstance = async (req, res) => {
-  if (!req.query.publicIP || !req.query.privateIP || !req.query.secret)
-    return new ErrorHandler(res, 400, 'missing parameter');
+  if (!req.query.publicIP || !req.query.privateIP || !req.query.secret) new ErrorHandler(res, 400, 'missing parameter');
   if (req.query.secret !== process.env.SECRET)
-    return new ErrorHandler(
+    new ErrorHandler(
       res,
       400,
       `Don't try to be smart. You haven't provided valid secret. Please don't try again unless you are admin. I know your address.`,
       'authentication error'
     );
   const existingInstance = await Instance.findOne({ publicIP: req.query.publicIP, privateIP: req.query.privateIP });
-  if (existingInstance)
-    return new ErrorHandler(res, 400, 'The entry for this instance exist with flag ' + existingInstance.occupied + ' kindly update if needed.');
+  if (existingInstance) {
+    new ErrorHandler(
+      res,
+      400,
+      'The entry for this instance exist with flag ' + existingInstance.occupied + ' kindly update if needed.'
+    );
+    return existingInstance;
+  }
   const entry = {
-      InstanceNo: 0,
-      InstanceRoute: `${req.query.publicIP.replaceAll('.', '_')}`,
-      publicIP: req.query.publicIP,
-      privateIP: req.query.privateIP,
-      occupied: false,
-      type: 'auto',
-      CPU: 0,
-      Upload: '0',
-      Download: '0',
-      Calls: 0,
-      Participants: 0
-    };
+    InstanceNo: 0,
+    InstanceRoute: `${req.query.publicIP.replaceAll('.', '_')}`,
+    publicIP: req.query.publicIP,
+    privateIP: req.query.privateIP,
+    occupied: false,
+    type: 'auto',
+    CPU: 0,
+    Upload: '0',
+    Download: '0',
+    Calls: 0,
+    Participants: 0,
+  };
   const instance = new Instance(entry);
   await instance.save((err) => {
     if (err) {
-      return new ErrorHandler(res, 400, 'error', err.message);
+      new ErrorHandler(res, 400, 'error', err.message);
+      return 'NaN';
     }
     res.json({
       code: 200,
