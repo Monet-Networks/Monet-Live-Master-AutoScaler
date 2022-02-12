@@ -34,6 +34,7 @@ new db();
 const instanceRegistrationHandle = async (req, res) => {
   await createOneInstance(req, res, ({ error, success }) => {
     if (error) return console.log('Instance creation error : ', error);
+    console.log('Instance creation success : ', success);
     if (success) if (success.publicIP) engine.addInstance(success);
   });
 };
