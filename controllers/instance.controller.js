@@ -7,7 +7,8 @@ exports.getInstances = async () => {
   return instanceIps.map(({ publicIP }) => publicIP);
 };
 
-exports.createOneInstance = async (req, res) => {
+exports.createOneInstance = async (req, res, CB) => {
+  if(typeof CB !== "function") return "NaN";
   if (!req.query.publicIP || !req.query.privateIP || !req.query.secret) new ErrorHandler(res, 400, 'missing parameter');
   if (req.query.secret !== process.env.SECRET)
     new ErrorHandler(
@@ -26,7 +27,7 @@ exports.createOneInstance = async (req, res) => {
       400,
       'The entry for this instance exist with flag ' + existingInstance.occupied + ' kindly update if needed.'
     );
-    return existingInstance;
+    CB({error:null, success: existingInstance});
   }
   const entry = {
     InstanceNo: 0,
@@ -45,14 +46,14 @@ exports.createOneInstance = async (req, res) => {
   await instance.save((err) => {
     if (err) {
       new ErrorHandler(res, 400, 'error', err.message);
-      return 'NaN';
+      CB({error: 'NaN'});
     }
     res.json({
       code: 200,
       error: false,
       message: 'Instance entry created : success',
     });
-    return entry;
+    CB({ error: null, success: entry });
   });
 };
 

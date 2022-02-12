@@ -32,9 +32,10 @@ engine.on('delete-instance', (instance) => {
 new db();
 
 const instanceRegistrationHandle = async (req, res) => {
-  const instance = await createOneInstance(req, res);
-  if (instance === "NaN") return;
-  if (instance.publicIP && instance) engine.addInstance(instance);
+  await createOneInstance(req, res, ({ error, success }) => {
+    if (error) return console.log('Instance creation error : ', error);
+    if (success) if (success.publicIP) engine.addInstance(success);
+  });
 };
 
 admin.post('/auth/google', googleAuth);
