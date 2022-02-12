@@ -127,7 +127,7 @@ class Engine {
       });
       const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
       if (occupancyCountChanged) {
-        this.state.TotalOccupancy = totalOccupancy;
+        this.state.TotalOccupied = totalOccupancy;
         // log(cyan('The number of occupied changed. '), this.state);
       }
       // log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
