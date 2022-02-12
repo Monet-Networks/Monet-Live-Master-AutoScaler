@@ -36,11 +36,8 @@ const instanceRegistrationHandle = async (req, res) => {
     if (error) return console.log('Instance creation error : ', error);
     console.log('Instance creation success : ', success, Object.keys(success));
     if (success)
-      if (success.publicIP) {
-        if (success['__v']) delete success['__v'];
-        if (success['_id']) delete success['_id'];
+      if (success.publicIP)
         engine.addInstance(success);
-      }
   });
 };
 
