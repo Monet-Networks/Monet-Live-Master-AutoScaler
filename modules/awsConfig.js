@@ -11,32 +11,7 @@ class AWS {
     this.instances = [];
     this.state = 'create';
     this.prevInstanceName = 'previousName';
-    this.currentInstanceName = 'NaN';
     if (this.currentInstanceName === this.prevInstanceName) this.state = 'same';
-    this.instanceParams = {
-      ImageId: AmiId || 'ami-0c1c02750a1158a9b', //AMI_ID
-      InstanceType: 't4g.micro',
-      KeyName: key || 'gurgaon', //KEY_PAIR_NAME
-      MinCount: 1,
-      MaxCount: 1,
-      SecurityGroupIds: ['sg-063905d4148d18403', 'sg-04061dff07fe82e78'],
-      SubnetId: 'subnet-706aed07', // us-west-2a
-      TagSpecifications: [
-        {
-          ResourceType: 'instance',
-          Tags: [
-            {
-              Key: 'Purpose',
-              Value: 'test',
-            },
-            {
-              Key: 'Name',
-              Value: this.currentInstanceName,
-            },
-          ],
-        },
-      ],
-    };
     this.client = ec2Client;
   };
 
@@ -45,7 +20,33 @@ class AWS {
    * @returns error || instance data
    */
   async createInstance(name) {
-    if (name) this.currentInstanceName = name;
+    if (name) {
+      this.currentInstanceName = name;
+      this.instanceParams = {
+        ImageId: AmiId || 'ami-0c1c02750a1158a9b', //AMI_ID
+        InstanceType: 't4g.micro',
+        KeyName: key || 'gurgaon', //KEY_PAIR_NAME
+        MinCount: 1,
+        MaxCount: 1,
+        SecurityGroupIds: ['sg-063905d4148d18403', 'sg-04061dff07fe82e78'],
+        SubnetId: 'subnet-706aed07', // us-west-2a
+        TagSpecifications: [
+          {
+            ResourceType: 'instance',
+            Tags: [
+              {
+                Key: 'Purpose',
+                Value: 'test',
+              },
+              {
+                Key: 'Name',
+                Value: name,
+              },
+            ],
+          },
+        ],
+      };
+    }
     else return log('No name provided for this instance');
     if (this.currentInstanceName !== 'NaN')
       return new Promise((resolve, reject) =>

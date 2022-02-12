@@ -229,9 +229,11 @@ class Engine {
      ***check OcuDiff, if it's still greater than two. send signal for deletion of candidate.
      */
 
-    if (this.state.TotalInstances > 1 && this.state.task === 0)
+    if (this.state.TotalInstances > 1 && this.state.task === 0) {
+      log(red('Entered the block scale out call block'));
       if (this.state.TotalOccupied !== this.state.TotalInstances) this.scaleOut();
       else this.deleteCandidate = 'NaN';
+    }
 
     // this is default phase cycle
     this.state.phase = 1;
