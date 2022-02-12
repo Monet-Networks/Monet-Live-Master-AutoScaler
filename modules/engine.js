@@ -136,7 +136,6 @@ class Engine {
          if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
          if (this.Instances[ip][this.reqKeyName] === 'completed') {
            this.Instances[ip][this.reqKeyName] = 'pending';
-           log('Sending request');
            this.sentReq(ip)
              .then((r) => {
                let response = '';
@@ -155,7 +154,7 @@ class Engine {
                    red(error)
                  );
                }
-               log('Response : ', gray(r));
+               //  log('Response : ', gray(r));
              })
              .catch((e) => {
                log('error : ', e.code);
