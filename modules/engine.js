@@ -91,7 +91,7 @@ class Engine {
 
   /* This method will check whether we have empty entries in Instances object */
   stateOne = async (data) => {
-    log(green(this.state));
+    // log(green(this.state));
     /* check for engine stop signal */
     if (this.state.phase === 0) {
       this.Invoker('engine-stopped');
@@ -179,7 +179,7 @@ class Engine {
 
   /* This method shall decide whether scaling up or down is needed? */
   stateTwo = async (data) => {
-    log(green(this.state));
+    // log(green(this.state));
     /* check for engine stop signal */
     if (this.state.phase === 0) {
       this.Invoker('engine-stopped');
