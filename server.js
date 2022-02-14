@@ -32,11 +32,10 @@ engine.on('create-instance', ({ name }) => {
 });
 engine.on('delete-instance', async (instance) => {
   console.log(instance);
-  if (instance.ImageId !== 'NaN') {
-    IController.deleteInstance(instance.ImageId);
-  }
+  const awsInstanceData = IController.deleteInstance(instance.ImageId);
   const deletionInfo = await deleteInstance(instance.publicIP);
-  console.log("deletion info : ",deletionInfo);
+  engine.deleteConfirmation({...awsInstanceData, ...deletionInfo});
+  console.log('deletion info : ', deletionInfo);
 });
 
 new db();
