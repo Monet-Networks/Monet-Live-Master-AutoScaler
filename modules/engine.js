@@ -228,7 +228,6 @@ class Engine {
      */
 
     if (this.state.TotalInstances > 1 && this.state.task === 0) {
-      log(red('Entered the block scale out call block'));
       if (this.state.TotalOccupied !== this.state.TotalInstances) this.scaleOut();
       else this.deleteCandidate = 'NaN';
     }
@@ -247,7 +246,8 @@ class Engine {
 
   scaleOut = () => {
     this.state.task = 2;
-    const OcuDiff = this.state.TotalOccupied - this.state.TotalInstances; // Total instances should always be greater than occupied ones
+    log(red('Entered the block scale out call block'));
+    const OcuDiff = this.state.TotalInstances - this.state.TotalOccupied; // Total instances should always be greater than occupied ones
     if (OcuDiff >= 1) {
       // If scaleUp flag is true, then rule out the possibility of Scaling Out.
       // this.state.ScaleOut = this.state.ScaleUp ? false : true;
@@ -266,7 +266,8 @@ class Engine {
           if (!instaObj.occupied && instaObj['Calls'] === 0 && instaObj['Participants'] === 0 && instaObj['CPU'] < 20) {
             /* This candidate has been selected for deletion */
             this.deleteCandidate = instaObj;
-          }
+          } else
+            log(red("Unable to find suitable candidate."));
         }
       } else if (
         typeof this.deleteCandidate === 'object' &&
