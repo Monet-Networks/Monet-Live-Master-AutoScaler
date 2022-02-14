@@ -308,8 +308,8 @@ class Engine {
             // Check whether scaleOut has reached it's threshhold.
             this.deleteInstance(this.deleteCandidate['publicIP']);
           } else {
-            this.state.task=0;
             ++this.deleteCandidate['deleteIteration'];
+            this.state.task=0;
           }
         } else {
           // set the candidate back to it's default value. And retry
