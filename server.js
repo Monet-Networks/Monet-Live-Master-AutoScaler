@@ -51,6 +51,19 @@ const instanceRegistrationHandle = async (req, res) => {
   });
 };
 
+admin.get('/reset-engine-state', (req,res) => {
+  if(req.query.secret==="monet@43324") {
+    engine.resetState()
+    res.json({
+      message:"success"
+    })
+  } else {
+    res.json({
+      message:"please don't use this api"
+    })
+  }
+});
+
 admin.post('/auth/google', googleAuth);
 
 admin.get('/configure-instances', async (req, res) => {

@@ -9,6 +9,11 @@ const { green, red, cyan, gray } = require('colors');
  *  Instance should be created when all the instances have occupied flag on.
  */
 class Engine {
+
+  resetState = () => {
+    this.state.task = 0;
+  }
+
   on = (event, callback, overwrite = false) => {
     if (typeof event !== 'string' && typeof callback !== 'function')
       return log(`The provided params is not of valid acceptable format : ${typeof event} , ${typeof callback}`);
