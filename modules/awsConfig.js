@@ -7,7 +7,7 @@ class AWS {
     this.init(AmiId, key);
   }
 
-  init = (AmiId, key) => {
+  init = () => {
     this.instances = [];
     this.state = 'create';
     this.prevInstanceName = 'previousName';
@@ -23,9 +23,9 @@ class AWS {
     if (name) {
       this.currentInstanceName = name;
       this.instanceParams = {
-        ImageId: AmiId || 'ami-0c1c02750a1158a9b', //AMI_ID
+        ImageId: 'ami-0c1c02750a1158a9b', //AMI_ID
         InstanceType: 't4g.micro',
-        KeyName: key || 'gurgaon', //KEY_PAIR_NAME
+        KeyName: 'gurgaon', //KEY_PAIR_NAME
         MinCount: 1,
         MaxCount: 1,
         SecurityGroupIds: ['sg-063905d4148d18403', 'sg-04061dff07fe82e78'],
@@ -46,8 +46,7 @@ class AWS {
           },
         ],
       };
-    }
-    else return log('No name provided for this instance');
+    } else return log('No name provided for this instance');
     if (this.currentInstanceName !== 'NaN')
       return new Promise((resolve, reject) =>
         this.client.runInstances(this.instanceParams, (error, data) => {

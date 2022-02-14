@@ -71,7 +71,7 @@ class Engine {
     this.CBDict = {};
     this.InternalIpImageIdMapping = {};
     this.Instances = {};
-    /* task flag
+    /*  task flag
         0 - idle
         1 - creating
         2 - deleting
@@ -97,11 +97,13 @@ class Engine {
       this.Invoker('engine-stopped');
       return log(green('>>>>>>>>>>> Engine Stopped >>>>>>>>>>>'));
     }
+
     /* Find IPs that don't have the data. */
     if (this.state.phase !== 1) {
       log(red('>>>>>>>>>>> This state does not authorize execution of state one >>>>>>>>>>>'));
       return this.Invoker('internal', this.state.phaseData, 5000);
     }
+
     if (data) {
       /* There is data. Do something with it */
     }
@@ -179,6 +181,7 @@ class Engine {
   };
 
   /* This method shall decide whether scaling up or down is needed? */
+  /* scaleUp */
   stateTwo = async (data) => {
     // log(green(this.state));
     /* check for engine stop signal */
@@ -204,11 +207,6 @@ class Engine {
       this.state.phase = 1;
       return this.Invoker('internal');
     }
-
-    /*
-      Scaling :
-      Scale Up should never contradict. Scale down
-     */
 
     /* decision : whether we need a new instance or not? Scale up ?
         1. check occupancy;
