@@ -252,6 +252,7 @@ class Engine {
   };
 
   scaleOut = () => {
+    if(this.state.CreationLockState) return log(red("New instance has just been spun up please"))
     this.state.task = 2;
     log(red('Entered the block scale out call block'));
     const OcuDiff = this.state.TotalInstances - this.state.TotalOccupied; // Total instances should always be greater than occupied ones
@@ -270,7 +271,13 @@ class Engine {
         // Find the suitable candidate and add it with deleteIteration key to deleteCandidate.
         for (let key in this.Instances) {
           const instaObj = this.Instances[key];
-          if (!instaObj.occupied && instaObj['Calls'] === 0 && instaObj['Participants'] === 0 && instaObj['CPU'] < 20) {
+          if (
+            !instaObj.occupied &&
+            instaObj['Calls'] === 0 &&
+            instaObj['Participants'] === 0 &&
+            instaObj['CPU'] < 20 &&
+            instaObj['ImageId'] !== "NaN"
+          ) {
             /* This candidate has been selected for deletion */
             this.deleteCandidate = instaObj;
           } else {
@@ -281,7 +288,8 @@ class Engine {
       } else if (
         typeof this.deleteCandidate === 'object' &&
         typeof this.deleteCandidate['deleteIteration'] === 'number' &&
-        this.deleteCandidate['publicIP']
+        this.deleteCandidate['publicIP'] &&
+        this.deleteCandidate['ImageId']
       ) {
         if (this.Instances[this.deleteCandidate['publicIP']]) {
           // watch this instance for 5 more iterations before deleting it as it might be used in certain threshhold of time
