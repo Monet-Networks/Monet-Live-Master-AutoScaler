@@ -29,7 +29,7 @@ class Engine {
 
   deleteConfirmation = (delInstanceInfo) => {
     if (delInstanceInfo.instanceId) log(green(`>>>>>>>>>>> Deleted instance ${delInstanceInfo.instanceId} >>>>>>>>>>>`))
-    else log(red(`>>>>>>>>>>> Unable to delete the instance >>>>>>>>>>>`));
+    else log(red(`>>>>>>>>>>> Unable to delete the instance >>>>>>>>>>>`), delInstanceInfo);
     this.state.task = 0;
   }
 
