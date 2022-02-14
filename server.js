@@ -33,9 +33,8 @@ engine.on('create-instance', ({ name }) => {
 engine.on('delete-instance', async (instance) => {
   console.log(instance);
   const awsInstanceData = IController.deleteInstance(instance.ImageId);
-  const deletionInfo = await deleteInstance(instance.publicIP);
-  engine.deleteConfirmation({...awsInstanceData, ...deletionInfo});
-  console.log('deletion info : ', deletionInfo);
+  await deleteInstance(instance.publicIP);
+  engine.deleteConfirmation(awsInstanceData);
 });
 
 new db();
