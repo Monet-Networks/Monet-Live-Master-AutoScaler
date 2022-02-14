@@ -27,6 +27,12 @@ class Engine {
     this.CBDict[event] = callback;
   };
 
+  deleteConfirmation = (delInstanceInfo) => {
+    if (delInstanceInfo.instanceId) log(green(`>>>>>>>>>>> Deleted instance ${delInstanceInfo.instanceId} >>>>>>>>>>>`))
+    else log(red(`>>>>>>>>>>> Unable to delete the instance >>>>>>>>>>>`));
+    this.state.task = 0;
+  }
+
   /* We will get this data sooner than the instance information */
   addInternalIpImageId = (entry) => {
     if (entry['PrivateIpAddress'] && entry['InstanceId'])
@@ -301,7 +307,10 @@ class Engine {
           if (this.deleteCandidate['deleteIteration'] > 5) {
             // Check whether scaleOut has reached it's threshhold.
             this.deleteInstance(this.deleteCandidate['publicIP']);
-          } else ++this.deleteCandidate['deleteIteration'];
+          } else {
+            this.state.task=0;
+            ++this.deleteCandidate['deleteIteration'];
+          }
         } else {
           // set the candidate back to it's default value. And retry
           this.deleteCandidate = 'NaN';
