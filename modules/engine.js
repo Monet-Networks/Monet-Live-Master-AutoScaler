@@ -252,7 +252,7 @@ class Engine {
   };
 
   scaleOut = () => {
-    if(this.state.CreationLockState) return log(red("New instance has just been spun up please"))
+    if (this.state.CreationLockState) return log(red('New instance has just been spun up please wait.'));
     this.state.task = 2;
     log(red('Entered the block scale out call block'));
     const OcuDiff = this.state.TotalInstances - this.state.TotalOccupied; // Total instances should always be greater than occupied ones
