@@ -85,6 +85,8 @@ class Engine {
       TotalOccupied: 0,
       TotalCalls: 0,
       TotalParticipants: 0,
+      CreationLockTimer: (1000 * 60 * 10),
+      CreationLockState: false,
     };
     this.deleteCandidate = 'NaN';
   };
@@ -239,9 +241,14 @@ class Engine {
 
   scaleUp = () => {
     // set task to creation
+    if(this.state.CreationLockState) return log(red("Instance creation is locked."))
     log(green('>>>>>>>>>>> Instance Creation Signal >>>>>>>>>>>'));
+    this.state.CreationLockState = true;
     this.state.task = 1;
     this.Invoker('create-instance', { name: uniqueNamesGenerator({ dictionaries: [colors, adjectives, animals] }) });
+    setTimeout(() => {
+      this.state.CreationLockState = false;
+    }, this.state.CreationLockTimer);
   };
 
   scaleOut = () => {
