@@ -280,7 +280,7 @@ class Engine {
         }
       } else if (
         typeof this.deleteCandidate === 'object' &&
-        this.deleteCandidate['deleteIteration'] &&
+        typeof this.deleteCandidate['deleteIteration'] === 'number' &&
         this.deleteCandidate['publicIP']
       ) {
         if (this.Instances[this.deleteCandidate['publicIP']]) {
