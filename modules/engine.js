@@ -16,6 +16,7 @@ class Engine {
       if (Array.isArray(dbEntries))
         if (dbEntries.lengh !== 0) {
           for (let entry of dbEntries) {
+            entry.deleteIteration = 0;
             this.Instances[entry.publicIP] = entry;
             log(this.Instances);
           }
