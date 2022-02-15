@@ -13,7 +13,11 @@ class Engine {
     if (typeof func === 'function') {
       this.fetchDBEntry = func;
       const dbEntries = await func();
-      if (Array.isArray(dbEntries)) if (dbEntries.lengh !== 0) this.Instances = dbEntries;
+      if (Array.isArray(dbEntries))
+        if (dbEntries.lengh !== 0) {
+          console.log(dbEntries);
+          this.Instances = dbEntries;
+        }
     } else {
       log(red('parameter is not of correct type'));
     }
