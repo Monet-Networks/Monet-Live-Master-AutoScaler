@@ -324,6 +324,7 @@ class Engine {
             /* This candidate has been selected for deletion */
             this.deleteCandidate = instaObj;
             this.state.task = 0;
+            log(cyan('Candidate for deletion selected'), this.deleteCandidate);
           } else {
             this.state.task = 0;
             log(red('Unable to find suitable candidate.'));
