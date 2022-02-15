@@ -155,16 +155,32 @@ class Engine {
       this.state.phase = 2;
       return this.Invoker('internal');
     }
-    /* Take tab of total no. of occupied instances */
+    /* Take tab of total no. of occupied instances, calls and participants */
+    let TotalCalls = 0;
     let totalOccupancy = 0;
+    let TotalParticipants = 0;
     currentInstances.forEach((Instance) => {
       if (this.Instances[Instance].occupied && this.Instances[Instance].occupied === true) ++totalOccupancy;
+      if (this.Instances.Participants > 0) TotalParticipants = TotalParticipants + this.Instances.Participants;
+      if (this.Instances.Calls > 0) TotalCalls = TotalCalls + this.Instances.Calls;
     });
     const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
+    const TotalCallsChange = this.state.TotalCalls !== TotalCalls;
+    const TotalParticipantsChange = this.state.TotalParticipants !== TotalParticipants;
     if (occupancyCountChanged) {
       this.state.TotalOccupied = totalOccupancy;
       // log(cyan('The number of occupied changed. '), this.state);
     }
+    if (TotalCallsChange) {
+      this.state.TotalCalls = TotalCalls;
+      // log(cyan('The number of occupied changed. '), this.state);
+    }
+    if (TotalParticipantsChange) {
+      this.state.TotalParticipants = TotalParticipants;
+      // log(cyan('The number of occupied changed. '), this.state);
+    }
+    /* Take tab of total no. of calls */
+
     // log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
     for (let ip of currentInstances) {
       /* Initiate if does not exist */
