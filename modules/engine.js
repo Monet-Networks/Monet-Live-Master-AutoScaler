@@ -15,7 +15,7 @@ class Engine {
       const dbEntries = await func();
       if (Array.isArray(dbEntries))
         if (dbEntries.lengh !== 0) {
-          for(let entry in dbEntries) {
+          for (let entry of dbEntries) {
             this.Instances[entry.publicIP] = entry;
             console.log(this.Instances);
           }
