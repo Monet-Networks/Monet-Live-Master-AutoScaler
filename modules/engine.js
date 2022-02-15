@@ -17,7 +17,7 @@ class Engine {
         if (dbEntries.lengh !== 0) {
           for (let entry of dbEntries) {
             this.Instances[entry.publicIP] = entry;
-            console.log(this.Instances);
+            log(this.Instances);
           }
         }
     } else {
