@@ -102,7 +102,7 @@ exports.freeAllInstances = async (req, res) => {
 
 /* General Functions */
 exports.getAllAutoInstances = () => {
-  return Instance.find({type:"auto"});
+  return Instance.find({type:"auto"}).lean();
 }
 
 exports.getGenInstances = (instanceIps) => {
