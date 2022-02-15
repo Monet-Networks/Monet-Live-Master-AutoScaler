@@ -16,7 +16,9 @@ class Engine {
       if (Array.isArray(dbEntries))
         if (dbEntries.lengh !== 0) {
           console.log(dbEntries);
-          this.Instances = dbEntries;
+          for(let entry in dbEntries) {
+            this.Instances[entry.publicIP] = entry;
+          }
         }
     } else {
       log(red('parameter is not of correct type'));
