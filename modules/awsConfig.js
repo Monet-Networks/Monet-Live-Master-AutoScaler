@@ -23,7 +23,7 @@ class AWS {
     if (name) {
       this.currentInstanceName = name;
       this.instanceParams = {
-        ImageId: 'ami-0850e7d5dd3fda878', // 'ami-0c1c02750a1158a9b', //AMI_ID
+        ImageId: 'ami-0e891a0d9bd041cb8', // 'ami-0850e7d5dd3fda878', // 'ami-0c1c02750a1158a9b', //AMI_ID
         InstanceType: 't4g.micro',
         KeyName: 'gurgaon', //KEY_PAIR_NAME
         MinCount: 1,
