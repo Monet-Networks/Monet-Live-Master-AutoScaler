@@ -113,7 +113,7 @@ class Engine {
       TotalOccupied: 0,
       TotalCalls: 0,
       TotalParticipants: 0,
-      CreationLockTimer: 1000 * 60 * 1,
+      CreationLockTimer: 1000 * 60 * 5,
       CreationLockState: false,
     };
     this.deleteCandidate = 'NaN';
