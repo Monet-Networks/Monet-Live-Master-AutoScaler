@@ -96,7 +96,7 @@ class Engine {
       TotalOccupied: 0,
       TotalCalls: 0,
       TotalParticipants: 0,
-      CreationLockTimer: (1000 * 60 * 10),
+      CreationLockTimer: (1000 * 60 * 1),
       CreationLockState: false,
     };
     this.deleteCandidate = 'NaN';
@@ -410,12 +410,12 @@ class Engine {
         case 1:
           setTimeout(() => {
             this.stateOne(data || this.state.phaseData);
-          }, timeout || 5000);
+          }, timeout || (1000 * 30));
           break;
         case 2:
           setTimeout(() => {
             this.stateTwo(data || this.state.phaseData);
-          }, timeout || 5000);
+          }, timeout || (1000 * 30));
           break;
         default:
           log('Unknown state : ', this.state.phase);
@@ -426,7 +426,7 @@ class Engine {
       }
     }
     const CB = typeof this.CBDict[event] === 'function' ? this.CBDict[event] : () => {};
-    CB(data || {});
+    CB(data || this.state);
   };
 }
 
