@@ -324,6 +324,7 @@ class Engine {
           if (this.deleteCandidate['deleteIteration'] > 5) {
             // Check whether scaleOut has reached it's threshhold.
             this.deleteInstance(this.deleteCandidate['publicIP']);
+            this.deleteCandidate = 'NaN';
           } else {
             ++this.deleteCandidate['deleteIteration'];
             this.state.task = 0;
@@ -337,7 +338,7 @@ class Engine {
         log(
           red(
             'Check what is missing. Candidate to be deleted does not have any valid entries or required keys in it to be suitable for deletion.'
-          )
+          ), this.deleteCandidate
         );
         this.state.task = 0;
       }
