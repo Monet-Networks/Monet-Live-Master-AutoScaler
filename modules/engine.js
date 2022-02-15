@@ -9,10 +9,19 @@ const { green, red, cyan, gray } = require('colors');
  *  Instance should be created when all the instances have occupied flag on.
  */
 class Engine {
+  DBEntryFunction = async (func) => {
+    if (typeof func === 'function') {
+      this.fetchDBEntry = func;
+      const dbEntries = await func();
+      if (Array.isArray(dbEntries)) if (dbEntries.lengh !== 0) this.Instances = dbEntries;
+    } else {
+      log(red('parameter is not of correct type'));
+    }
+  };
 
   resetState = () => {
     this.state.task = 0;
-  }
+  };
 
   on = (event, callback, overwrite = false) => {
     if (typeof event !== 'string' && typeof callback !== 'function')
@@ -28,10 +37,11 @@ class Engine {
   };
 
   deleteConfirmation = (delInstanceInfo) => {
-    if (delInstanceInfo.instanceId) log(green(`>>>>>>>>>>> Deleted instance ${delInstanceInfo.instanceId} >>>>>>>>>>>`))
+    if (delInstanceInfo.instanceId)
+      log(green(`>>>>>>>>>>> Deleted instance ${delInstanceInfo.instanceId} >>>>>>>>>>>`));
     else log(red(`>>>>>>>>>>> Unable to delete the instance >>>>>>>>>>>`), delInstanceInfo);
     this.state.task = 0;
-  }
+  };
 
   /* We will get this data sooner than the instance information */
   addInternalIpImageId = (entry) => {
@@ -47,7 +57,7 @@ class Engine {
         let ImageId;
         if (this.InternalIpImageIdMapping[Instance.privateIP]) {
           ImageId = this.InternalIpImageIdMapping[Instance.privateIP]['InstanceId'];
-          this.Invoker("up-instance-image", {ImageId, privateIP: Instance.privateIP})
+          this.Invoker('up-instance-image', { ImageId, privateIP: Instance.privateIP });
         }
         this.Instances[InstanceIP] = {
           ImageId: ImageId || 'NaN',
@@ -97,7 +107,7 @@ class Engine {
       TotalOccupied: 0,
       TotalCalls: 0,
       TotalParticipants: 0,
-      CreationLockTimer: (1000 * 60 * 1),
+      CreationLockTimer: 1000 * 60 * 1,
       CreationLockState: false,
     };
     this.deleteCandidate = 'NaN';
@@ -253,7 +263,7 @@ class Engine {
 
   scaleUp = () => {
     // set task to creation
-    if(this.state.CreationLockState) return log(red("Instance creation is locked."))
+    if (this.state.CreationLockState) return log(red('Instance creation is locked.'));
     log(green('>>>>>>>>>>> Instance Creation Signal >>>>>>>>>>>'));
     this.state.CreationLockState = true;
     this.state.task = 1;
@@ -288,7 +298,7 @@ class Engine {
             instaObj['Calls'] === 0 &&
             instaObj['Participants'] === 0 &&
             instaObj['CPU'] < 20 &&
-            instaObj['ImageId'] !== "NaN"
+            instaObj['ImageId'] !== 'NaN'
           ) {
             /* This candidate has been selected for deletion */
             this.deleteCandidate = instaObj;
@@ -310,7 +320,7 @@ class Engine {
             this.deleteInstance(this.deleteCandidate['publicIP']);
           } else {
             ++this.deleteCandidate['deleteIteration'];
-            this.state.task=0;
+            this.state.task = 0;
           }
         } else {
           // set the candidate back to it's default value. And retry
@@ -411,12 +421,12 @@ class Engine {
         case 1:
           setTimeout(() => {
             this.stateOne(data || this.state.phaseData);
-          }, timeout || (1000 * 30));
+          }, timeout || 1000 * 30);
           break;
         case 2:
           setTimeout(() => {
             this.stateTwo(data || this.state.phaseData);
-          }, timeout || (1000 * 30));
+          }, timeout || 1000 * 30);
           break;
         default:
           log('Unknown state : ', this.state.phase);

@@ -11,7 +11,8 @@ const {
   getInstance,
   freeAllInstances,
   deleteInstance,
-  updateImageId
+  updateImageId,
+  getAllAutoInstances,
 } = require('./controllers/instance.controller');
 const { getRoom } = require('./controllers/room.controller');
 const CreateConfiguration = require('./modules/createConfig');
@@ -24,6 +25,7 @@ const PORT = process.env.PORT || 3000;
 
 /* Instantiate the engine class */
 const engine = new Engine();
+engine.DBEntryFunction(getAllAutoInstances);
 engine.on('create-instance', ({ name }) => {
   console.log('Instance creation signal with name : ', name);
   /* Check whether this object needs to be recorded or not. */
