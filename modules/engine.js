@@ -319,7 +319,7 @@ class Engine {
             !instaObj.occupied &&
             instaObj['Calls'] === 0 &&
             instaObj['Participants'] === 0 &&
-            instaObj['CPU'] < 5 &&
+            instaObj['CPU'] < 10 &&
             instaObj['ImageId'] &&
             instaObj['ImageId'] !== 'NaN'
           ) {
