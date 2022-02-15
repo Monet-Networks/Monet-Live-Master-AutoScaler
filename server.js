@@ -11,6 +11,7 @@ const {
   getInstance,
   freeAllInstances,
   deleteInstance,
+  updateImageId
 } = require('./controllers/instance.controller');
 const { getRoom } = require('./controllers/room.controller');
 const CreateConfiguration = require('./modules/createConfig');
@@ -35,6 +36,10 @@ engine.on('delete-instance', async (instance) => {
   const awsInstanceData = IController.deleteInstance(instance.ImageId);
   await deleteInstance(instance.publicIP);
   engine.deleteConfirmation(awsInstanceData);
+});
+engine.on('up-instance-image', async ({ImageId, privateIP}) => {
+  const update = await updateImageId(ImageId,privateIP);
+  console.log(`The update status for ${privateIP} is `, update);
 });
 
 new db();

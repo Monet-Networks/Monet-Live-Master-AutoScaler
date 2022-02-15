@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const instanceSchema = mongoose.Schema({
+  ImageId: { type: String, default: 'NaN' },
   InstanceNo: { type: Number, required: true },
   InstanceRoute: { type: String, required: true },
   publicIP: { type: String, required: true },

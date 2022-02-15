@@ -6,7 +6,8 @@ const { authenticate, generateToken } = require('../util/auth');
 
 /* Google's Authentication Controller */
 exports.googleAuth = async (req, res) => {
-  if (!req.body['token']) return new ErrorHandler(res, 'No token provided.');
+  if (!req.body) return new ErrorHandler(res, 'No body provided.', body);
+  if (!req.body.token) return new ErrorHandler(res, 'No token provided.');
   const { token } = req.body;
   const client = new OAuth2Client({
     clientId: process.env.GOOGLE_CLIENT_ID,

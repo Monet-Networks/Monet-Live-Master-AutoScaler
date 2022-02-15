@@ -47,6 +47,7 @@ class Engine {
         let ImageId;
         if (this.InternalIpImageIdMapping[Instance.privateIP]) {
           ImageId = this.InternalIpImageIdMapping[Instance.privateIP]['InstanceId'];
+          this.Invoker("up-instance-image", {ImageId, privateIP: Instance.privateIP})
         }
         this.Instances[InstanceIP] = {
           ImageId: ImageId || 'NaN',
@@ -267,7 +268,7 @@ class Engine {
     this.state.task = 2;
     log(red('Entered the block scale out call block'));
     const OcuDiff = this.state.TotalInstances - this.state.TotalOccupied; // Total instances should always be greater than occupied ones
-    if (OcuDiff >= 1) {
+    if (OcuDiff > 1) {
       // If scaleUp flag is true, then rule out the possibility of Scaling Out.
       // this.state.ScaleOut = this.state.ScaleUp ? false : true;
       // if (!this.state.ScaleOut)

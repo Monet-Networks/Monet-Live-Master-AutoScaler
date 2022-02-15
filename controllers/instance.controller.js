@@ -108,3 +108,7 @@ exports.getGenInstances = (instanceIps) => {
 exports.deleteInstance = (publicIP) => {
   return Instance.deleteOne({ publicIP });
 };
+
+exports.updateImageId = (ImageId, privateIP) => {
+  return Instance.updateOne({ privateIP }, { ImageId });
+};
