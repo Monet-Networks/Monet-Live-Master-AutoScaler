@@ -1,4 +1,4 @@
-const db = require('./db');
+// const db = require('./db');
 const hyperReq = require('http');
 const { log } = require('console');
 const { uniqueNamesGenerator, adjectives, colors, animals } = require('unique-names-generator');
@@ -43,10 +43,10 @@ class Engine {
   };
 
   deleteConfirmation = (delInstanceInfo) => {
+    this.state.task = 0;
     if (delInstanceInfo.instanceId)
       log(green(`>>>>>>>>>>> Deleted instance ${delInstanceInfo.instanceId} >>>>>>>>>>>`));
     else log(red(`>>>>>>>>>>> Unable to delete the instance >>>>>>>>>>>`), delInstanceInfo);
-    this.state.task = 0;
   };
 
   /* We will get this data sooner than the instance information */
