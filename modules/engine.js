@@ -319,6 +319,7 @@ class Engine {
             instaObj['Calls'] === 0 &&
             instaObj['Participants'] === 0 &&
             instaObj['CPU'] < 20 &&
+            instaObj['ImageId'] &&
             instaObj['ImageId'] !== 'NaN'
           ) {
             /* This candidate has been selected for deletion */
