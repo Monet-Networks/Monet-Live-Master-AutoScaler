@@ -6,6 +6,7 @@ const { authenticate, generateToken } = require('../util/auth');
 
 /* Google's Authentication Controller */
 exports.googleAuth = async (req, res) => {
+  console.log('>>>>>>>>>> Google request body : ', req.body);
   if (!req.body) return new ErrorHandler(res, 'No body provided.', req.body);
   if (!req.body.token) return new ErrorHandler(res, 'No token provided.');
   const { token } = req.body;
