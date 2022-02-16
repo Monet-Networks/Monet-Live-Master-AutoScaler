@@ -56,6 +56,8 @@ const instanceRegistrationHandle = async (req, res) => {
   });
 };
 
+admin.use(express.bodyParser());
+
 admin.get('/reset-engine-state', (req,res) => {
   if(req.query.secret==="monet@43324") {
     engine.resetState()
