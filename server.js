@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const bodyParser = require('body-parser');
 const admin = express();
 const { log } = require('console');
 const db = require('./modules/db');
@@ -56,7 +57,7 @@ const instanceRegistrationHandle = async (req, res) => {
   });
 };
 
-admin.use(express.bodyParser());
+admin.use(bodyParser.json());
 
 admin.get('/reset-engine-state', (req,res) => {
   if(req.query.secret==="monet@43324") {
