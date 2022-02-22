@@ -226,8 +226,13 @@ admin.post('/generateReport', async (req, res) => {
       error: true,
       message: `Could not generate report for roomid: ${roomid} & creator_ID: ${creator_ID}. Please check`,
     });
-  }
-  res.json({ code: 200, error: false, message: 'Report generated successfully', report });
+  } else if (report.length === 0)
+    return res.json({
+      code: 400,
+      error: true,
+      message: `Report is processing for roomid: ${roomid} & creator_ID: ${creator_ID}. Please check`,
+    });
+  else return es.json({ code: 200, error: false, message: 'Report generated successfully', report });
 })
 
 httpServer.listen(PORT, () => log(`[Server OK]`));
