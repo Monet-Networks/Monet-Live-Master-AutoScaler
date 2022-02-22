@@ -7,7 +7,7 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const { log } = require('console');
 const db = require('./modules/db');
-const Engine = require('./modules/engine');
+const Engine = require('./modules/scaleEngine');
 const { googleAuth } = require('./controllers/user.controller');
 const {
   getInstances,

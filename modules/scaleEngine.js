@@ -4,11 +4,11 @@ const { uniqueNamesGenerator, adjectives, colors, animals } = require('unique-na
 const { green, red, cyan } = require('colors');
 const debug = require('debug');
 const monet = {
-  vdebug: debug('engine:vdebug'),
-  debug: debug('engine:debug'),
-  err: debug('engine:error'),
-  warn: debug('engine:warn'),
-  info: debug('engine:info'),
+  vdebug: debug('scale-engine:vdebug'),
+  debug: debug('scale-engine:debug'),
+  err: debug('scale-engine:error'),
+  warn: debug('scale-engine:warn'),
+  info: debug('scale-engine:info'),
 };
 
 /** Condition for autoscaling
