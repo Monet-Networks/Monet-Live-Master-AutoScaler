@@ -24,8 +24,10 @@ const AWSConfiguration = require('./modules/awsConfig');
 const IController = new AWSConfiguration();
 const SuccessHandler = require('./util/SuccessHandler');
 const Reports = require('./models/reports.model');
+const sessionController = require('./controllers/sessions.controller');
 const MonetIO = require('./modules/websockets');
-// const ErrorHandler = require('./util/ErrorHandler');
+const ErrorHandler = require('./util/ErrorHandler');
+const Report = require('./util/Report');
 let redis;
 
 const PORT = process.env.PORT || 3000;
@@ -65,7 +67,7 @@ const httpServer = createServer(admin);
 const io = new Server(httpServer, {
   /* options */
   path: '/sock',
-  transports: ['websocket']
+  transports: ['websocket'],
 });
 
 new db();
@@ -80,7 +82,7 @@ const instanceRegistrationHandle = async (req, res) => {
 };
 
 admin.use(bodyParser.json());
-admin.use('/test',express.static('tests'))
+admin.use('/test', express.static('tests'));
 
 admin.get('/reset-engine-state', (req, res) => {
   if (req.query.secret === 'monet@43324') {
@@ -168,5 +170,48 @@ admin.get('/getReportData', async (req, res) => {
     }
   }
 });
+
+admin.post('/addFinalReport', async (req, res) => {
+  if (!req.body.roomid || !req.body.report) return new ErrorHandler(res, 404, 'Missing parameters in body');
+  const { roomid, report } = req.body;
+  const Report = await Reports.findOneAndUpdate({ roomid }, { report }, { new: true });
+  if (!Report) {
+    res.json({
+      code: 404,
+      error: true,
+      message: 'Invalid roomId data not found',
+    });
+  }
+  res.json({
+    code: 200,
+    error: false,
+    message: 'Report added',
+    report: Report,
+  });
+});
+
+admin.get('/report', async (req, res) => {
+  const user = await sessionController.getUser({ uuid: req.query.id });
+  if (user && user.name) {
+    const report = await Report(user);
+    if (report) {
+      res.json({
+        code: 200,
+        error: false,
+        message: 'user report',
+        response: report,
+      });
+    } else {
+      res.json({
+        code: 400,
+        error: true,
+        message: 'Error generating report',
+        response: 'The report has not been generated',
+      });
+    }
+  }
+});
+
+
 
 httpServer.listen(PORT, () => log(`[Server OK]`));

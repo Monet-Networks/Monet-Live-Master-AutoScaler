@@ -4,8 +4,8 @@ socket.on('connect', () => {
   console.log('socket connected.');
 });
 
-socket.emit('register-userId', { name: 'kyubi' });
+socket.on('avg-engagement-res', (data) => console.log(data));
 
-socket.on('fetch-userId', () => {
-  socket.emit('register-userId', { name: 'kyubi' });
-});
+console.log('Emitting avg engagement request.');
+
+socket.emit('avg-engagement-req', { roomid: '1645502879946' });
