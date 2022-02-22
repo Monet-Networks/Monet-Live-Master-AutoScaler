@@ -1,8 +1,15 @@
 // const db = require('./db');
 const hyperReq = require('http');
-const { log } = require('console');
 const { uniqueNamesGenerator, adjectives, colors, animals } = require('unique-names-generator');
-const { green, red, cyan, gray } = require('colors');
+const { green, red, cyan } = require('colors');
+const debug = require('debug');
+const monet = {
+  vdebug: debug('engine:vdebug'),
+  debug: debug('engine:debug'),
+  err: debug('engine:error'),
+  warn: debug('engine:warn'),
+  info: debug('engine:info'),
+};
 
 /** Condition for autoscaling
  *  Atleast one instance should be There.
@@ -18,11 +25,10 @@ class Engine {
           for (let entry of dbEntries) {
             entry.deleteIteration = 0;
             this.Instances[entry.publicIP] = entry;
-            log(this.Instances);
           }
         }
     } else {
-      log(red('parameter is not of correct type'));
+      monet.err('parameter is not of correct type');
     }
   };
 
@@ -32,12 +38,12 @@ class Engine {
 
   on = (event, callback, overwrite = false) => {
     if (typeof event !== 'string' && typeof callback !== 'function')
-      return log(`The provided params is not of valid acceptable format : ${typeof event} , ${typeof callback}`);
+      return monet.err(`The provided params is not of valid acceptable format : ${typeof event} , ${typeof callback}`);
     if (this.reservedEvent.includes[event])
-      return log(`The event is internally used event. Please register this call with other event name.`);
+      return monet.err(`The event is internally used event. Please register this call with other event name.`);
     const exists = this.CBDict[event];
     if (exists) {
-      log(`Event ${event} is already registered with the object. Do you wish overwrite?`);
+      monet.err(`Event ${event} is already registered with the object. Do you wish overwrite?`);
       if (!overwrite) return;
     }
     this.CBDict[event] = callback;
@@ -46,8 +52,8 @@ class Engine {
   deleteConfirmation = (delInstanceInfo) => {
     this.state.task = 0;
     if (delInstanceInfo.instanceId)
-      log(green(`>>>>>>>>>>> Deleted instance ${delInstanceInfo.instanceId} >>>>>>>>>>>`));
-    else log(red(`>>>>>>>>>>> Unable to delete the instance >>>>>>>>>>>`), delInstanceInfo);
+      monet.debug(`>>>>>>>>>>> Deleted instance ${delInstanceInfo.instanceId} >>>>>>>>>>>`);
+    else monet.err(`>>>>>>>>>>> Unable to delete the instance >>>>>>>>>>>`, delInstanceInfo);
   };
 
   /* We will get this data sooner than the instance information */
@@ -75,7 +81,7 @@ class Engine {
         this.state.task = 0;
       }
     } else {
-      return log(red('The instance structure does not exists or is missing publicIP or privateIP key : '), Instance);
+      return monet.err('The instance structure does not exists or is missing publicIP or privateIP key : ', Instance);
     }
   };
 
@@ -85,7 +91,7 @@ class Engine {
   }
 
   start = () => {
-    log(green('Engine goes brrrrrrrrr......'));
+    monet.debug('Engine goes brrrrrrrrr......');
     this.state.phase = 1;
     this.stateOne();
   };
@@ -122,16 +128,16 @@ class Engine {
 
   /* This method will check whether we have empty entries in Instances object */
   stateOne = async (data) => {
-    // log(green(this.state));
+    // monet.debug(this.state);
     /* check for engine stop signal */
     if (this.state.phase === 0) {
       this.Invoker('engine-stopped');
-      return log(green('>>>>>>>>>>> Engine Stopped >>>>>>>>>>>'));
+      return monet.warn('>>>>>>>>>>> Engine Stopped >>>>>>>>>>>');
     }
 
     /* Find IPs that don't have the data. */
     if (this.state.phase !== 1) {
-      log(red('>>>>>>>>>>> This state does not authorize execution of state one >>>>>>>>>>>'));
+      monet.err('>>>>>>>>>>> This state does not authorize execution of state one >>>>>>>>>>>');
       return this.Invoker('internal', this.state.phaseData, 5000);
     }
 
@@ -150,7 +156,7 @@ class Engine {
     const instanceCountChanged = this.state.TotalInstances !== ILength;
     if (instanceCountChanged) {
       this.state.TotalInstances = currentInstances.length;
-      // log(cyan('The number of instances changed. '), this.state);
+      monet.vdebug('The number of instances changed. ', this.state);
     }
     if (ILength === 0) {
       this.state.phase = 2;
@@ -170,19 +176,19 @@ class Engine {
     const TotalParticipantsChange = this.state.TotalParticipants !== TotalParticipants;
     if (occupancyCountChanged) {
       this.state.TotalOccupied = totalOccupancy;
-      // log(cyan('The number of occupied changed. '), this.state);
+      monet.vdebug('The number of occupied changed. ', this.state);
     }
     if (TotalCallsChange) {
       this.state.TotalCalls = TotalCalls;
-      // log(cyan('The number of occupied changed. '), this.state);
+      monet.debug('The number of occupied changed. ', this.state.TotalCalls);
     }
     if (TotalParticipantsChange) {
       this.state.TotalParticipants = TotalParticipants;
-      // log(cyan('The number of occupied changed. '), this.state);
+      monet.debug('The number of occupied changed. ', this.state.TotalParticipants);
     }
     /* Take tab of total no. of calls */
 
-    // log(cyan('>>>>>>>>>>> Instances >>>>>>>>>>> \n'), cyan(this.Instances));
+    monet.vdebug('>>>>>>>>>>> Instances >>>>>>>>>>> \n', this.Instances);
     for (let ip of currentInstances) {
       /* Initiate if does not exist */
       if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
@@ -197,18 +203,18 @@ class Engine {
             } catch (error) {
               this.Instances[ip][this.reqKeyName] = 'completed';
               response = r;
-              log(
-                red('There is an issue with IP response. Shall I count this as instance failure : '),
-                red(ip),
+              monet.red(
+                'There is an issue with IP response. Shall I count this as instance failure : ',
+                ip,
                 ' -:- ',
-                red(response),
+                response,
                 ' -:- ',
-                red(error)
+                error
               );
             }
           })
           .catch((e) => {
-            log('error : ', e.code);
+            monet.err('error : ', e.code);
             this.ipErrHandle(e.code, ip);
           });
       }
@@ -230,16 +236,16 @@ class Engine {
   /* This method shall decide whether scaling up or down is needed? */
   /* scaleUp */
   stateTwo = async (data) => {
-    // log(green(this.state));
+    monet.vdebug(this.state);
     /* check for engine stop signal */
     if (this.state.phase === 0) {
       this.Invoker('engine-stopped');
-      return log(green('>>>>>>>>>>> Engine Stopped >>>>>>>>>>>'));
+      return monet.warn('>>>>>>>>>>> Engine Stopped >>>>>>>>>>>');
     }
 
     /* check the phase the engine is in */
     if (this.state.phase !== 2) {
-      log(red('>>>>>>>>>>> This state does not authorize execution of state two >>>>>>>>>>>'));
+      monet.err('>>>>>>>>>>> This state does not authorize execution of state two >>>>>>>>>>>');
       return this.Invoker('internal', this.state.phaseData, 5000);
     }
 
@@ -250,7 +256,7 @@ class Engine {
 
     // Check if Instances dictionary is empty or not
     if (this.state.TotalInstances === 0) {
-      log(red('There are no known instances with me.'));
+      monet.err('There are no known instances with me.');
       this.state.phase = 1;
       return this.Invoker('internal');
     }
@@ -261,7 +267,7 @@ class Engine {
         3. check number of participants/total instances ratio; (optional)
     */
 
-    log(green(this.state));
+    monet.vdebug(this.state);
     // check occupancy -> if all the instances are occupied;
     if (this.state.TotalInstances <= 5 && this.state.task === 0)
       if (this.state.TotalOccupied === this.state.TotalInstances) this.scaleUp();
@@ -286,8 +292,8 @@ class Engine {
 
   scaleUp = () => {
     // set task to creation
-    if (this.state.CreationLockState) return log(red('Instance creation is locked.'));
-    log(green('>>>>>>>>>>> Instance Creation Signal >>>>>>>>>>>'));
+    if (this.state.CreationLockState) return monet.err('Instance creation is locked.');
+    monet.debug('>>>>>>>>>>> Instance Creation Signal >>>>>>>>>>>');
     this.state.CreationLockState = true;
     this.state.task = 1;
     this.Invoker('create-instance', { name: uniqueNamesGenerator({ dictionaries: [colors, adjectives, animals] }) });
@@ -297,14 +303,13 @@ class Engine {
   };
 
   scaleOut = () => {
-    if (this.state.CreationLockState) return log(red('New instance has just been spun up please wait.'));
+    if (this.state.CreationLockState) return monet.err('New instance has just been spun up please wait.');
     this.state.task = 2;
     const OcuDiff = this.state.TotalInstances - this.state.TotalOccupied; // Total instances should always be greater than occupied ones
     if (OcuDiff > 1) {
       // If scaleUp flag is true, then rule out the possibility of Scaling Out.
       // this.state.ScaleOut = this.state.ScaleUp ? false : true;
       // if (!this.state.ScaleOut)
-      // return log(red('Currently engine is scaling up. Ruling out possibility of scaling out'));
       /* Find Candidate
          If Candidate already exists and have required keys
          a. deleteIteration -> for how man cycles this instance is being watched.
@@ -326,10 +331,10 @@ class Engine {
             /* This candidate has been selected for deletion */
             this.deleteCandidate = instaObj;
             this.state.task = 0;
-            log(cyan('Candidate for deletion selected'), this.deleteCandidate);
+            monet.debug('Candidate for deletion selected', this.deleteCandidate);
           } else {
             this.state.task = 0;
-            log(red('Unable to find suitable candidate.'));
+            monet.debug('Unable to find suitable candidate.');
           }
         }
       } else if (
@@ -354,10 +359,9 @@ class Engine {
           this.state.task = 0;
         }
       } else {
-        log(
-          red(
-            'Check what is missing. Candidate to be deleted does not have any valid entries or required keys in it to be suitable for deletion.'
-          ), this.deleteCandidate
+        monet.err(
+          'Check what is missing. Candidate to be deleted does not have any valid entries or required keys in it to be suitable for deletion.',
+          this.deleteCandidate
         );
         this.state.task = 0;
       }
@@ -371,7 +375,7 @@ class Engine {
 
   ipSuccessHandle = (data, IP) => {
     this.Instances[IP][this.reqKeyName] = 'completed';
-    if (!this.Instances[IP]) return log(red(`there is no entry with this IP. Shall I add ${IP} ?`));
+    if (!this.Instances[IP]) return monet.err(`there is no entry with this IP. Shall I add ${IP} ?`);
     this.Instances[IP]['live'] = 1;
     if (data.result === 200 && data.state) {
       this.Instances[IP] = { ...this.Instances[IP], ...data.state };
@@ -380,7 +384,7 @@ class Engine {
 
   ipErrHandle = (errorCode, IP) => {
     this.Instances[IP][this.reqKeyName] = 'completed';
-    if (!this.Instances[IP]) return log(red(`there is no entry with this IP. Shall I add ${IP} ?`));
+    if (!this.Instances[IP]) return monet.err(`there is no entry with this IP. Shall I add ${IP} ?`);
     switch (errorCode) {
       case 'ETIMEDOUT':
         if (this.Instances[IP]['live'] > -7) --this.Instances[IP]['live'];
@@ -389,7 +393,7 @@ class Engine {
         if (this.Instances[IP]['live'] > -7) --this.Instances[IP]['live'];
         break;
       default:
-        log(red('Unknown error code : '), errorCode);
+        monet.err('Unknown error code : ', errorCode);
         break;
     }
     if (this.Instances[IP]['live'] < -5) {
@@ -431,7 +435,7 @@ class Engine {
 
   /* This method is ought to delete instance entry from Instances dict and */
   deleteInstance = (IP) => {
-    log(green(`>>>>>>>>>>> Delete signal for ${IP} >>>>>>>>>>>`));
+    monet.debug(`>>>>>>>>>>> Delete signal for ${IP} >>>>>>>>>>>`);
     /* delete entry from instances dictionary */
     this.Invoker('delete-instance', this.Instances[IP]);
     this.deleteCandidate = 'NaN';
@@ -455,8 +459,7 @@ class Engine {
           }, timeout || 1000 * 30);
           break;
         default:
-          log('Unknown state : ', this.state.phase);
-          log('Shifting state to 1');
+          monet.warn('Unknown state : ', this.state.phase, ' Shifting state to 1');
           this.state.phase = 1;
           this.Invoker('internal');
           break;
