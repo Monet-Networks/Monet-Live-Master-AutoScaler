@@ -212,6 +212,21 @@ admin.get('/report', async (req, res) => {
   }
 });
 
-
+admin.post('/generateReport', async (req, res) => {
+  const { roomid, creator_ID } = req.body;
+  const reportExists = await Reports.findOne({ roomid });
+  if (reportExists) {
+    return res.json({ code: 200, error: false, message: 'Report already exists', report: reportExists });
+  }
+  const report = await GenReport(roomid, creator_ID);
+  if (!report) {
+    return res.json({
+      code: 400,
+      error: true,
+      message: `Could not generate report for roomid: ${roomid} & creator_ID: ${creator_ID}. Please check`,
+    });
+  }
+  res.json({ code: 200, error: false, message: 'Report generated successfully', report });
+})
 
 httpServer.listen(PORT, () => log(`[Server OK]`));
