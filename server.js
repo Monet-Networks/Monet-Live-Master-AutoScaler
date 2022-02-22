@@ -229,7 +229,7 @@ admin.post('/generateReport', async (req, res) => {
   } else if (report.length === 0)
     return res.json({
       code: 202,
-      error: true,
+      error: false,
       message: `Generating report.`,
     });
   else return es.json({ code: 200, error: false, message: 'Report generated successfully', report });
