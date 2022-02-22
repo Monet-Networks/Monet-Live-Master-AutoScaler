@@ -222,15 +222,15 @@ admin.post('/generateReport', async (req, res) => {
   const report = await GenReport(roomid, creator_ID);
   if (!report) {
     return res.json({
-      code: 400,
+      code: 404,
       error: true,
       message: `Could not generate report for roomid: ${roomid} & creator_ID: ${creator_ID}. Please check`,
     });
   } else if (report.length === 0)
     return res.json({
-      code: 400,
+      code: 202,
       error: true,
-      message: `Report is processing for roomid: ${roomid} & creator_ID: ${creator_ID}. Please check`,
+      message: `Generating report.`,
     });
   else return es.json({ code: 200, error: false, message: 'Report generated successfully', report });
 })
