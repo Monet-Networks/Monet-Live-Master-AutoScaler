@@ -1,5 +1,5 @@
 // Load required packages
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Define our Company schema
 const roomSchema = new mongoose.Schema({
@@ -7,21 +7,21 @@ const roomSchema = new mongoose.Schema({
   creator_ID: { type: String, required: true },
   source: {
     type: String,
-    enum: ['google', 'outlook', 'monet'],
-    default: 'monet',
+    enum: ["google", "outlook", "monet"],
+    default: "monet",
   },
   sourceId: { type: String },
   name: {
     type: String,
-    default: '-',
+    default: "-",
   },
   room: {
     type: String,
-    default: '0',
+    default: "0",
   },
   roomid: {
     type: String,
-    default: '0',
+    default: "0",
   },
   alive: {
     type: Number,
@@ -30,7 +30,7 @@ const roomSchema = new mongoose.Schema({
   },
   summary: {
     type: String,
-    default: '-',
+    default: "-",
   },
   start: {
     dateTime: {
@@ -68,29 +68,34 @@ const roomSchema = new mongoose.Schema({
   },
   observerEmail: {
     type: String,
-    default: '',
+    default: "",
   },
   observerLink: {
     type: String,
-    default: '',
+    default: "",
   },
   observing: {
     type: Boolean,
     default: false,
   },
   settings: {
-    type: { waitingRoom: Boolean, screenShare: Boolean, chat: Boolean, limit: Number },
+    type: {
+      waitingRoom: Boolean,
+      screenShare: Boolean,
+      chat: Boolean,
+      limit: Number,
+    },
     default: { waitingRoom: true, screenShare: true, chat: true, limit: 10 },
   },
   grp: {
     type: String,
-    default: '',
+    default: "",
   },
   instance: {
     type: String,
-    default: '',
+    default: "",
   },
 });
 
 // Export the Mongoose model
-module.exports = mongoose.model('rooms', roomSchema, 'rooms');
+module.exports = mongoose.model("rooms", roomSchema, "rooms");
