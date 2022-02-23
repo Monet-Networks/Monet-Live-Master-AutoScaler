@@ -4,6 +4,7 @@ const SuccessHandler = require('../util/SuccessHandler');
 const UserModel = require('../models/user.model');
 const { authenticate, generateToken } = require('../util/auth');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 /* Google's Authentication Controller */
 exports.googleAuth = async (req, res) => {
