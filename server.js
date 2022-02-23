@@ -28,7 +28,7 @@ const sessionController = require('./controllers/sessions.controller');
 const MonetIO = require('./modules/websockets');
 const ErrorHandler = require('./util/ErrorHandler');
 const Report = require('./util/Report');
-const GenReport = require('./util/GenReport');
+const genReport = require('./util/GenReport');
 let redis;
 
 const PORT = process.env.PORT || 3000;
@@ -221,7 +221,7 @@ admin.post('/generateReport', async (req, res) => {
   if (reportExists) {
     return res.json({ code: 200, error: false, message: 'Report already exists', report: reportExists });
   }
-  const report = await GenReport({ roomid, creator_ID });
+  const report = await genReport(roomid, creator_ID);
   if (!report) {
     return res.json({
       code: 404,
