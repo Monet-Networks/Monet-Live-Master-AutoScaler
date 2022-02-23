@@ -107,7 +107,7 @@ admin.get('/configure-instances', async (req, res) => {
   return new SuccessHandler(res, 200, 'IPs configured', ips);
 });
 
-router.post('/login', login);
+admin.post('/login', login);
 
 admin.get('/getRoomIp', async (req, res) => {
   const { roomid } = req.query;
