@@ -1,4 +1,4 @@
-const fdController = require('../controllers/user.controller');
+const fdController = require('../controllers/faceData.controller');
 const Sessions = require('../models/sessions.model');
 
 const debug = require('debug');
