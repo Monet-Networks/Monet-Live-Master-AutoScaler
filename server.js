@@ -107,7 +107,7 @@ admin.get('/configure-instances', async (req, res) => {
   return new SuccessHandler(res, 200, 'IPs configured', ips);
 });
 
-admin.post('/login', login);
+router.post('/login', login);
 
 admin.get('/getRoomIp', async (req, res) => {
   const { roomid } = req.query;
@@ -234,7 +234,7 @@ admin.post('/generateReport', async (req, res) => {
       error: false,
       message: `Generating report.`,
     });
-  else return es.json({ code: 200, error: false, message: 'Report generated successfully', report });
-})
+  else return res.json({ code: 200, error: false, message: 'Report generated successfully', report });
+});
 
 httpServer.listen(PORT, () => log(`[Server OK]`));
