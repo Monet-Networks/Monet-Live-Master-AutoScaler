@@ -28,7 +28,7 @@ const sessionController = require('./controllers/sessions.controller');
 const MonetIO = require('./modules/websockets');
 const ErrorHandler = require('./util/ErrorHandler');
 const Report = require('./util/Report');
-const genReport = require('./util/GenReport');
+const genReport = require('./util/genReport');
 let redis;
 
 const PORT = process.env.PORT || 3000;
