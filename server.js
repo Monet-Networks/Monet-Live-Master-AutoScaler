@@ -221,7 +221,7 @@ admin.post('/generateReport', async (req, res) => {
   if (reportExists) {
     return res.json({ code: 200, error: false, message: 'Report already exists', report: reportExists });
   }
-  const report = await genReport(roomid, creator_ID);
+  const report = await genReport(roomid, creator_ID, redis);
   if (!report) {
     return res.json({
       code: 404,
