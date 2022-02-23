@@ -313,6 +313,8 @@ admin.get("/my-meetings", async (req, res) => {
   });
 });
 
+admin.post("/getRecordings", roomController.getAdminRecordings);
+
 httpServer.listen(PORT, () => log(`[Server OK]`));
 
 const durationCalculator = (start, end) => {
