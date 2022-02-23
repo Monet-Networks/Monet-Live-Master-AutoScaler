@@ -1,10 +1,12 @@
-const redis = require('redis');
+const red = require('redis');
 const Reports = require('../models/reports.model');
 const fdModel = require('../models/faceData.model');
 const Sessions = require('../models/sessions.model');
 const { createQuad } = require('./createQuad');
 
-const redisCli = redis.createClient(6379, '34.220.116.222', { auth_pass: 'monet@615' }); // {auth_pass:"monet@615"} 54.218.77.251
+const redis = red.createClient({
+  url: 'redis://:monet%40615@34.220.116.222:6379',
+}); // {auth_pass:"monet@615"} 54.218.77.251
 
 const pieReport = async (roomid) => {
   let sessions = Sessions.find({ roomid }, 'uuid name');
