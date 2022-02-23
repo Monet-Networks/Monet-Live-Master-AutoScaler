@@ -1,4 +1,4 @@
-const GenReport = require('../util/GenReport');
+const GenReport = require('../util/genReport');
 
 const debug = require('debug');
 const monet = {
