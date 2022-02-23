@@ -8,7 +8,7 @@ const { Server } = require('socket.io');
 const { log } = require('console');
 const db = require('./modules/db');
 const Engine = require('./modules/scaleEngine');
-const { googleAuth } = require('./controllers/user.controller');
+const { googleAuth, login  } = require('./controllers/user.controller');
 const {
   getInstances,
   createOneInstance,
@@ -106,6 +106,8 @@ admin.get('/configure-instances', async (req, res) => {
   new CreateConfiguration(ips);
   return new SuccessHandler(res, 200, 'IPs configured', ips);
 });
+
+router.post('/login', login);
 
 admin.get('/getRoomIp', async (req, res) => {
   const { roomid } = req.query;

@@ -1,4 +1,4 @@
-let socket,
+ let socket,
   dynamoIp,
   dynamoLink,
   myPubUser = null,
