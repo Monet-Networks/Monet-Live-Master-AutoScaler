@@ -111,20 +111,20 @@ const overallAverageEngagement = async (roomid) => {
 const genReport = async (roomid, creator_ID) => {
   try {
     console.log(`Generating report for roomId: ${roomid}`);
-    redisCli.set(`report:${roomid}`, 1, () => {
+    redis.set(`report:${roomid}`, 1, () => {
       console.log('Flag set in Redis');
     });
     const pie = pieReport(roomid);
     const overall = overallAverageEngagement(roomid);
     const [pieData, overallEngagement] = await Promise.all([pie, overall]);
     return Reports.create({ roomid, creator_ID, pieData, overallEngagement }).then((report) => {
-      redisCli.del(`report:${roomid}`, () => {
+      redis.del(`report:${roomid}`, () => {
         console.log('Flag removed from Redis');
       });
       return report;
     });
   } catch (err) {
-    redisCli.del(`report:${roomid}`, () => {
+    redis.del(`report:${roomid}`, () => {
       console.log('Flag removed from Redis');
     });
     return undefined;
