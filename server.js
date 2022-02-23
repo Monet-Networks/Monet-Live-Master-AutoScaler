@@ -8,7 +8,7 @@ const { Server } = require('socket.io');
 const { log } = require('console');
 const db = require('./modules/db');
 const Engine = require('./modules/scaleEngine');
-const { googleAuth, login  } = require('./controllers/user.controller');
+const { googleAuth, login } = require('./controllers/user.controller');
 const {
   getInstances,
   createOneInstance,
@@ -221,7 +221,7 @@ admin.post('/generateReport', async (req, res) => {
   if (reportExists) {
     return res.json({ code: 200, error: false, message: 'Report already exists', report: reportExists });
   }
-  const report = await GenReport(roomid, creator_ID);
+  const report = await GenReport({ roomid, creator_ID });
   if (!report) {
     return res.json({
       code: 404,

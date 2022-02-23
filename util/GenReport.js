@@ -5,8 +5,9 @@ async function GenReport(data) {
   const report = [];
   const userArrays = {};
   const { roomid } = data;
-  const sessionData = await fdController.fetchSession(roomid);
-  const userList = await SessionsModel.find({ roomid });
+  const sessionDataPromise = fdController.fetchSession(roomid);
+  const userListPromise = SessionsModel.find({ roomid });
+  const [sessionData, userList] = await Promise.all([sessionDataPromise, userListPromise]);
   userList.forEach(({ uuid }) => (userArrays[uuid] = []));
   sessionData.forEach(({ uuid, segment, createdAt, mood, webcam, engagement }) => {
     userArrays[uuid].push({ segment, createdAt, mood, webcam, engagement });
