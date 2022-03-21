@@ -8,7 +8,7 @@ const avatarUpload = require('../util/avatarUpload.js');
 const { OAuth2Client } = require('google-auth-library');
 const { ErrorHandler } = require('../util/eventHandlers');
 const axios = require('axios');
-const { authenticate, generateToken } = require('../middlewares/auth');
+const { authenticate, generateToken } = require('../util/auth');
 const sendMail = require('../util/sendMail.js');
 const { verifyToken, decodeToken } = require('../util/token');
 
