@@ -4,13 +4,13 @@ const PlansModel = require('../models/plans.model');
 const PlanGroups = require('../models/planGroups.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const avatarUpload = require('../utils/avatarUpload.js');
+const avatarUpload = require('../util/avatarUpload.js');
 const { OAuth2Client } = require('google-auth-library');
-const { ErrorHandler } = require('../utils/eventHandlers');
+const { ErrorHandler } = require('../util/eventHandlers');
 const axios = require('axios');
 const { authenticate, generateToken } = require('../middlewares/auth');
-const sendMail = require('../utils/sendMail.js');
-const { verifyToken, decodeToken } = require('../utils/token');
+const sendMail = require('../util/sendMail.js');
+const { verifyToken, decodeToken } = require('../util/token');
 
 exports.registerUser = async (req, res) => {
   if (!req.body.ID || !req.body.name || !req.body.email || !req.body.password) {
