@@ -1,5 +1,5 @@
 // Load required packages
-const UserModel = require('../models/users.model.js');
+const UserModel = require('../models/user.model.js');
 const PlansModel = require('../models/plans.model');
 const PlanGroups = require('../models/planGroups.model');
 const bcrypt = require('bcryptjs');
