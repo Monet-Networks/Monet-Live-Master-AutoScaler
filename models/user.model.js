@@ -7,6 +7,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  stripeId: {
+    type: String,
+    default: '',
+  },
   source: {
     type: String,
     enum: ['google', 'microsoft', 'monet'],
@@ -23,6 +27,7 @@ const UserSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   contact: {
     type: String,
@@ -46,13 +51,17 @@ const UserSchema = new mongoose.Schema({
   userType: {
     type: String,
     enum: ['student', 'proctor', 'manager', 'teacher', 'observer', 'moderator', 'NaN'],
-    default: 'NaN',
+    default: 'moderator',
   },
   active: {
     type: Boolean,
     default: false,
   },
   address: {
+    type: String,
+    default: '',
+  },
+  city: {
     type: String,
     default: '',
   },
@@ -64,13 +73,102 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  pinCode: {
+    type: String,
+    default: '',
+  },
   settings: {
     type: { waitingRoom: Boolean, screenShare: Boolean, chat: Boolean, limit: Number },
-    default: { waitingRoom: true, screenShare: true, chat: true, limit: 10 },
+    default: { waitingRoom: false, screenShare: true, chat: true, limit: 5 },
+  },
+  token: {
+    type: String,
+    default: '',
   },
   plan: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'plans',
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'plans',
+      default: '61d279ea7b02f1835c9968df',
+    },
+    planUid: {
+      type: Number,
+      default: 0,
+    },
+    groupUid: {
+      type: String,
+      default: '',
+    },
+    name: {
+      type: String,
+      default: 'Free Tier',
+    },
+    type: {
+      type: String,
+      enum: ['purchased', 'assigned', 'free', 'expired'],
+      default: 'free',
+    },
+    assignedBy: {
+      type: String,
+      default: '',
+    },
+    licenseCount: {
+      type: Number,
+      default: 0,
+    },
+    assigned: {
+      type: Number,
+      default: 0,
+    },
+    assignees: {
+      type: [
+        {
+          email: String,
+          token: String,
+          status: String,
+          expiresAt: String,
+        },
+      ],
+      default: [],
+    },
+    expiresAt: {
+      type: Date,
+      default: new Date(new Date().setDate(new Date().getDate() + 14)),
+    },
+  },
+  cards: {
+    type: [
+      {
+        stripeId: { type: String },
+        name: { type: String },
+        number: { type: String },
+        exp_month: { type: String },
+        exp_year: { type: String },
+        brand: { type: String },
+        type: { type: String },
+        fingerprint: { type: String },
+      },
+    ],
+    default: [],
+  },
+  lastPaymentIntendId: {
+    type: String,
+    default: '',
+  },
+  paymentHistory: {
+    type: [
+      {
+        stripeIntentId: String,
+        stripeChargeId: String,
+        amount: String,
+        description: String,
+        currency: String,
+        createdAt: Number,
+        receiptUrl: String,
+        status: String,
+      },
+    ],
+    default: [],
   },
 });
 
