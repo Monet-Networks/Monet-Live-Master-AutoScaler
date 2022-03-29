@@ -30,8 +30,11 @@ const roomController = require("./controllers/room.controller");
 const MonetIO = require("./modules/websockets");
 const ErrorHandler = require("./util/ErrorHandler");
 const Report = require("./util/Report");
+const userController = require("./controllers/user.controller");
 const { genReport } = require("./util/GenReport");
-
+const planController = require("./controllers/plans.controller");
+const stripeController = require("./controllers/stripe.controller");
+const planGroupsController = require("./controllers/planGroups.controller");
 let redis;
 
 const PORT = process.env.PORT || 3000;
@@ -150,7 +153,7 @@ admin.get("/getInviteRoom", async (req, res) => {
     });
 });
 
-admin.get("/getAllInviteRooms", function (req, res) {
+admin.post("/getAllInviteRooms", function (req, res) {
   roomController.getAllRooms(req, res).then(() => {
     /* don't do anything */
   });
@@ -312,8 +315,33 @@ admin.get("/my-meetings", async (req, res) => {
     data: { meetings, duration, overallAverageEngagement, overallAverageMood },
   });
 });
+admin.post("/create-payment-intent", stripeController.createPaymentIntent);
+
+admin.get("/userStatus", stripeController.userStatus);
+
+admin.post("/addPaymentMethod", stripeController.paymentMethod);
+
+admin.post("/webhooks", stripeController.handleWebhook);
+
+admin.put("/selectPlan", userController.selectPlan);
 
 admin.post("/getRecordings", roomController.getAdminRecordings);
+
+admin.get("/getPlan", planController.getPlan);
+
+admin.get("/getAllPlans", planController.getAllPlans);
+
+admin.post("/createPlan", planController.createPlan);
+
+admin.put("/updatePlan", planController.updatePlan);
+
+admin.delete("/deletePlan", planController.deletePlan);
+
+admin.put("/assignPlan", planContrFoller.assignPlan);
+
+admin.put("/updateMeetingHours", planGroupsController.updateMeetingHours);
+
+admin.get("/getPlanGroupDetails", planGroupsController.getPlanGroupDetails);
 
 httpServer.listen(PORT, () => log(`[Server OK]`));
 
