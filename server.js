@@ -337,7 +337,7 @@ admin.put("/updatePlan", planController.updatePlan);
 
 admin.delete("/deletePlan", planController.deletePlan);
 
-admin.put("/assignPlan", planContrFoller.assignPlan);
+admin.put("/assignPlan", planController.assignPlan);
 
 admin.put("/updateMeetingHours", planGroupsController.updateMeetingHours);
 
