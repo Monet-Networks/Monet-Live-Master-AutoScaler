@@ -52,7 +52,8 @@ exports.getAllRooms = async function (req, res) {
     return res.json({
       code: 400,
       error: true,
-      message: "Unable to find rooms",
+      message: 'Unable to find rooms',
+      response: error.message,
     });
   }
 };
