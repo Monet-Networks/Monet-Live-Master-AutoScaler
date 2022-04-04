@@ -9,7 +9,7 @@ const { Server } = require("socket.io");
 const { log } = require("console");
 const db = require("./modules/db");
 const Engine = require("./modules/scaleEngine");
-
+const { getAllAutoInstances } = require('./controllers/instance.controller');
 const AWSConfiguration = require("./modules/awsConfig");
 const IController = new AWSConfiguration();
 const SuccessHandler = require("./util/SuccessHandler");
@@ -27,6 +27,15 @@ const PORT = process.env.PORT || 3000;
   redis.on("error", (err) => console.log("Redis Client Error", err));
   await redis.connect();
 })();
+
+const instanceRegistrationHandle = async (req, res) => {
+  await createOneInstance(req, res, ({ error, success }) => {
+    if (error) return console.log('Instance creation error : ', error);
+    console.log('Instance creation success : ', success, Object.keys(success));
+    if (success) if (success.publicIP) engine.addInstance(success);
+  });
+};
+
 
 /* Instantiate the engine class */
 const engine = new Engine();
@@ -73,11 +82,3 @@ admin.get('/register-instance', instanceRegistrationHandle);
 admin.use("/", apiRoutes);
 
 httpServer.listen(PORT, () => log(`[Server OK]`));
-
-const instanceRegistrationHandle = async (req, res) => {
-  await createOneInstance(req, res, ({ error, success }) => {
-    if (error) return console.log('Instance creation error : ', error);
-    console.log('Instance creation success : ', success, Object.keys(success));
-    if (success) if (success.publicIP) engine.addInstance(success);
-  });
-};
