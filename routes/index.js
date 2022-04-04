@@ -56,8 +56,6 @@ admin.get("/getRoomIp", async (req, res) => {
   res.json({ code: 200, error: false, message: "Room found", room });
 });
 
-admin.get("/register-instance", instanceRegistrationHandle);
-
 admin.get("/get-link", getInstance);
 
 admin.get("/free-all-instances", freeAllInstances);
@@ -272,5 +270,9 @@ admin.put("/updateMeetingHours", planGroupsController.updateMeetingHours);
 admin.put("/updateSetting", userController.userSettings);
 
 admin.get("/getPlanGroupDetails", planGroupsController.getPlanGroupDetails);
+
+const durationCalculator = (start, end) => {
+  return (new Date(end) - new Date(start)) / 1000;
+};
 
 module.exports = admin;

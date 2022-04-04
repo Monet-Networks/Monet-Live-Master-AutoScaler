@@ -66,21 +66,18 @@ const io = new Server(httpServer, {
 new db();
 new MonetIO(io);
 
-const instanceRegistrationHandle = async (req, res) => {
-  await createOneInstance(req, res, ({ error, success }) => {
-    if (error) return console.log("Instance creation error : ", error);
-    console.log("Instance creation success : ", success, Object.keys(success));
-    if (success) if (success.publicIP) engine.addInstance(success);
-  });
-};
-
 admin.use(bodyParser.json());
 admin.use("/test", express.static("tests"));
+admin.get('/register-instance', instanceRegistrationHandle);
 
 admin.use("/", apiRoutes);
 
 httpServer.listen(PORT, () => log(`[Server OK]`));
 
-const durationCalculator = (start, end) => {
-  return (new Date(end) - new Date(start)) / 1000;
+const instanceRegistrationHandle = async (req, res) => {
+  await createOneInstance(req, res, ({ error, success }) => {
+    if (error) return console.log('Instance creation error : ', error);
+    console.log('Instance creation success : ', success, Object.keys(success));
+    if (success) if (success.publicIP) engine.addInstance(success);
+  });
 };
