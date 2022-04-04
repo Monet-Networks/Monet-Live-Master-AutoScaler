@@ -6,7 +6,6 @@ const {
   freeAllInstances,
   deleteInstance,
   updateImageId,
-  getAllAutoInstances,
 } = require("../controllers/instance.controller");
 const { getRoom } = require("../controllers/room.controller");
 const sessionController = require("../controllers/sessions.controller");
