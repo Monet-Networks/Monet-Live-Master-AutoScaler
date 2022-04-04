@@ -1,5 +1,5 @@
 require("dotenv").config();
-const routes = require("./routes");
+const apiRoutes = require("./routes");
 const red = require("redis");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -77,7 +77,7 @@ const instanceRegistrationHandle = async (req, res) => {
 admin.use(bodyParser.json());
 admin.use("/test", express.static("tests"));
 
-admin.use("/", routes);
+admin.use("/", apiRoutes);
 
 httpServer.listen(PORT, () => log(`[Server OK]`));
 

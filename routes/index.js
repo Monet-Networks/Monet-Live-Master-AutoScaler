@@ -21,7 +21,8 @@ const planGroupsController = require("../controllers/planGroups.controller");
 const Reports = require("../models/reports.model");
 const Rooms = require("../models/room.model");
 const CreateConfiguration = require("../modules/createConfig");
-const { Router: admin } = require("express");
+const { Router } = require("express");
+const admin = Router();
 
 admin.get("/reset-engine-state", (req, res) => {
   if (req.query.secret === "monet@43324") {
