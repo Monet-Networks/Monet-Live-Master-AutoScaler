@@ -28,6 +28,15 @@ const PORT = process.env.PORT || 3000;
   await redis.connect();
 })();
 
+const instanceRegistrationHandle = async (req, res) => {
+  await createOneInstance(req, res, ({ error, success }) => {
+    if (error) return console.log('Instance creation error : ', error);
+    console.log('Instance creation success : ', success, Object.keys(success));
+    if (success) if (success.publicIP) engine.addInstance(success);
+  });
+};
+
+
 /* Instantiate the engine class */
 const engine = new Engine();
 engine.DBEntryFunction(getAllAutoInstances);
@@ -73,11 +82,3 @@ admin.get('/register-instance', instanceRegistrationHandle);
 admin.use("/", apiRoutes);
 
 httpServer.listen(PORT, () => log(`[Server OK]`));
-
-const instanceRegistrationHandle = async (req, res) => {
-  await createOneInstance(req, res, ({ error, success }) => {
-    if (error) return console.log('Instance creation error : ', error);
-    console.log('Instance creation success : ', success, Object.keys(success));
-    if (success) if (success.publicIP) engine.addInstance(success);
-  });
-};
