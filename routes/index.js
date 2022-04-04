@@ -22,6 +22,8 @@ const Reports = require("../models/reports.model");
 const Rooms = require("../models/room.model");
 const CreateConfiguration = require("../modules/createConfig");
 const { Router } = require("express");
+const sendMail = require("../util/sendMail");
+
 const admin = Router();
 
 admin.get("/reset-engine-state", (req, res) => {
@@ -270,6 +272,138 @@ admin.put("/updateMeetingHours", planGroupsController.updateMeetingHours);
 admin.put("/updateSetting", userController.userSettings);
 
 admin.get("/getPlanGroupDetails", planGroupsController.getPlanGroupDetails);
+
+admin.post("/sendAdminEmail", async function (req, res) {
+  const {
+    Admin: email,
+    Name,
+    Attendees,
+    Link,
+    Date,
+    Duration,
+    Summary: Topic,
+    RoomId,
+  } = req.body;
+  roomEmails[RoomId] = { email, name: Name, topic: Topic };
+  const info = await sendMail(
+    "../views/admin.handlebars",
+    email,
+    `[Monet Live] Report for ${Topic} is available on Monet Live`,
+    {
+      Name,
+      Attendees,
+      Link,
+      Date,
+      Duration,
+      Topic,
+    },
+    "anand@monetnetworks.com"
+  );
+  return res.json({
+    code: 200,
+    error: false,
+    message: "List participate",
+    response: info.response,
+  });
+});
+
+admin.post("/sendEmails", async function (req, response) {
+  try {
+    const emails = req.body.email;
+    let emailArr = emails.split(",");
+    const subject = req.body.subject;
+    const roomId = req.body.roomId;
+    // var dateandtime = req.body.dateandtime;
+    const joinLink = req.body.joinLink;
+    const startDate = req.body.startdate;
+    const stopDate = req.body.stopdate;
+    if (Array.isArray(emailArr)) {
+      // let responseArr = [];
+      let index = 0;
+      while (index < emailArr.length) {
+        if (typeof emailArr[index] == "string") {
+          const email = emailArr[index];
+          await sendMail(
+            "../views/index.handlebars",
+            email,
+            `[Monet Live] ${subject}`,
+            {
+              roomId: roomId,
+              startDate: startDate,
+              stopDate: stopDate,
+              joinLink: joinLink,
+            }
+          );
+        }
+        index++;
+      }
+      try {
+        NoOfInvites[roomId] = index;
+      } catch (err) {
+        console.log(err);
+      }
+
+      response.json({
+        code: 200,
+        error: false,
+        message: "List Invites",
+        subject: subject,
+        NumberOfInvites: NoOfInvites[roomId],
+        // response: responseArr,
+        startDate: startDate,
+        stopDate: stopDate,
+      });
+    }
+  } catch (err) {
+    response.json({
+      code: 400,
+      error: true,
+      message: "Caught error while sending Emails.",
+      response: error,
+    });
+  }
+});
+
+router.post("/sendEmail", async function (req, response) {
+  const { Admin: email, Name, Attendees, Link, Date, Duration } = req.body;
+  const content = {
+    Name,
+    Attendees,
+    Link,
+    Date,
+    Duration,
+  };
+  // const email = req.body.email;
+  // const content = req.body.content;
+  // const name = req.body.name;
+  // const dateandtime = req.body.dateandtime;
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    //secure: false, // true for 465, false for other ports
+    service: "gmail",
+    auth: {
+      user: "admin@monetlive.com",
+      pass: "xnfoogozwbfoemgm",
+    },
+  });
+
+  const mailOptions = {
+    from: "admin@monetlive.com", // 'atul@ashmar.in'
+    to: email,
+    subject: "Monet Support",
+    text: JSON.stringify(content),
+  };
+
+  const info = await transporter.sendMail(mailOptions);
+  response.json({
+    code: 200,
+    error: false,
+    message: "List participate",
+    response: info.response,
+  });
+});
 
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
