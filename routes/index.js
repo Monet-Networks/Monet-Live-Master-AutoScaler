@@ -18,9 +18,9 @@ const { genReport } = require("../util/GenReport");
 const planController = require("../controllers/plans.controller");
 const stripeController = require("../controllers/stripe.controller");
 const planGroupsController = require("../controllers/planGroups.controller");
-const Reports = require("./models/reports.model");
-const Rooms = require("./models/room.model");
-const CreateConfiguration = require("./modules/createConfig");
+const Reports = require("../models/reports.model");
+const Rooms = require("../models/room.model");
+const CreateConfiguration = require("../modules/createConfig");
 const { Router: admin } = require("express");
 
 admin.get("/reset-engine-state", (req, res) => {
