@@ -341,6 +341,8 @@ admin.put("/assignPlan", planContrFoller.assignPlan);
 
 admin.put("/updateMeetingHours", planGroupsController.updateMeetingHours);
 
+router.put("/updateSetting", userController.userSettings);
+
 admin.get("/getPlanGroupDetails", planGroupsController.getPlanGroupDetails);
 
 httpServer.listen(PORT, () => log(`[Server OK]`));
