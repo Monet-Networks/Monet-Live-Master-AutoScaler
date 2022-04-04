@@ -363,7 +363,7 @@ admin.post("/sendEmails", async function (req, response) {
   }
 });
 
-router.post("/sendEmail", async function (req, response) {
+admin.post("/sendEmail", async function (req, response) {
   const { Admin: email, Name, Attendees, Link, Date, Duration } = req.body;
   const content = {
     Name,
