@@ -5,15 +5,45 @@ exports.getRoom = (roomId) => Rooms.findOne({ roomid: roomId });
 
 exports.getAllRooms = async function (req, res) {
   try {
-    let email = req.query.email;
+    const { page, limit } = req.query;
+    const { email } = req.body;
+    const [start, end] = [req.body.start || "", req.body.end || ""];
     let rooms;
     if (email) {
-      rooms = await Rooms.find({ creator_ID: email });
-    } else {
-      rooms = await Rooms.find({});
+      if (page && limit) {
+        rooms = await paginate(
+          page,
+          limit,
+          Rooms,
+          start
+            ? {
+                creator_ID: email,
+                "start.dateTime": {
+                  $gte: new Date(start),
+                  $lte: new Date(end),
+                },
+              }
+            : { creator_ID: email },
+          { _id: -1 }
+        );
+      } else {
+        rooms = await Rooms.find({ creator_ID: email });
+        if (!rooms?.length)
+          return res.json({
+            code: 404,
+            error: true,
+            message: "No rooms found",
+          });
+      }
     }
+    if (!rooms)
+      return res.json({
+        code: 404,
+        error: true,
+        message: "No rooms found",
+      });
     return res.json({
-      code: 201,
+      code: 200,
       error: false,
       message: "The room exists",
       response: rooms,
@@ -68,4 +98,18 @@ exports.getAdminRecordings = async (req, res) => {
       message: "no records found for the id " + creator_ID,
     });
   }
+};
+exports.verifyObserver = async (req, res) => {
+  const { roomid } = req.query;
+  const room = await Rooms.findOne({ roomid });
+  if (room.observing) {
+    return res.json({
+      code: 400,
+      error: true,
+      message: "Someone is already observing this room",
+    });
+  }
+  room.observing = true;
+  room.save();
+  res.json({ code: 200, error: false, message: "You can observe this room" });
 };
