@@ -22,7 +22,7 @@ const Rooms = require("../models/room.model");
 const CreateConfiguration = require("../modules/createConfig");
 const { Router } = require("express");
 const sendMail = require("../util/sendMail");
-
+const roomEmails = {};
 const admin = Router();
 
 admin.get("/reset-engine-state", (req, res) => {
@@ -283,7 +283,7 @@ admin.post("/sendAdminEmail", async function (req, res) {
     Summary: Topic,
     RoomId,
   } = req.body;
-  roomEmails[RoomId] = { email, name: Name, topic: Topic };
+  roomEmails[RoomId] =  email, name: Name, topic: Topic };
   const info = await sendMail(
     "../views/admin.handlebars",
     email,
@@ -405,6 +405,16 @@ admin.post("/sendEmail", async function (req, response) {
 });
 
 admin.get("/getScreenShareDetails", sessionController.getScreenShareDetails);
+
+admin.get("/avg-engagement-req",  async function (req, response){ async (data) => {
+  try {
+    monet.debug("The engagement request : ", data);
+    let report = await this.genReport(data);
+    res.json( report);
+  } catch (err) {
+    res.json( err.message);
+  }
+} }) ;
 
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
