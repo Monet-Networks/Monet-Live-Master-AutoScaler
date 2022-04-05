@@ -418,14 +418,14 @@ admin.get("/avg-engagement-req", async function (req, res) {
   try {
     const data = req.query;
     monet.debug("The engagement request : ", data);
-    let report = await genReport(data);
+    let report = await getReport(data);
     res.json(report);
   } catch (err) {
     res.json(err.message);
   }
 });
 
-const genReport = async (data) => {
+const getReport = async (data) => {
   const report = [];
   const userArrays = {};
   const { roomid } = data;
