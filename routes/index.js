@@ -404,6 +404,8 @@ admin.post("/sendEmail", async function (req, response) {
   });
 });
 
+admin.get("/getScreenShareDetails", sessionController.getScreenShareDetails);
+
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
 };
