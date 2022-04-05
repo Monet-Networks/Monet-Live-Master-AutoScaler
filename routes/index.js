@@ -24,13 +24,13 @@ const { Router } = require("express");
 const sendMail = require("../util/sendMail");
 const roomEmails = {};
 const admin = Router();
-const debug = require('debug');
+const debug = require("debug");
 const monet = {
-  vdebug: debug('websocket:vdebug'),
-  debug: debug('websocket:debug'),
-  err: debug('websocket:error'),
-  warn: debug('websocket:warn'),
-  info: debug('websocket:info'),
+  vdebug: debug("websocket:vdebug"),
+  debug: debug("websocket:debug"),
+  err: debug("websocket:error"),
+  warn: debug("websocket:warn"),
+  info: debug("websocket:info"),
 };
 
 admin.get("/reset-engine-state", (req, res) => {
@@ -291,7 +291,7 @@ admin.post("/sendAdminEmail", async function (req, res) {
     Summary: Topic,
     RoomId,
   } = req.body;
-  roomEmails[RoomId] =  {email, name: Name, topic: Topic };
+  roomEmails[RoomId] = { email, name: Name, topic: Topic };
   const info = await sendMail(
     "../views/admin.handlebars",
     email,
@@ -414,8 +414,64 @@ admin.post("/sendEmail", async function (req, response) {
 
 admin.get("/getScreenShareDetails", sessionController.getScreenShareDetails);
 
+admin.get("/avg-engagement-req", async function (req, res) {
+  try {
+    const data = req.query;
+    monet.debug("The engagement request : ", data);
+    let report = await genReport(data);
+    res.json(report);
+  } catch (err) {
+    res.json(err.message);
+  }
+});
 
-
+const genReport = async (data) => {
+  const report = [];
+  const userArrays = {};
+  const { roomid } = data;
+  const sessionData = await fdController.fetchSession(roomid);
+  const userList = await Sessions.find({ roomid: roomid });
+  userList.forEach(({ uuid }) => (userArrays[uuid] = []));
+  sessionData.forEach(
+    ({ uuid, segment, createdAt, mood, webcam, engagement }) => {
+      userArrays[uuid].push({ segment, createdAt, mood, webcam, engagement });
+    }
+  );
+  for (const user in userArrays) {
+    // userArrays[user].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    userArrays[user].forEach((val, index) => {
+      val.segment = index + 1;
+    });
+  }
+  for (const user of userList) {
+    const { uuid, roomid, name } = user;
+    const map = {
+      name: name,
+      std_id: uuid,
+      roomid: roomid,
+    };
+    // const userData = await fdController.fetchData(roomid);
+    const userData = userArrays[uuid];
+    if (userData.length === 0) {
+      monet.warn("no data...");
+      continue;
+    }
+    map["engagement_avg"] = 0;
+    map["mood_avg"] = 0;
+    const last_10 = userData.slice(Math.max(userData.length - 10, 1));
+    last_10.forEach((r) => {
+      if (r["mood"] === null) r["mood"] = 0;
+      map["engagement_avg"] += r["engagement"];
+      map["mood_avg"] += r["mood"];
+    });
+    map["engagement_avg"] = map["engagement_avg"] / 10;
+    map["mood_avg"] = map["mood_avg"] / 10;
+    map["session_data"] = userData;
+    report.push(map);
+    delete userArrays[uuid];
+  }
+  return report;
+};
 
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
