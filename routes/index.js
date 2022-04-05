@@ -17,6 +17,7 @@ const { genReport } = require("../util/GenReport");
 const planController = require("../controllers/plans.controller");
 const stripeController = require("../controllers/stripe.controller");
 const planGroupsController = require("../controllers/planGroups.controller");
+const fdController = require("../controllers/faceData.controller");
 const Reports = require("../models/reports.model");
 const Rooms = require("../models/room.model");
 const CreateConfiguration = require("../modules/createConfig");
