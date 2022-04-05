@@ -24,6 +24,14 @@ const { Router } = require("express");
 const sendMail = require("../util/sendMail");
 const roomEmails = {};
 const admin = Router();
+const debug = require('debug');
+const monet = {
+  vdebug: debug('websocket:vdebug'),
+  debug: debug('websocket:debug'),
+  err: debug('websocket:error'),
+  warn: debug('websocket:warn'),
+  info: debug('websocket:info'),
+};
 
 admin.get("/reset-engine-state", (req, res) => {
   if (req.query.secret === "monet@43324") {
