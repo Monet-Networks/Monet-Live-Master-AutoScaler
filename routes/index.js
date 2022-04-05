@@ -24,6 +24,7 @@ const CreateConfiguration = require("../modules/createConfig");
 const { Router } = require("express");
 const sendMail = require("../util/sendMail");
 const roomEmails = {};
+const Sessions = require("../controllers/sessions.controller");
 const admin = Router();
 const debug = require("debug");
 const monet = {
