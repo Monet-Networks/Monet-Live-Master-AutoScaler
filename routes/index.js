@@ -414,6 +414,49 @@ admin.post("/sendEmail", async function (req, response) {
   });
 });
 
+admin.post("/muteRoom", async (req, res) => {
+  let R;
+  const { status, room, uuid } = req.body;
+  if (status !== "mute_room" && status !== "unmute_room") {
+    return res.json({
+      code: 400,
+      error: true,
+      message: "API error details",
+      response: "Invalid status request",
+    });
+  }
+  janus.muteRoom({ status, room, uuid }, (err, success) => {
+    if (err)
+      return res.json({
+        code: 400,
+        error: true,
+        message: "API error details",
+        response: err,
+      });
+    else {
+      R = { ...success, mute: status === "mute_room" };
+      return res.json({
+        code: 200,
+        error: false,
+        message: "Room mute details",
+        response: R,
+      });
+    }
+  });
+  await sessionController.janusStatusToggle(
+    room,
+    "audio",
+    status !== "mute_room"
+  );
+  io.to(room).emit("room-audio", {
+    mute: status === "mute_room",
+    from: uuid,
+    roomid: room,
+    event: "audio",
+    type: "webcam",
+  });
+});
+
 admin.get("/getScreenShareDetails", sessionController.getScreenShareDetails);
 
 admin.get("/avg-engagement-req", async function (req, res) {
