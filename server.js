@@ -70,7 +70,7 @@ const io = new Server(httpServer, {
 new db();
 new MonetIO(io);
 
-admin.use(bodyParser.json());
+admin.use(bodyParser.json({ limit: '50mb' }));
 admin.use('/test', express.static('tests'));
 admin.get('/register-instance', instanceRegistrationHandle);
 
