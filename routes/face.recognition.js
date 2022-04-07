@@ -2,7 +2,7 @@ const { Router } = require('express');
 const FaceRouter = Router();
 const AutoToken = require('@modules/AutoToken');
 const Recognition = require('@modules/Rekognition');
-const S3Client = require('@modules/S3');
+const SThree = require('@modules/S3');
 
 const autoToken = new AutoToken();
 const Rekognition = new Recognition();
