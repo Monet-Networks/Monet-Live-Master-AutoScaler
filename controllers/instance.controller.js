@@ -1,6 +1,6 @@
-const Instance = require('../models/instance.model');
-const ErrorHandler = require('../util/ErrorHandler');
-const SuccessHandler = require('../util/SuccessHandler');
+const Instance = require('@models/instance.model');
+const ErrorHandler = require('@utils/ErrorHandler');
+const SuccessHandler = require('@utils/SuccessHandler');
 
 exports.getInstances = async () => {
   const instanceIps = await Instance.find({ type: 'auto' }, 'publicIP');

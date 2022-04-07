@@ -1,8 +1,8 @@
-const Plans = require("../models/plans.model");
-const PlanGroups = require("../models/planGroups.model");
-const Users = require("../models/user.model");
-const { genToken } = require("../util/token");
-const sendMail = require("../util/sendMail");
+const Plans = require("@models/plans.model");
+const PlanGroups = require("@models/planGroups.model");
+const Users = require("@models/user.model");
+const { genToken } = require("@utils/token");
+const sendMail = require("@utils/sendMail");
 
 exports.getPlan = async (req, res) => {
   const plan = await Plans.findById(req.query.planId);

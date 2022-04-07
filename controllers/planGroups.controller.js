@@ -1,4 +1,4 @@
-const PlanGroup = require("../models/planGroups.model");
+const PlanGroup = require("@models/planGroups.model");
 
 exports.getPlanGroupDetails = async (req, res) => {
   const { uid } = req.query;

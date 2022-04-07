@@ -1,4 +1,4 @@
-const { googleAuth, login } = require("../controllers/user.controller");
+const { googleAuth, login } = require("@controllers/user.controller");
 const {
   getInstances,
   createOneInstance,
@@ -6,25 +6,25 @@ const {
   freeAllInstances,
   deleteInstance,
   updateImageId,
-} = require("../controllers/instance.controller");
-const { getRoom } = require("../controllers/room.controller");
-const sessionController = require("../controllers/sessions.controller");
-const roomController = require("../controllers/room.controller");
-const ErrorHandler = require("../util/ErrorHandler");
-const Report = require("../util/Report");
-const userController = require("../controllers/user.controller");
-const { genReport } = require("../util/GenReport");
-const planController = require("../controllers/plans.controller");
-const stripeController = require("../controllers/stripe.controller");
-const planGroupsController = require("../controllers/planGroups.controller");
-const fdController = require("../controllers/faceData.controller");
-const Reports = require("../models/reports.model");
-const Rooms = require("../models/room.model");
-const CreateConfiguration = require("../modules/createConfig");
+} = require("@controllers/instance.controller");
+const { getRoom } = require("@controllers/room.controller");
+const sessionController = require("@controllers/sessions.controller");
+const roomController = require("@controllers/room.controller");
+const ErrorHandler = require("@utils/ErrorHandler");
+const Report = require("@utils/Report");
+const userController = require("@controllers/user.controller");
+const { genReport } = require("@utils/GenReport");
+const planController = require("@controllers/plans.controller");
+const stripeController = require("@controllers/stripe.controller");
+const planGroupsController = require("@controllers/planGroups.controller");
+const fdController = require("@controllers/faceData.controller");
+const Reports = require("@models/reports.model");
+const Rooms = require("@models/room.model");
+const CreateConfiguration = require("@modules/createConfig");
 const { Router } = require("express");
-const sendMail = require("../util/sendMail");
+const sendMail = require("@utils/sendMail");
 const roomEmails = {};
-const Sessions = require("../models/sessions.model");
+const Sessions = require("@models/sessions.model");
 const admin = Router();
 const debug = require("debug");
 const monet = {

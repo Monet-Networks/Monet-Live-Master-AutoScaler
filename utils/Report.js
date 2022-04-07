@@ -1,5 +1,5 @@
 const fs = require('fs');
-const fdController = require('../controllers/faceData.controller');
+const fdController = require('@controllers/faceData.controller');
 const basePath = '/mnt/efs/fs1/data/';
 
 async function Report(data) {

@@ -1,4 +1,4 @@
-const Sessions = require("../models/sessions.model");
+const Sessions = require("@models/sessions.model");
 
 exports.getUsersBySid = async function ({ sid }) {
   let result = await Sessions.findOne({ sid });

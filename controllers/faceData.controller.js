@@ -1,8 +1,8 @@
-const fdModel = require('../models/faceData.model');
-// const { createQuad } = require('../utils/createQuad');
-// const UserModel = require('../models/users.model.js');
-// const Sessions = require('../models/sessions.model');
-// const { overallAverageEngagement } = require('../utils/genReport');
+const fdModel = require('@models/faceData.model');
+// const { createQuad } = require('@utils/createQuad');
+// const UserModel = require('@models/users.model.js');
+// const Sessions = require('@models/sessions.model');
+// const { overallAverageEngagement } = require('@utils/genReport');
 
 exports.saveBatch = (batch) => {
   if (Array.isArray(batch)) {
