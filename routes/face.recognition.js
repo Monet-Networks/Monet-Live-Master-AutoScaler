@@ -4,6 +4,7 @@ const AutoToken = require('@modules/AutoToken');
 const Recognition = require('@modules/Rekognition');
 const SThree = require('@modules/S3');
 const hyperReq = require('https');
+const UserController = require("@controllers/user.controller");
 
 const autoToken = new AutoToken();
 const Rekognition = new Recognition();
