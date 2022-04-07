@@ -6,7 +6,7 @@ const { v4: uuid } = require("uuid");
 const Users = require("@models/user.model");
 const Plans = require("@models/plans.model");
 const PlanGroups = require("@models/planGroups.model");
-const sendMail = require("@util/sendMail");
+const sendMail = require('@utils/sendMail');
 
 const createCustomer = async (user) => {
   const customer = await stripe.customers.create({
