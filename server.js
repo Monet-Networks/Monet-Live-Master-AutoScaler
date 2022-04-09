@@ -76,7 +76,4 @@ admin.get('/register-instance', instanceRegistrationHandle);
 
 admin.use('/', apiRoutes);
 
-httpServer.listen(PORT, () => {
-  console.log('Server listening on port : ', PORT);
-  log(`[Server OK]`);
-});
+httpServer.listen(PORT, () => log(`[Server OK]`));
