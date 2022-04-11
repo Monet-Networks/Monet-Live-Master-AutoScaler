@@ -1,7 +1,7 @@
 // const red = require('redis');
-const Reports = require('../models/reports.model');
-const fdModel = require('../models/faceData.model');
-const Sessions = require('../models/sessions.model');
+const Reports = require('@models/reports.model');
+const fdModel = require('@models/faceData.model');
+const Sessions = require('@models/sessions.model');
 const { createQuad } = require('./createQuad');
 
 // const redis = red.createClient({

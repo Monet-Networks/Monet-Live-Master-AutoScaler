@@ -1,4 +1,4 @@
-const Sessions = require('../models/sessions.model');
+const Sessions = require("@models/sessions.model");
 
 exports.getUsersBySid = async function ({ sid }) {
   let result = await Sessions.findOne({ sid });
@@ -6,7 +6,9 @@ exports.getUsersBySid = async function ({ sid }) {
 };
 
 exports.updateOne = async (uuid, value) => {
-  const updatedUser = await Sessions.findOneAndUpdate({ uuid }, value, { new: true });
+  const updatedUser = await Sessions.findOneAndUpdate({ uuid }, value, {
+    new: true,
+  });
   return updatedUser;
 };
 
@@ -17,12 +19,12 @@ exports.getUser = async ({ uuid }) => {
 
 exports.userList = async (req, res) => {
   const { id } = req.query;
-  const teacher = await Sessions.findOne({ roomid: id, proctor: 'teacher' });
+  const teacher = await Sessions.findOne({ roomid: id, proctor: "teacher" });
   if (!teacher) {
     return res.json({
       code: 200,
       error: false,
-      message: 'The moderator has not joined.',
+      message: "The moderator has not joined.",
       response: [],
     });
   }
@@ -31,8 +33,8 @@ exports.userList = async (req, res) => {
     return res.json({
       code: 404,
       error: true,
-      message: 'No users in the room',
-      response: 'error',
+      message: "No users in the room",
+      response: "error",
     });
   }
   const responses = [];
@@ -55,21 +57,43 @@ exports.userList = async (req, res) => {
       time: s.time,
       serverIP: s.serverIP,
     };
-    if (s.proctor !== 'teacher' || s.proctor !== 'moderator') info.students.push(examData);
+    if (s.proctor !== "teacher" || s.proctor !== "moderator")
+      info.students.push(examData);
   }
   responses.push(info);
   if (responses.length !== 0)
     return res.json({
       code: 200,
       error: false,
-      message: 'user list',
+      message: "user list",
       response: info.students,
     });
-  else console.log('There is no student detail in the array');
+  else console.log("There is no student detail in the array");
 };
 
 exports.janusStatusToggle = async (roomId, key, status) => {
-  const upKey = 'janus.' + key;
-  const res = await Sessions.updateMany({ roomid: roomId }, { $set: { [upKey]: status } });
+  const upKey = "janus." + key;
+  const res = await Sessions.updateMany(
+    { roomid: roomId },
+    { $set: { [upKey]: status } }
+  );
   return res;
+};
+
+exports.getScreenShareDetails = async (req, res) => {
+  const { uuid } = req.query;
+  const screenShare = await Sessions.findOne({ uuid: `${uuid}___${uuid}` });
+  if (!screenShare) {
+    return res.json({
+      code: 404,
+      error: false,
+      message: "This user did not shared the screen",
+    });
+  }
+  res.json({
+    code: 200,
+    error: false,
+    message: "Screen share found",
+    data: screenShare,
+  });
 };

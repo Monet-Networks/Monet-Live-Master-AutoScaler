@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
-const templateA = require('../static/config');
+const templateA = require('@static/config');
 
 class CreateConfiguration {
   constructor(IPs) {

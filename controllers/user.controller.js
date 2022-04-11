@@ -1,16 +1,27 @@
-// Load required packages
-const UserModel = require('../models/user.model.js');
-const PlansModel = require('../models/plans.model');
-const PlanGroups = require('../models/planGroups.model');
+const UserModel = require('@models/user.model');
+const PlansModel = require('@models/plans.model');
+const PlanGroups = require('@models/planGroups.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const avatarUpload = require('../util/avatarUpload.js');
+const avatarUpload = require('@utils/avatarUpload.js');
 const { OAuth2Client } = require('google-auth-library');
-const { ErrorHandler } = require('../util/eventHandlers');
+const { ErrorHandler } = require('@utils/eventHandlers');
 const axios = require('axios');
-const { authenticate, generateToken } = require('../util/auth');
-const sendMail = require('../util/sendMail.js');
-const { verifyToken, decodeToken } = require('../util/token');
+const { authenticate, generateToken } = require('@utils/auth');
+const sendMail = require('@utils/sendMail.js');
+const { verifyToken, decodeToken } = require('@utils/token');
+
+exports.SaveUser = async (Object) => {
+  // noinspection UnnecessaryLocalVariableJS
+  const User = await UserModel.findOneAndUpdate({ ID: Object.ID }, Object, { upsert: true, new: true });
+  return User;
+};
+
+exports.GetUser = async (response) => {
+  // noinspection UnnecessaryLocalVariableJS
+  let result = await UserModel.findOne({ ID: response.ID });
+  return result;
+};
 
 exports.registerUser = async (req, res) => {
   if (!req.body.ID || !req.body.name || !req.body.email || !req.body.password) {

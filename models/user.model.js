@@ -7,6 +7,12 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  ImageId: {
+    type: String,
+  },
+  MyImageId: {
+    type: String,
+  },
   stripeId: {
     type: String,
     default: '',
@@ -26,8 +32,8 @@ const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true,
-    unique: true,
+    // required: true,
+    // unique: true,
   },
   contact: {
     type: String,
@@ -95,10 +101,6 @@ const UserSchema = new mongoose.Schema({
       type: Number,
       default: 0,
     },
-    groupUid: {
-      type: String,
-      default: '',
-    },
     name: {
       type: String,
       default: 'Free Tier',
@@ -130,10 +132,6 @@ const UserSchema = new mongoose.Schema({
         },
       ],
       default: [],
-    },
-    expiresAt: {
-      type: Date,
-      default: new Date(new Date().setDate(new Date().getDate() + 14)),
     },
   },
   cards: {
