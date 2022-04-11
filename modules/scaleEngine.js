@@ -414,7 +414,7 @@ class Engine {
           str += chunk;
         });
         response.on('end', function () {
-          resolve(str);
+          resolve(str); 
         });
       };
       const options = {
