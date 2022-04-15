@@ -58,7 +58,7 @@ const faceDataSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
-  createdAt: String,
+  createdAt: Date,
 });
 
 module.exports = mongoose.model('fdModel', faceDataSchema, 'face_data');

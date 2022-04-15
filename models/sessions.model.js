@@ -35,20 +35,20 @@ const SessionSchema = new mongoose.Schema({
     screen: { type: Boolean, default: false },
     audio: { type: Boolean, default: false },
     audio_start: {
-      type: String,
+      type: Date,
       default() {
         return new Date();
       },
     },
-    audio_stop: { type: String, default: 'NaN' },
+    audio_stop: { type: Date, default: new Date() },
     video: { type: Boolean, default: false },
     video_start: {
-      type: String,
+      type: Date,
       default() {
         return new Date();
       },
     },
-    video_stop: { type: String, default: 'NaN' },
+    video_stop: { type: Date, default: 'NaN' },
   },
 });
 
