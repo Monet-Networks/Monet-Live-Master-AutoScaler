@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const faceDataSchema = mongoose.Schema({
   speaking: {
@@ -41,7 +41,7 @@ const faceDataSchema = mongoose.Schema({
     Glasses: {
       type: String,
       // enum:["Yes","No"],
-      default: 'No',
+      default: "No",
     },
     Moustache: String,
     Beard: String,
@@ -52,13 +52,13 @@ const faceDataSchema = mongoose.Schema({
   NumberOfFaces: Number,
   ActionableEmotion: {
     type: String,
-    default: 'n/a',
+    default: "n/a",
   },
   webcam: {
     type: Number,
     default: 0,
   },
-  createdAt: String,
+  createdAt: Date,
 });
 
-module.exports = mongoose.model('fdModel', faceDataSchema, 'face_data');
+module.exports = mongoose.model("fdModel", faceDataSchema, "face_data");

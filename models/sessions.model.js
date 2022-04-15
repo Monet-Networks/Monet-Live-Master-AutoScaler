@@ -7,12 +7,12 @@ const SessionSchema = new mongoose.Schema({
   },
   proctor: {
     type: String,
-    enum: ['student', 'proctor', 'manager', 'teacher'],
-    default: 'student',
+    enum: ["student", "proctor", "manager", "teacher"],
+    default: "student",
   },
   sid: {
     type: String,
-    default: '-',
+    default: "-",
   },
   pubID: {
     type: Number,
@@ -20,7 +20,7 @@ const SessionSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    default: 'malkoti.mayank@gmail.com',
+    default: "malkoti.mayank@gmail.com",
     // required: true,
   },
   uuid: { type: String, required: true },
@@ -35,20 +35,20 @@ const SessionSchema = new mongoose.Schema({
     screen: { type: Boolean, default: false },
     audio: { type: Boolean, default: false },
     audio_start: {
-      type: String,
+      type: Date,
       default() {
         return new Date();
       },
     },
-    audio_stop: { type: String, default: 'NaN' },
+    audio_stop: { type: Date, default: new Date() },
     video: { type: Boolean, default: false },
     video_start: {
-      type: String,
+      type: Date,
       default() {
         return new Date();
       },
     },
-    video_stop: { type: String, default: 'NaN' },
+    video_stop: { type: Date, default: new Date() },
   },
 });
 
