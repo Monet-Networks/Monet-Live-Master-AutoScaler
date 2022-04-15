@@ -48,7 +48,7 @@ const SessionSchema = new mongoose.Schema({
         return new Date();
       },
     },
-    video_stop: { type: Date, default: 'NaN' },
+    video_stop: { type: Date, default: new Date() },
   },
 });
 
