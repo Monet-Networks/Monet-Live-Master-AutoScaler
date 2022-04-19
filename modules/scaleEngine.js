@@ -189,7 +189,7 @@ class Engine {
     }
     /* Take tab of total no. of calls */
 
-    monet.vdebug('>>>>>>>>>>> Instances >>>>>>>>>>> \n', this.Instances);
+    monet.vdebug('Overall Instances : ', this.Instances);
     for (let ip of currentInstances) {
       /* Initiate if does not exist */
       if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
@@ -237,7 +237,7 @@ class Engine {
   /* This method shall decide whether scaling up or down is needed? */
   /* scaleUp */
   stateTwo = async (data) => {
-    monet.vdebug(this.state);
+    monet.vdebug('The State in Two : ', this.state);
     /* check for engine stop signal */
     if (this.state.phase === 0) {
       this.Invoker('engine-stopped');
@@ -268,7 +268,6 @@ class Engine {
         3. check number of participants/total instances ratio; (optional)
     */
 
-    monet.vdebug(this.state);
     // check occupancy -> if all the instances are occupied;
     if (this.state.TotalInstances <= 5 && this.state.task === 0)
       if (this.state.TotalOccupied === this.state.TotalInstances) this.scaleUp();
