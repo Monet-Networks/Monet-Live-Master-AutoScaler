@@ -168,8 +168,9 @@ class Engine {
     let TotalParticipants = 0;
     currentInstances.forEach((Instance) => {
       if (this.Instances[Instance].occupied && this.Instances[Instance].occupied === true) ++totalOccupancy;
-      if (this.Instances.Participants > 0) TotalParticipants = TotalParticipants + this.Instances.Participants;
-      if (this.Instances.Calls > 0) TotalCalls = TotalCalls + this.Instances.Calls;
+      if (this.Instances[Instance].Participants > 0)
+        TotalParticipants = TotalParticipants + this.Instances[Instance].Participants;
+      if (this.Instances[Instance].Calls > 0) TotalCalls = TotalCalls + this.Instances[Instance].Calls;
     });
     const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
     const TotalCallsChange = this.state.TotalCalls !== TotalCalls;
