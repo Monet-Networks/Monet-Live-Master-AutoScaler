@@ -181,11 +181,11 @@ class Engine {
     }
     if (TotalCallsChange) {
       this.state.TotalCalls = TotalCalls;
-      monet.debug('The number of occupied changed. ', this.state.TotalCalls);
+      monet.debug('The number of total calls changed. ', this.state.TotalCalls);
     }
     if (TotalParticipantsChange) {
       this.state.TotalParticipants = TotalParticipants;
-      monet.debug('The number of occupied changed. ', this.state.TotalParticipants);
+      monet.debug('The number of total users changed. ', this.state.TotalParticipants);
     }
     /* Take tab of total no. of calls */
 
