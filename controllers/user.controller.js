@@ -172,6 +172,22 @@ exports.registerInvitedUser = async (req, res) => {
   });
 };
 
+exports.microsoftAuth = async (req, res) => {
+  let user = await microsoft(req, res);
+  const planGroup = await PlanGroups.findOne({ uid: user.plan.groupUid });
+  if (planGroup) {
+    user = {
+      ...JSON.parse(JSON.stringify(user)),
+      remainingHours: Math.round(planGroup.leftHours),
+    };
+  }
+  res.json({
+    error: false,
+    message: "Authentication successful",
+    user,
+  });
+};
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
   let existingUser = await UserModel.findOne({ email });
