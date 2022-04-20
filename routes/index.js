@@ -23,7 +23,6 @@ const CreateConfiguration = require("@modules/createConfig");
 const { Router } = require("express");
 const sendMail = require("@utils/sendMail");
 const roomEmails = {};
-const monet_rooms = {};
 const Sessions = require("@models/sessions.model");
 const admin = Router();
 const debug = require("debug");
