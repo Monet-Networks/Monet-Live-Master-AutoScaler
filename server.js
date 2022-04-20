@@ -10,11 +10,11 @@ const { Server } = require('socket.io');
 const { log } = require('console');
 const db = require('@modules/db');
 const Engine = require('@modules/scaleEngine');
-const { getAllAutoInstances, createOneInstance } = require('@controllers/instance.controller');
 const AWSConfiguration = require('@modules/awsConfig');
 const IController = new AWSConfiguration();
 const MonetIO = require('@modules/websockets');
 const {
+  getAllAutoInstances,
   createOneInstance,
   deleteInstance,
   updateImageId,
