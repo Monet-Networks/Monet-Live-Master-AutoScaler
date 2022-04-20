@@ -13,8 +13,6 @@ const Engine = require('@modules/scaleEngine');
 const { getAllAutoInstances, createOneInstance } = require('@controllers/instance.controller');
 const AWSConfiguration = require('@modules/awsConfig');
 const IController = new AWSConfiguration();
-const SuccessHandler = require('@utils/SuccessHandler');
-
 const MonetIO = require('@modules/websockets');
 
 let redis;
