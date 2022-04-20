@@ -1,4 +1,5 @@
 const { googleAuth, login } = require("@controllers/user.controller");
+const { log } = require('console');
 const {
   getInstances,
   createOneInstance,
