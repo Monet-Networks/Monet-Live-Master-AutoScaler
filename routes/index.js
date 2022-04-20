@@ -9,7 +9,7 @@ const {
   updateImageId,
 } = require("@controllers/instance.controller");
 const SuccessHandler = require("@utils/SuccessHandler");
-const { getRoom } = require("@controllers/room.controller");
+const { getRoom, saveRoom } = require("@controllers/room.controller");
 const sessionController = require("@controllers/sessions.controller");
 const roomController = require("@controllers/room.controller");
 const ErrorHandler = require("@utils/ErrorHandler");
@@ -75,43 +75,7 @@ admin.get("/get-link", getInstance);
 
 admin.get("/free-all-instances", freeAllInstances);
 
-admin.post("/inviteRoom", async (req, res) => {
-  if (!req.body.roomid)
-    return res.json({ code: 400, error: true, message: "Roomid not found" });
-  const monet_room = monet_rooms[req.body.roomid];
-  if (!monet_room)
-    return res.json({
-      code: 400,
-      error: true,
-      message: "No room object found",
-    });
-  const { summary, start, observerEmail, observerLink } = req.body;
-  monet_room.persist(req.body);
-  if (observerEmail && observerEmail.includes("@")) {
-    await sendMail(
-      "./views/observerInvite.handlebars",
-      observerEmail,
-      `[Monet Live] You are invited to observe meeting named: ${summary}`,
-      {
-        Name: summary,
-        Link: observerLink,
-        Time: new Date(start.dateTime).toGMTString(),
-      }
-    );
-    return res.json({
-      code: 201,
-      error: false,
-      message: "Room updated and Observer has been invited via email",
-      response: monet_room.Snap,
-    });
-  } else
-    return res.json({
-      code: 201,
-      error: false,
-      message: "Room updated!",
-      response: monet_room.Snap,
-    });
-});
+admin.post("/inviteRoom", saveRoom);
 
 admin.get("/getInviteRoom", async (req, res) => {
   let room;
