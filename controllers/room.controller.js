@@ -119,7 +119,7 @@ exports.saveRoom = async function (req, res) {
   const { roomid, summary, start, observerEmail, observerLink } = req.body;
   /* Handling object in attendees key of the body */
   // req.body.attendees = req.body.attendees.map((e) => e.email);
-  Rooms.updateOne({ roomid }, req.body, async (error, success) => {
+  await Rooms.updateOne({ roomid }, req.body, async (error, success) => {
     if (error) {
       console.log('Room Error : ', error);
       return res.json({
