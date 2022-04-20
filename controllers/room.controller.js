@@ -1,7 +1,7 @@
 const Rooms = require("@models/room.model");
 const fs = require("fs");
 const paginate = require("@utils/paginate");
-const sendMail = require('@util/sendMail')
+const sendMail = require('@utils/sendMail');
 exports.getRoom = (roomId) => Rooms.findOne({ roomid: roomId });
 
 exports.getAllRooms = async function (req, res) {
