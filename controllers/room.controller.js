@@ -1,6 +1,7 @@
 const Rooms = require("@models/room.model");
 const fs = require("fs");
 const paginate = require("@utils/paginate");
+const sendMail = require('@utils/sendMail');
 exports.getRoom = (roomId) => Rooms.findOne({ roomid: roomId });
 
 exports.getAllRooms = async function (req, res) {
@@ -114,11 +115,11 @@ exports.verifyObserver = async (req, res) => {
   room.save();
   res.json({ code: 200, error: false, message: "You can observe this room" });
 };
-exports.saveRoom = async function (req, res) {
+exports.saveRoom = function (req, res) {
   if (!req.body.roomid) return res.json({ code: 400, error: true, message: 'Roomid not found' });
   const { roomid, summary, start, observerEmail, observerLink } = req.body;
   /* Handling object in attendees key of the body */
-  req.body.attendees = req.body.attendees.map((e) => e.email);
+  // req.body.attendees = req.body.attendees.map((e) => e.email);
   Rooms.updateOne({ roomid }, req.body, async (error, success) => {
     if (error) {
       console.log('Room Error : ', error);
@@ -149,5 +150,5 @@ exports.saveRoom = async function (req, res) {
         response: success,
       });
     }
-  }).then(() => {});
+  });
 };
