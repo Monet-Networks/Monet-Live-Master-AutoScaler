@@ -61,6 +61,8 @@ admin.get("/configure-instances", async (req, res) => {
   return new SuccessHandler(res, 200, "IPs configured", ips);
 });
 
+admin.post("/auth/microsoft", userController.microsoftAuth);
+
 admin.post("/login", login);
 
 admin.get("/getRoomIp", async (req, res) => {
