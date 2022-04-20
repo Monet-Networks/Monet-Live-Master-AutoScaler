@@ -14,6 +14,11 @@ const { getAllAutoInstances, createOneInstance } = require('@controllers/instanc
 const AWSConfiguration = require('@modules/awsConfig');
 const IController = new AWSConfiguration();
 const MonetIO = require('@modules/websockets');
+const {
+  createOneInstance,
+  deleteInstance,
+  updateImageId,
+} = require('@controllers/instance.controller');
 
 let redis;
 

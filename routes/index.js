@@ -2,11 +2,8 @@ const { googleAuth, login } = require("@controllers/user.controller");
 const { log } = require("console");
 const {
   getInstances,
-  createOneInstance,
   getInstance,
   freeAllInstances,
-  deleteInstance,
-  updateImageId,
 } = require("@controllers/instance.controller");
 const SuccessHandler = require("@utils/SuccessHandler");
 const { getRoom, saveRoom } = require("@controllers/room.controller");
