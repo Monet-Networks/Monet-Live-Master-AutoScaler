@@ -19,6 +19,7 @@ const {
   deleteInstance,
   updateImageId,
 } = require('@controllers/instance.controller');
+const { isLoggedIn } = require('@middlewares/auth');
 
 let redis;
 
@@ -77,6 +78,7 @@ admin.use(bodyParser.json({ limit: '50mb' }));
 admin.use('/test', express.static('tests'));
 admin.get('/register-instance', instanceRegistrationHandle);
 
+admin.use(isLoggedIn);
 admin.use('/', apiRoutes);
 
 httpServer.listen(PORT, () => log(`[Server OK]`));

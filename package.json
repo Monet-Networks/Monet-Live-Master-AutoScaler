@@ -13,6 +13,7 @@
     "@utils": "./utils",
     "@modules": "./modules",
     "@controllers": "./controllers",
+    "@middlewares": "./middlewares",
     "@models": "./models",
     "@routes": "./routes",
     "@views": "./views",
