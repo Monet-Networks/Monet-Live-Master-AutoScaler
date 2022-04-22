@@ -1,4 +1,5 @@
-const UserModel = require('@models/user.model');
+// Load required packages
+const UserModel = require('@models/users.model.js');
 const PlansModel = require('@models/plans.model');
 const PlanGroups = require('@models/planGroups.model');
 const bcrypt = require('bcryptjs');
@@ -11,16 +12,13 @@ const { authenticate, generateToken } = require('@utils/auth');
 const sendMail = require('@utils/sendMail.js');
 const { verifyToken, decodeToken } = require('@utils/token');
 
-exports.SaveUser = async (Object) => {
-  // noinspection UnnecessaryLocalVariableJS
-  const User = await UserModel.findOneAndUpdate({ ID: Object.ID }, Object, { upsert: true, new: true });
-  return User;
-};
-
-exports.GetUser = async (response) => {
-  // noinspection UnnecessaryLocalVariableJS
-  let result = await UserModel.findOne({ ID: response.ID });
-  return result;
+const addRemainingHours = async (user) => {
+  if (user.plan.groupUid) {
+    const planGroup = await PlanGroups.findOne({ uid: user.plan.groupUid });
+    if (planGroup) {
+      user = { ...JSON.parse(JSON.stringify(user)), remainingHours: Math.round(planGroup.leftHours) };
+    }
+  }
 };
 
 exports.registerUser = async (req, res) => {
@@ -45,12 +43,6 @@ exports.registerUser = async (req, res) => {
       expiresIn: process.env.JWT_EXPIRE,
     });
     user.save();
-    const planGroup = await PlanGroups.findOne({ uid: user.plan.groupUid });
-    if (planGroup) {
-      user.remainingHours = planGroup.leftHours;
-    } else {
-      user.remainingHours = 0;
-    }
     return res.json({
       code: 200,
       error: false,
@@ -152,7 +144,7 @@ exports.registerInvitedUser = async (req, res) => {
     default:
       return res.json({ code: 400, error: true, message: 'Invalid request' });
   }
-  const assignedUser = { id: user.id, name: user.name, email: user.email };
+  const assignedUser = [{ id: user.id, name: user.name, email: user.email }];
   PlanGroups.findOneAndUpdate({ uuid: assignor.plan.groupUid }, { $push: { users: assignedUser } });
   assignor.plan.assignees.forEach((user) => {
     if (user.email === assigneeEmail) {
@@ -160,10 +152,7 @@ exports.registerInvitedUser = async (req, res) => {
     }
   });
   assignor.save();
-  const planGroup = await PlanGroups.findOne({ uid: user.plan.groupUid });
-  if (planGroup) {
-    user.remainingHours = planGroup.leftHours;
-  }
+  addRemainingHours(user);
   return res.json({
     code: 200,
     error: false,
@@ -174,7 +163,7 @@ exports.registerInvitedUser = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  let existingUser = await UserModel.findOne({ email });
+  const existingUser = await UserModel.findOne({ email });
   if (!existingUser)
     return res.json({
       code: 401,
@@ -210,10 +199,7 @@ exports.login = async (req, res) => {
     }
   });
   existingUser.save();
-  const planGroup = await PlanGroups.findOne({ uid: existingUser.plan.groupUid });
-  if (planGroup) {
-    existingUser = { ...JSON.parse(JSON.stringify(existingUser)), remainingHours: planGroup.leftHours };
-  }
+  addRemainingHours(existingUser);
   return res.json({
     code: 200,
     error: false,
@@ -387,6 +373,7 @@ exports.updateUser = async (req, res) => {
     let { ID } = req.body;
     const user = await UserModel.findOneAndUpdate({ ID }, req.body, { new: true });
     if (user) {
+      addRemainingHours(user);
       res.json({ code: 200, error: false, message: 'User details updated', data: user });
     } else if (!user) {
       res.json({ code: 404, error: true, message: 'User not found' });
@@ -571,11 +558,8 @@ const google = async (req, res, assigneeEmail = '', additionalFields = {}) => {
 
 /* Google's Authentication Controller */
 exports.googleAuth = async (req, res) => {
-  let user = await google(req, res);
-  const planGroup = await PlanGroups.findOne({ uid: user.plan.groupUid });
-  if (planGroup) {
-    user = { ...JSON.parse(JSON.stringify(user)), remainingHours: planGroup.leftHours };
-  }
+  const user = await google(req, res);
+  addRemainingHours(user);
   res.json({
     error: false,
     message: 'Authentication successful',
@@ -626,11 +610,8 @@ const microsoft = async (req, res, assigneeEmail = '', additionalFields = {}) =>
 
 /* Microsoft's Authentication Controller */
 exports.microsoftAuth = async (req, res) => {
-  let user = await microsoft(req, res);
-  const planGroup = await PlanGroups.findOne({ uid: user.plan.groupUid });
-  if (planGroup) {
-    user = { ...JSON.parse(JSON.stringify(user)), remainingHours: planGroup.leftHours };
-  }
+  const user = await microsoft(req, res);
+  addRemainingHours(user);
   res.json({
     error: false,
     message: 'Authentication successful',
