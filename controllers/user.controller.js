@@ -18,7 +18,7 @@ const addRemainingHours = async (user) => {
     if (planGroup) {
       user = { ...JSON.parse(JSON.stringify(user)), remainingHours: planGroup.leftHours.toFixed(2) };
     }
-  }
+  } else console.log('There is no plan : ', user);
 };
 
 exports.registerUser = async (req, res) => {
