@@ -1,45 +1,41 @@
-const { googleAuth, login } = require("@controllers/user.controller");
-const { log } = require("console");
-const {
-  getInstances,
-  getInstance,
-  freeAllInstances,
-} = require("@controllers/instance.controller");
-const SuccessHandler = require("@utils/SuccessHandler");
-const { getRoom, saveRoom } = require("@controllers/room.controller");
-const sessionController = require("@controllers/sessions.controller");
-const roomController = require("@controllers/room.controller");
-const ErrorHandler = require("@utils/ErrorHandler");
-const Report = require("@utils/Report");
-const userController = require("@controllers/user.controller");
-const { genReport } = require("@utils/GenReport");
-const planController = require("@controllers/plans.controller");
-const stripeController = require("@controllers/stripe.controller");
-const planGroupsController = require("@controllers/planGroups.controller");
-const fdController = require("@controllers/faceData.controller");
-const Reports = require("@models/reports.model");
-const Rooms = require("@models/room.model");
-const CreateConfiguration = require("@modules/createConfig");
-const { Router } = require("express");
-const sendMail = require("@utils/sendMail");
+const { googleAuth, login } = require('@controllers/user.controller');
+const { log } = require('console');
+const { getInstances, getInstance, freeAllInstances } = require('@controllers/instance.controller');
+const SuccessHandler = require('@utils/SuccessHandler');
+const { getRoom, saveRoom } = require('@controllers/room.controller');
+const sessionController = require('@controllers/sessions.controller');
+const roomController = require('@controllers/room.controller');
+const ErrorHandler = require('@utils/ErrorHandler');
+const Report = require('@utils/Report');
+const userController = require('@controllers/user.controller');
+const { genReport } = require('@utils/GenReport');
+const planController = require('@controllers/plans.controller');
+const stripeController = require('@controllers/stripe.controller');
+const planGroupsController = require('@controllers/planGroups.controller');
+const fdController = require('@controllers/faceData.controller');
+const Reports = require('@models/reports.model');
+const Rooms = require('@models/room.model');
+const CreateConfiguration = require('@modules/createConfig');
+const { Router } = require('express');
+const sendMail = require('@utils/sendMail');
 const roomEmails = {};
-const Sessions = require("@models/sessions.model");
+const Sessions = require('@models/sessions.model');
 const admin = Router();
-const debug = require("debug");
-const FaceRouter = require("@routes/face.recognition");
+const debug = require('debug');
+const FaceRouter = require('@routes/face.recognition');
 const monet = {
-  vdebug: debug("websocket:vdebug"),
-  debug: debug("websocket:debug"),
-  err: debug("websocket:error"),
-  warn: debug("websocket:warn"),
-  info: debug("websocket:info"),
+  vdebug: debug('websocket:vdebug'),
+  debug: debug('websocket:debug'),
+  err: debug('websocket:error'),
+  warn: debug('websocket:warn'),
+  info: debug('websocket:info'),
 };
 
-admin.get("/reset-engine-state", (req, res) => {
-  if (req.query.secret === "monet@43324") {
+admin.get('/reset-engine-state', (req, res) => {
+  if (req.query.secret === 'monet@43324') {
     engine.resetState();
     res.json({
-      message: "success",
+      message: 'success',
     });
   } else {
     res.json({
@@ -48,34 +44,33 @@ admin.get("/reset-engine-state", (req, res) => {
   }
 });
 
-admin.post("/auth/google", googleAuth);
+admin.post('/auth/google', googleAuth);
 
-admin.get("/configure-instances", async (req, res) => {
-  log("configure instance call.");
+admin.get('/configure-instances', async (req, res) => {
+  log('configure instance call.');
   const ips = await getInstances();
   new CreateConfiguration(ips);
-  return new SuccessHandler(res, 200, "IPs configured", ips);
+  return new SuccessHandler(res, 200, 'IPs configured', ips);
 });
 
-admin.post("/auth/microsoft", userController.microsoftAuth);
+admin.post('/auth/microsoft', userController.microsoftAuth);
 
-admin.post("/login", login);
+admin.post('/login', login);
 
-admin.get("/getRoomIp", async (req, res) => {
+admin.get('/getRoomIp', async (req, res) => {
   const { roomid } = req.query;
   const room = await getRoom(roomid);
-  if (!room)
-    return res.json({ code: 404, error: true, message: "Room not found" });
-  res.json({ code: 200, error: false, message: "Room found", room });
+  if (!room) return res.json({ code: 404, error: true, message: 'Room not found' });
+  res.json({ code: 200, error: false, message: 'Room found', room });
 });
 
-admin.get("/get-link", getInstance);
+admin.get('/get-link', getInstance);
 
-admin.get("/free-all-instances", freeAllInstances);
+admin.get('/free-all-instances', freeAllInstances);
 
-admin.post("/inviteRoom", saveRoom);
+admin.post('/inviteRoom', saveRoom);
 
-admin.get("/getInviteRoom", async (req, res) => {
+admin.get('/getInviteRoom', async (req, res) => {
   let room;
   const roomid = req.query.roomid;
   if (roomid) room = await getRoom();
@@ -83,31 +78,31 @@ admin.get("/getInviteRoom", async (req, res) => {
     return res.json({
       code: 201,
       error: false,
-      message: "The room exists",
+      message: 'The room exists',
       response: room,
     });
   else
     return res.json({
       code: 404,
       error: true,
-      message: "The room does not exists",
+      message: 'The room does not exists',
     });
 });
 
-admin.post("/getAllInviteRooms", function (req, res) {
+admin.post('/getAllInviteRooms', function (req, res) {
   roomController.getAllRooms(req, res).then(() => {
     /* don't do anything */
   });
 });
 
-admin.get("/getReportData", async (req, res) => {
+admin.get('/getReportData', async (req, res) => {
   const { roomid } = req.query;
   const report = redis.get(`report:${roomid}`);
-  if (report === "1") {
+  if (report === '1') {
     return res.json({
       code: 202,
       error: false,
-      message: "Report is generating",
+      message: 'Report is generating',
     });
   } else {
     try {
@@ -116,48 +111,43 @@ admin.get("/getReportData", async (req, res) => {
         return res.json({
           code: 404,
           error: true,
-          message: "Report data not found",
+          message: 'Report data not found',
         });
       } else {
         res.json({
           code: 200,
           error: false,
-          message: "Report data found",
+          message: 'Report data found',
           report,
         });
       }
     } catch (error) {
-      console.log("getReportData error", error);
+      console.log('getReportData error', error);
       res.json({ code: 400, error: true, message: error });
     }
   }
 });
 
-admin.post("/addFinalReport", async (req, res) => {
-  if (!req.body.roomid || !req.body.report)
-    return new ErrorHandler(res, 404, "Missing parameters in body");
+admin.post('/addFinalReport', async (req, res) => {
+  if (!req.body.roomid || !req.body.report) return new ErrorHandler(res, 404, 'Missing parameters in body');
   const { roomid, report } = req.body;
-  const Report = await Reports.findOneAndUpdate(
-    { roomid },
-    { report },
-    { new: true }
-  );
+  const Report = await Reports.findOneAndUpdate({ roomid }, { report }, { new: true });
   if (!Report) {
     res.json({
       code: 404,
       error: true,
-      message: "Invalid roomId data not found",
+      message: 'Invalid roomId data not found',
     });
   }
   res.json({
     code: 200,
     error: false,
-    message: "Report added",
+    message: 'Report added',
     report: Report,
   });
 });
 
-admin.get("/report", async (req, res) => {
+admin.get('/report', async (req, res) => {
   const user = await sessionController.getUser({ uuid: req.query.id });
   if (user && user.name) {
     const report = await Report(user);
@@ -165,28 +155,28 @@ admin.get("/report", async (req, res) => {
       res.json({
         code: 200,
         error: false,
-        message: "user report",
+        message: 'user report',
         response: report,
       });
     } else {
       res.json({
         code: 400,
         error: true,
-        message: "Error generating report",
-        response: "The report has not been generated",
+        message: 'Error generating report',
+        response: 'The report has not been generated',
       });
     }
   }
 });
 
-admin.post("/generateReport", async (req, res) => {
+admin.post('/generateReport', async (req, res) => {
   const { roomid, creator_ID } = req.body;
   const reportExists = await Reports.findOne({ roomid });
   if (reportExists) {
     return res.json({
       code: 200,
       error: false,
-      message: "Report already exists",
+      message: 'Report already exists',
       report: reportExists,
     });
   }
@@ -201,44 +191,40 @@ admin.post("/generateReport", async (req, res) => {
     return res.json({
       code: 200,
       error: false,
-      message: "Report generated successfully",
+      message: 'Report generated successfully',
       report,
     });
 });
 
-admin.get("/my-meetings", async (req, res) => {
+admin.get('/my-meetings', async (req, res) => {
   const { creator_ID, timeline } = req.query;
   const [start, end] =
-    timeline === "day"
+    timeline === 'day'
+      ? [new Date(new Date().setHours(0, 0, 0, 0)), new Date(new Date().setHours(23, 59, 59, 999))]
+      : timeline === 'week'
       ? [
-          new Date(new Date().setHours(0, 0, 0, 0)),
-          new Date(new Date().setHours(23, 59, 59, 999)),
-        ]
-      : timeline === "week"
-      ? [
-          new Date(
-            new Date().setHours(0, 0, 0, 0).valueOf() - 6 * 24 * 60 * 60 * 1000
-          ),
+          new Date(new Date().setHours(0, 0, 0, 0).valueOf() - 6 * 24 * 60 * 60 * 1000),
           new Date(new Date().setHours(23, 59, 59, 999)),
         ]
       : [
-          new Date(
-            new Date().setHours(0, 0, 0, 0).valueOf() - 29 * 24 * 60 * 60 * 1000
-          ),
+          new Date(new Date().setHours(0, 0, 0, 0).valueOf() - 29 * 24 * 60 * 60 * 1000),
           new Date(new Date().setHours(23, 59, 59, 999)),
         ];
   const reportsData = Reports.find({ creator_ID });
   const userRoomsData = Rooms.find({
     creator_ID,
-    "start.dateTime": { $gte: new Date(start) },
-    "end.dateTime": { $lte: new Date(end) },
+    'start.dateTime': { $gte: new Date(start) },
+    'end.dateTime': { $lte: new Date(end) },
   });
   const [reports, userRooms] = await Promise.all([reportsData, userRoomsData]);
-  const meetings = userRooms.length;
   let duration = 0;
-  userRooms.forEach((room) => {
-    duration += durationCalculator(room.start.dateTime, room.end.dateTime);
+  userRooms.filter((room) => {
+    if (new Date(room.start.dateTime) < new Date(room.end.dateTime)) {
+      duration += durationCalculator(room.start.dateTime, room.end.dateTime);
+      return room;
+    }
   });
+  const meetings = userRooms.length;
   let overallEngagement = 0;
   let overallMood = 0;
   reports.forEach(({ report }) => {
@@ -252,54 +238,45 @@ admin.get("/my-meetings", async (req, res) => {
   res.json({
     code: 200,
     error: false,
-    message: "Details fetched for the user",
+    message: 'Details fetched for the user',
     data: { meetings, duration, overallAverageEngagement, overallAverageMood },
   });
 });
-admin.post("/create-payment-intent", stripeController.createPaymentIntent);
+admin.post('/create-payment-intent', stripeController.createPaymentIntent);
 
-admin.get("/userStatus", stripeController.userStatus);
+admin.get('/userStatus', stripeController.userStatus);
 
-admin.post("/addPaymentMethod", stripeController.paymentMethod);
+admin.post('/addPaymentMethod', stripeController.paymentMethod);
 
-admin.post("/webhooks", stripeController.handleWebhook);
+admin.post('/webhooks', stripeController.handleWebhook);
 
-admin.put("/selectPlan", userController.selectPlan);
+admin.put('/selectPlan', userController.selectPlan);
 
-admin.post("/getRecordings", roomController.getAdminRecordings);
+admin.post('/getRecordings', roomController.getAdminRecordings);
 
-admin.get("/getPlan", planController.getPlan);
+admin.get('/getPlan', planController.getPlan);
 
-admin.get("/getAllPlans", planController.getAllPlans);
+admin.get('/getAllPlans', planController.getAllPlans);
 
-admin.post("/createPlan", planController.createPlan);
+admin.post('/createPlan', planController.createPlan);
 
-admin.put("/updatePlan", planController.updatePlan);
+admin.put('/updatePlan', planController.updatePlan);
 
-admin.delete("/deletePlan", planController.deletePlan);
+admin.delete('/deletePlan', planController.deletePlan);
 
-admin.put("/assignPlan", planController.assignPlan);
+admin.put('/assignPlan', planController.assignPlan);
 
-admin.put("/updateMeetingHours", planGroupsController.updateMeetingHours);
+admin.put('/updateMeetingHours', planGroupsController.updateMeetingHours);
 
-admin.put("/updateSetting", userController.userSettings);
+admin.put('/updateSetting', userController.userSettings);
 
-admin.get("/getPlanGroupDetails", planGroupsController.getPlanGroupDetails);
+admin.get('/getPlanGroupDetails', planGroupsController.getPlanGroupDetails);
 
-admin.post("/sendAdminEmail", async function (req, res) {
-  const {
-    Admin: email,
-    Name,
-    Attendees,
-    Link,
-    Date,
-    Duration,
-    Summary: Topic,
-    RoomId,
-  } = req.body;
+admin.post('/sendAdminEmail', async function (req, res) {
+  const { Admin: email, Name, Attendees, Link, Date, Duration, Summary: Topic, RoomId } = req.body;
   roomEmails[RoomId] = { email, name: Name, topic: Topic };
   const info = await sendMail(
-    "../views/admin.handlebars",
+    '../views/admin.handlebars',
     email,
     `[Monet Live] Report for ${Topic} is available on Monet Live`,
     {
@@ -310,20 +287,20 @@ admin.post("/sendAdminEmail", async function (req, res) {
       Duration,
       Topic,
     },
-    "anand@monetnetworks.com"
+    'anand@monetnetworks.com'
   );
   return res.json({
     code: 200,
     error: false,
-    message: "List participate",
+    message: 'List participate',
     response: info.response,
   });
 });
 
-admin.post("/sendEmails", async function (req, response) {
+admin.post('/sendEmails', async function (req, response) {
   try {
     const emails = req.body.email;
-    let emailArr = emails.split(",");
+    let emailArr = emails.split(',');
     const subject = req.body.subject;
     const roomId = req.body.roomId;
     // var dateandtime = req.body.dateandtime;
@@ -334,19 +311,14 @@ admin.post("/sendEmails", async function (req, response) {
       // let responseArr = [];
       let index = 0;
       while (index < emailArr.length) {
-        if (typeof emailArr[index] == "string") {
+        if (typeof emailArr[index] == 'string') {
           const email = emailArr[index];
-          await sendMail(
-            "../views/index.handlebars",
-            email,
-            `[Monet Live] ${subject}`,
-            {
-              roomId: roomId,
-              startDate: startDate,
-              stopDate: stopDate,
-              joinLink: joinLink,
-            }
-          );
+          await sendMail('../views/index.handlebars', email, `[Monet Live] ${subject}`, {
+            roomId: roomId,
+            startDate: startDate,
+            stopDate: stopDate,
+            joinLink: joinLink,
+          });
         }
         index++;
       }
@@ -359,7 +331,7 @@ admin.post("/sendEmails", async function (req, response) {
       response.json({
         code: 200,
         error: false,
-        message: "List Invites",
+        message: 'List Invites',
         subject: subject,
         NumberOfInvites: NoOfInvites[roomId],
         // response: responseArr,
@@ -371,13 +343,13 @@ admin.post("/sendEmails", async function (req, response) {
     response.json({
       code: 400,
       error: true,
-      message: "Caught error while sending Emails.",
+      message: 'Caught error while sending Emails.',
       response: error,
     });
   }
 });
 
-admin.post("/sendEmail", async function (req, response) {
+admin.post('/sendEmail', async function (req, response) {
   const { Admin: email, Name, Attendees, Link, Date, Duration } = req.body;
   const content = {
     Name,
@@ -391,21 +363,21 @@ admin.post("/sendEmail", async function (req, response) {
   // const name = req.body.name;
   // const dateandtime = req.body.dateandtime;
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: 'smtp.gmail.com',
     port: 587,
     secure: false,
     //secure: false, // true for 465, false for other ports
-    service: "gmail",
+    service: 'gmail',
     auth: {
-      user: "admin@monetlive.com",
-      pass: "xnfoogozwbfoemgm",
+      user: 'admin@monetlive.com',
+      pass: 'xnfoogozwbfoemgm',
     },
   });
 
   const mailOptions = {
-    from: "admin@monetlive.com", // 'atul@ashmar.in'
+    from: 'admin@monetlive.com', // 'atul@ashmar.in'
     to: email,
-    subject: "Monet Support",
+    subject: 'Monet Support',
     text: JSON.stringify(content),
   };
 
@@ -413,17 +385,17 @@ admin.post("/sendEmail", async function (req, response) {
   response.json({
     code: 200,
     error: false,
-    message: "List participate",
+    message: 'List participate',
     response: info.response,
   });
 });
 
-admin.get("/getScreenShareDetails", sessionController.getScreenShareDetails);
+admin.get('/getScreenShareDetails', sessionController.getScreenShareDetails);
 
-admin.get("/avg-engagement-req", async function (req, res) {
+admin.get('/avg-engagement-req', async function (req, res) {
   try {
     const data = req.query;
-    monet.debug("The engagement request : ", data);
+    monet.debug('The engagement request : ', data);
     let report = await getReport(data);
     res.json(report);
   } catch (err) {
@@ -431,7 +403,7 @@ admin.get("/avg-engagement-req", async function (req, res) {
   }
 });
 
-admin.use("/face", FaceRouter);
+admin.use('/face', FaceRouter);
 
 const getReport = async (data) => {
   const report = [];
@@ -440,11 +412,9 @@ const getReport = async (data) => {
   const sessionData = await fdController.fetchSession(roomid);
   const userList = await Sessions.find({ roomid: roomid });
   userList.forEach(({ uuid }) => (userArrays[uuid] = []));
-  sessionData.forEach(
-    ({ uuid, segment, createdAt, mood, webcam, engagement }) => {
-      userArrays[uuid].push({ segment, createdAt, mood, webcam, engagement });
-    }
-  );
+  sessionData.forEach(({ uuid, segment, createdAt, mood, webcam, engagement }) => {
+    userArrays[uuid].push({ segment, createdAt, mood, webcam, engagement });
+  });
   for (const user in userArrays) {
     // userArrays[user].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     userArrays[user].forEach((val, index) => {
@@ -461,20 +431,20 @@ const getReport = async (data) => {
     // const userData = await fdController.fetchData(roomid);
     const userData = userArrays[uuid];
     if (userData.length === 0) {
-      monet.warn("no data...");
+      monet.warn('no data...');
       continue;
     }
-    map["engagement_avg"] = 0;
-    map["mood_avg"] = 0;
+    map['engagement_avg'] = 0;
+    map['mood_avg'] = 0;
     const last_10 = userData.slice(Math.max(userData.length - 10, 1));
     last_10.forEach((r) => {
-      if (r["mood"] === null) r["mood"] = 0;
-      map["engagement_avg"] += r["engagement"];
-      map["mood_avg"] += r["mood"];
+      if (r['mood'] === null) r['mood'] = 0;
+      map['engagement_avg'] += r['engagement'];
+      map['mood_avg'] += r['mood'];
     });
-    map["engagement_avg"] = map["engagement_avg"] / 10;
-    map["mood_avg"] = map["mood_avg"] / 10;
-    map["session_data"] = userData;
+    map['engagement_avg'] = map['engagement_avg'] / 10;
+    map['mood_avg'] = map['mood_avg'] / 10;
+    map['session_data'] = userData;
     report.push(map);
     delete userArrays[uuid];
   }
