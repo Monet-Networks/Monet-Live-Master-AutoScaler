@@ -3,6 +3,7 @@ const { log } = require('console');
 const { getInstances, getInstance, freeAllInstances } = require('@controllers/instance.controller');
 const SuccessHandler = require('@utils/SuccessHandler');
 const { getRoom, saveRoom } = require('@controllers/room.controller');
+const fileController = require('@controllers/file.controller');
 const sessionController = require('@controllers/sessions.controller');
 const roomController = require('@controllers/room.controller');
 const ErrorHandler = require('@utils/ErrorHandler');
@@ -242,6 +243,11 @@ admin.get('/my-meetings', async (req, res) => {
     data: { meetings, duration, overallAverageEngagement, overallAverageMood },
   });
 });
+
+admin.post('/upFile', fileController.fileUpload);
+
+admin.get('/downFile/:file', fileController.fileDownload);
+
 admin.post('/create-payment-intent', stripeController.createPaymentIntent);
 
 admin.get('/userStatus', stripeController.userStatus);
