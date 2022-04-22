@@ -216,7 +216,7 @@ admin.get('/my-meetings', async (req, res) => {
     'start.dateTime': { $gte: new Date(start) },
     'end.dateTime': { $lte: new Date(end) },
   });
-  const [reports, userRooms] = await Promise.all([reportsData, userRoomsData]);
+  let [reports, userRooms] = await Promise.all([reportsData, userRoomsData]);
   let duration = 0;
   userRooms = userRooms.filter((room) => {
     if (new Date(room.start.dateTime) < new Date(room.end.dateTime)) {
