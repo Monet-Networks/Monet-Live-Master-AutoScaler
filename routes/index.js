@@ -218,7 +218,7 @@ admin.get('/my-meetings', async (req, res) => {
   });
   const [reports, userRooms] = await Promise.all([reportsData, userRoomsData]);
   let duration = 0;
-  userRooms.filter((room) => {
+  userRooms = userRooms.filter((room) => {
     if (new Date(room.start.dateTime) < new Date(room.end.dateTime)) {
       duration += durationCalculator(room.start.dateTime, room.end.dateTime);
       return room;
