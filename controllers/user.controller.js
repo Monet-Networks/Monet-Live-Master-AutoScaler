@@ -16,10 +16,9 @@ const addRemainingHours = async (user) => {
   if (user.plan && user.plan.groupUid) {
     const planGroup = await PlanGroups.findOne({ uid: user.plan.groupUid });
     if (planGroup) {
-      // user = { ...JSON.parse(JSON.stringify(user)), remainingHours: planGroup.leftHours.toFixed(2) };
-      user.remainingHours = planGroup.leftHours.toFixed(2)
+      return { ...JSON.parse(JSON.stringify(user)), remainingHours: planGroup.leftHours.toFixed(2) };
     }
-  }
+  } else return user;
 };
 
 exports.registerUser = async (req, res) => {
@@ -153,7 +152,7 @@ exports.registerInvitedUser = async (req, res) => {
     }
   });
   assignor.save();
-  addRemainingHours(user);
+  user = addRemainingHours(user);
   return res.json({
     code: 200,
     error: false,
@@ -200,7 +199,7 @@ exports.login = async (req, res) => {
     }
   });
   existingUser.save();
-  addRemainingHours(existingUser);
+  existingUser = addRemainingHours(existingUser);
   return res.json({
     code: 200,
     error: false,
@@ -374,7 +373,7 @@ exports.updateUser = async (req, res) => {
     let { ID } = req.body;
     let user = await UserModel.findOneAndUpdate({ ID }, req.body, { new: true });
     if (user) {
-      addRemainingHours(user);
+      user = addRemainingHours(user);
       res.json({ code: 200, error: false, message: 'User details updated', data: user });
     } else if (!user) {
       res.json({ code: 404, error: true, message: 'User not found' });
@@ -560,7 +559,7 @@ const google = async (req, res, assigneeEmail = '', additionalFields = {}) => {
 /* Google's Authentication Controller */
 exports.googleAuth = async (req, res) => {
   let user = await google(req, res);
-  addRemainingHours(user);
+  user = addRemainingHours(user);
   res.json({
     error: false,
     message: 'Authentication successful',
@@ -612,7 +611,7 @@ const microsoft = async (req, res, assigneeEmail = '', additionalFields = {}) =>
 /* Microsoft's Authentication Controller */
 exports.microsoftAuth = async (req, res) => {
   let user = await microsoft(req, res);
-  addRemainingHours(user);
+  user = addRemainingHours(user);
   res.json({
     error: false,
     message: 'Authentication successful',
