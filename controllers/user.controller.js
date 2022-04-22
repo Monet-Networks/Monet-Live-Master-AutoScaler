@@ -163,7 +163,7 @@ exports.registerInvitedUser = async (req, res) => {
 
 exports.login = async (req, res) => {
   const { email, password } = req.body;
-  const existingUser = await UserModel.findOne({ email });
+  let existingUser = await UserModel.findOne({ email });
   if (!existingUser)
     return res.json({
       code: 401,
@@ -371,7 +371,7 @@ exports.updateUser = async (req, res) => {
       req.body.avatar = 'https://www.monetlive.com/data/avatars/' + req.file.filename;
     }
     let { ID } = req.body;
-    const user = await UserModel.findOneAndUpdate({ ID }, req.body, { new: true });
+    let user = await UserModel.findOneAndUpdate({ ID }, req.body, { new: true });
     if (user) {
       addRemainingHours(user);
       res.json({ code: 200, error: false, message: 'User details updated', data: user });
@@ -558,7 +558,7 @@ const google = async (req, res, assigneeEmail = '', additionalFields = {}) => {
 
 /* Google's Authentication Controller */
 exports.googleAuth = async (req, res) => {
-  const user = await google(req, res);
+  let user = await google(req, res);
   addRemainingHours(user);
   res.json({
     error: false,
@@ -610,7 +610,7 @@ const microsoft = async (req, res, assigneeEmail = '', additionalFields = {}) =>
 
 /* Microsoft's Authentication Controller */
 exports.microsoftAuth = async (req, res) => {
-  const user = await microsoft(req, res);
+  let user = await microsoft(req, res);
   addRemainingHours(user);
   res.json({
     error: false,
