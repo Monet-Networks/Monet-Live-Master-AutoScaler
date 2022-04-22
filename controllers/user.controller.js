@@ -16,7 +16,8 @@ const addRemainingHours = async (user) => {
   if (user.plan && user.plan.groupUid) {
     const planGroup = await PlanGroups.findOne({ uid: user.plan.groupUid });
     if (planGroup) {
-      user = { ...JSON.parse(JSON.stringify(user)), remainingHours: planGroup.leftHours.toFixed(2) };
+      // user = { ...JSON.parse(JSON.stringify(user)), remainingHours: planGroup.leftHours.toFixed(2) };
+      user.remainingHours = planGroup.leftHours.toFixed(2)
     }
   }
 };

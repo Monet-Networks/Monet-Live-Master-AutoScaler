@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
             {
-            "address": "35.161.34.176",
+            "address": "35.86.86.104",
             "localRoot": "${workspaceFolder}",
             "name": "AutoScale-Remote-Master",
             "port": 9229,
