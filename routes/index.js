@@ -1,5 +1,6 @@
 const { googleAuth, login } = require('@controllers/user.controller');
 const { log } = require('console');
+const red = require('redis');
 const { getInstances, getInstance, freeAllInstances } = require('@controllers/instance.controller');
 const SuccessHandler = require('@utils/SuccessHandler');
 const { getRoom, saveRoom } = require('@controllers/room.controller');
@@ -31,6 +32,16 @@ const monet = {
   warn: debug('websocket:warn'),
   info: debug('websocket:info'),
 };
+
+let redis;
+
+(async () => {
+  redis = red.createClient({
+    url: 'redis://:monet%40615@34.220.116.222:6379',
+  });
+  redis.on('error', (err) => console.log('Redis Client Error', err));
+  await redis.connect();
+})();
 
 admin.get('/reset-engine-state', (req, res) => {
   if (req.query.secret === 'monet@43324') {

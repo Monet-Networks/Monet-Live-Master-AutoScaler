@@ -1,7 +1,6 @@
 require('module-alias/register');
 require('dotenv').config();
 const apiRoutes = require('@routes');
-const red = require('redis');
 const express = require('express');
 const bodyParser = require('body-parser');
 const admin = express();
@@ -20,17 +19,8 @@ const {
   updateImageId,
 } = require('@controllers/instance.controller');
 
-let redis;
 
 const PORT = process.env.PORT || 3000;
-
-(async () => {
-  redis = red.createClient({
-    url: 'redis://:monet%40615@34.220.116.222:6379',
-  });
-  redis.on('error', (err) => console.log('Redis Client Error', err));
-  await redis.connect();
-})();
 
 const instanceRegistrationHandle = async (req, res) => {
   await createOneInstance(req, res, ({ error, success }) => {
