@@ -6,6 +6,7 @@ const SuccessHandler = require('@utils/SuccessHandler');
 const { getRoom, saveRoom } = require('@controllers/room.controller');
 const fileController = require('@controllers/file.controller');
 const sessionController = require('@controllers/sessions.controller');
+const reportsController = require('@controllers/reports.controller');
 const roomController = require('@controllers/room.controller');
 const ErrorHandler = require('@utils/ErrorHandler');
 const Report = require('@utils/Report');
@@ -207,6 +208,8 @@ admin.post('/generateReport', async (req, res) => {
       report,
     });
 });
+
+admin.get('/report-pdf', reportsController.reportPdf);
 
 admin.get('/my-meetings', async (req, res) => {
   const { creator_ID, timeline } = req.query;
