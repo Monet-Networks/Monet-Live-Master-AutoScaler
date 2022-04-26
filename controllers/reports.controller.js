@@ -9,7 +9,7 @@ exports.reportPdf = async (req, res) => {
   const sessionsPromise = Sessions.find({ roomid });
   const reportPromise = Reports.findOne({ roomid });
   const [room, sessions, report] = await Promise.all([roomPromise, sessionsPromise, reportPromise]);
-  if (!room && !sessions) {
+  if (!room || !sessions || !report) {
     return res.json({ code: 404, error: true, message: 'Room data not found' });
   }
   const students = sessions.filter((session) => session.proctor === 'student' && !session.uuid.includes('___'));
