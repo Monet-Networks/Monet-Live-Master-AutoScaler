@@ -1,4 +1,5 @@
- let socket,
+let socket,
+  Online = true,
   dynamoIp,
   dynamoLink,
   myPubUser = null,
@@ -6,10 +7,14 @@
   sub_list = {},
   subscriber = null,
   MediaStreams = [],
-  pc_subscribe = {};
-const streams = [],
-  uuid = window.location.hash.substr(window.location.hash.lastIndexOf('id')).split('&')[0].replace('id=', ''),
-  name = window.location.hash.substr(window.location.hash.lastIndexOf('name')).split('&')[0].replace('name=', '');
+  pc_subscribe = {},
+  ID,
+  Name,
+  RoomId;
+const streams = [];
+// ID = params.get('id'),
+// Name = params.get('name'),
+// RoomId = params.get('roomid');
 
 // const check_speed = (cb) => {
 //     cb(navigator.connection.downlink);
@@ -20,6 +25,9 @@ class PubUser {
   static webRTCAdapter = this.adapter;
 
   constructor(name, uuid, room_id, user_type, serverIP, socket, streamType, mediaStream, email, log = false) {
+    const params = new URLSearchParams(window.location.search);
+    (ID = params.get('id')), (Name = params.get('name')), (RoomId = params.get('roomid'));
+    console.log(`ID - Name - RoomId : ${ID} -:- ${Name} -:- ${RoomId}`);
     this.videoStreams = {};
     this.screen = false;
     this.callbacks = {};
@@ -28,6 +36,8 @@ class PubUser {
     this.screen = this.streamType === 'screen';
     this.mediaStream = mediaStream;
     this.socket = socket || null;
+    this.video = true;
+    this.audio = true;
     this.count = 0;
     this.timer = null;
     this.log = log;
@@ -64,6 +74,20 @@ class PubUser {
 
   set sock(val) {
     this.socket = val;
+  }
+
+  /**
+   * @param {boolean} flag
+   */
+  set newAudioStatus(flag) {
+    this.audio = flag;
+  }
+
+  /**
+   * @param {boolean} flag
+   */
+  set newVideoStatus(flag) {
+    this.video = flag;
   }
 
   static isWebrtcSupported() {
@@ -105,6 +129,8 @@ class PubUser {
   };
 
   init = () => {
+    console.log('Details init : >>>>>>>>>>>>>>>>>> ', ID, Name, RoomId);
+    socket.io.opts.query = { ID, Name, RoomId };
     // mediaDev.on('toggle-video', (flag) => this.toggleVideo(this.streamType, flag));
     // mediaDev.on('toggle-audio', (flag) => this.toggleAudio(this.streamType, flag));
     this.transactions = {};
@@ -161,6 +187,7 @@ class PubUser {
         }
       }
     });
+
     socket.emit('create-user', { user, type: this.streamType });
 
     socket.on('toggle-audio', (data) => {
@@ -198,11 +225,12 @@ class PubUser {
     });
     socket.on('connected', ({ iceServers }) => {
       console.log('Connected to server.');
+      this.iceServers = iceServers;
       this.publish(
         {
           stream: this.streamType,
           roomid: this.user.roomid,
-          iceServers: iceServers.iceServers,
+          iceServers: iceServers,
         },
         (err) => {
           if (err) console.error('There is an error publishing stream : ', err);
@@ -218,6 +246,7 @@ class PubUser {
       successCB(msg);
     });
     socket.on('webrtc', ({ msg }) => {
+      if (!msg) return;
       let info = msg['payload'];
       let webrtcCB = typeof callbacks['webrtc'] == 'function' ? callbacks['webrtc'] : noop;
       webrtcCB(info);
@@ -245,10 +274,13 @@ class PubUser {
       return;
     }
     const { stream: type } = details;
-    if (!this.once[type]) return;
+    if (!this.once[type]) return console.error('Publish have been called once. Returning');
     this.once[type] = false;
     if (pc[type]) {
       callback('Already publishing the ' + type);
+      console.error('Already publishing the ' + type);
+      pc[type].close();
+      pc[type] = null;
       return;
     }
     if (type === 'webcam') {
@@ -311,9 +343,7 @@ class PubUser {
     pc['webcam']
       .createOffer(
         (offer) => {
-          if (pc['sdpSend_video'] === true) {
-            return;
-          }
+          if (pc['sdpSend_video'] === true) return console.error('SDP already sent. Please check.');
           pc['sdpSend_video'] = true;
           pc['webcam'].setLocalDescription(offer).then(() => {});
           const jsep = {
@@ -325,6 +355,7 @@ class PubUser {
             monet: 'publish',
             id: trID(16),
             payload: {
+              id: this.user.uuid,
               stream: 'webcam',
               jsep,
               roomid: user.roomid,
@@ -334,7 +365,7 @@ class PubUser {
             if (result['monet'] === 'error') {
               // hangup("webcam");
               callback(result['payload']['reason']);
-              return;
+              return console.error('Error publishing webcam stream. ', result);
             }
             const remoteJsep = result['payload']['jsep'];
             pc['webcam']
@@ -371,6 +402,48 @@ class PubUser {
     //   callback(err);
     // });
   };
+
+  getSpeakingThreshold(stream, analyzer, dataArray) {
+    if (!stream.getAudioTracks()) {
+      console.error('Audio not found in media stream');
+      return false;
+    }
+    analyzer.getByteFrequencyData(dataArray);
+    let values = 0;
+    const length = dataArray.length;
+    for (let i = 0; i < length; i++) {
+      values += dataArray[i];
+    }
+    return Math.round(values / length);
+  }
+
+  sendSpeakingInfo(stream = this.mediaStream) {
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    });
+    const delay =
+      localStorage.getItem('realTimeScore') ||
+      JSON.parse(localStorage.getItem('userPlanDetails')).realTimeScores ||
+      params.matrixScore;
+    const context = new AudioContext();
+    const track = context.createMediaStreamSource(stream);
+    const gainNode = context.createGain();
+    const analyzer = context.createAnalyser();
+    track.connect(gainNode);
+    track.connect(analyzer);
+    // track.connect(context.destination);
+    const bufferLength = analyzer.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    let interval;
+    interval = setInterval(() => {
+      if (this.audio) {
+        const speakingValue = this.getSpeakingThreshold(stream, analyzer, dataArray);
+        if (speakingValue && speakingValue > 5) {
+          socket.emit('speaking', { status: 1, uuid: this.user.uuid });
+        }
+      } else socket.emit('speaking', { status: 0, uuid: this.user.uuid });
+    }, delay * 1000);
+  }
 
   publishAudio = (callback) => {
     const { callbacks, noop, myStream, pc, trID, iceServers, send, user } = this;
@@ -442,6 +515,7 @@ class PubUser {
             monet: 'publish',
             id: trID(16),
             payload: {
+              id: this.user.uuid,
               stream: 'audio',
               jsep,
               roomid: user.roomid,
@@ -545,6 +619,7 @@ class PubUser {
                 monet: 'publish',
                 id: trID(16),
                 payload: {
+                  id: this.user.uuid,
                   stream: 'screen',
                   jsep,
                   roomid: user.roomid,
@@ -732,6 +807,7 @@ class PubUser {
   }
 
   toggleVideo(type = 'webcam', flag = true) {
+    this.video = flag;
     mediaDev.toggleVideo(flag);
     if (this.streams['local'][type] === undefined) {
       console.warn(`No such ${type} of media stream in this object. Returning.`);
@@ -763,6 +839,7 @@ class PubUser {
   toggleAudio(type = 'webcam', flag = true) {
     mediaDev.toggleAudio(flag);
     if (type === 'webcam') {
+      this.audio = flag;
       if (!this.streams['local']['audio']) return;
       if (!this.streams['local']['audio'].getAudioTracks()) return;
       if (this.streams['local']['audio'].getAudioTracks()[0] === undefined) {
@@ -1477,6 +1554,7 @@ class StateSubscription {
         remoteCall(audioContext);
       }
       MediaStreams.push({ id: uuid, type: 'video', stream });
+      console.log('newStreamResponse :>>>>>>>>>>>>>> ', newStreamResponse);
       remoteCall(newStreamResponse);
       this.state = 0;
     }
@@ -1568,20 +1646,20 @@ class MediaDev {
   };
 
   start = (video = true, audio = true) => {
-    const vid = {
-      height: { ideal: 360 },
-      width: { ideal: 478 },
-      aspectRatio: { ideal: 1.33 },
-      facingMode: 'user',
-      resizeMode: 'crop-and-scale',
-    };
+    // const vid = {
+    //   height: { ideal: 360 },
+    //   width: { ideal: 478 },
+    //   aspectRatio: { ideal: 1.33 },
+    //   facingMode: 'user',
+    //   resizeMode: 'crop-and-scale',
+    // };
     if (video && audio) {
-      this.mediaStreamInit(null, vid);
+      this.mediaStreamInit(null, video);
       this.enumerate();
     } else if (audio && !video) {
       this.mediaStreamInit(null, false);
     } else if (video && !audio) {
-      this.mediaStreamInit(false, vid);
+      this.mediaStreamInit(false, video);
     } else {
       console.log('invalid params');
     }
@@ -1625,6 +1703,7 @@ class MediaDev {
       .catch((err) => {
         const mediaErrCB =
           typeof this.callbacks['media-error'] === 'function' ? this.callbacks['media-error'] : this.noop;
+        console.log('mediastream error : ', err);
         mediaErrCB(err);
       });
   }
@@ -1736,22 +1815,22 @@ class MediaDev {
 
 const mediaDev = new MediaDev();
 
-const fetchAvailableInstance = (link, ip, callback = () => {}) => {
-  // console.log('Got IP and link : ', ip, ' -:- ', link);
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-  }
+const fetchAvailableInstanceBack = (link, ip, callback = () => {}) => {
+  console.log('Got IP and link : ', ip, ' -:- ', link);
+  // if (socket) {
+  //   socket.disconnect();
+  //   socket = null;
+  // }
   const CB = typeof callback === 'function' ? callback : () => {};
   if (link && ip) {
-    dynamoIp = ip;
-    dynamoLink = link;
-    socket = io(`https://call.monetanalytics.com`, {
-      query: { uuid, name },
-      path: `/${link}/sock`,
+    dynamoIp = '34.212.174.197'; // ip;
+    dynamoLink = '34_212_174_197'; // link;
+    socket = io(`localhost:8666`, {
+      query: { ID, Name, RoomId },
+      path: `/34_212_174_197/sock`,
       transports: ['websocket'],
       reconnect: true,
-    });
+    }); // https://call.monetanalytics.com /${link}/
     registerSocketEvents();
     return CB({ allotted: true });
   } else {
@@ -1759,44 +1838,70 @@ const fetchAvailableInstance = (link, ip, callback = () => {}) => {
       .then((response) => response.json())
       .then((response) => {
         const data = response.data;
-        console.log('Data : ', data);
-        dynamoIp = data.ip;
-        dynamoLink = `https://call.monetanalytics.com`;
+        dynamoIp = '34.212.174.197'; //data.ip;
+        dynamoLink = 'localhost:8666'; //https://call.monetanalytics.com
         socket = io(dynamoLink, {
-          query: { uuid, name },
-          path: `/${data.route}/sock`,
+          query: { ID, Name, RoomId },
+          path: `/34_212_174_197/sock`,
           transports: ['websocket'],
           reconnect: true,
-        });
-        socket.emit('I-AM-ADMIN');
-        dynamoLink = data.route;
+        }); // /${link}/
+        dynamoLink = '34_212_174_197'; // data.route;
         registerSocketEvents();
         if (typeof data.response === 'string')
           if (data.response.includes('No instances available.')) return CB({ allotted: false });
-        if (data.response.occupied) return CB({ allotted: true });
+        return CB({ allotted: true });
       });
   }
 };
 
-const registerSocketEvents = () => {
+const fetchAvailableInstance = (link, ip, callback = () => {}) => {
+  console.log('Got IP and link : ', ip, ' -:- ', link);
+  // if (socket) {
+  //   socket.disconnect();
+  //   socket = null;
+  // }
+  const CB = typeof callback === 'function' ? callback : () => {};
+  if (link !== null && ip !== null && ip !== undefined && link !== undefined) {
+    dynamoIp = ip;
+    dynamoLink = link;
+    socket = io(`https://www.monetlive.com`, {
+      query: { ID, Name, RoomId },
+      path: `/${link}/sock`,
+      transports: ['websocket'],
+      reconnect: true,
+    });
+    registerSocketEvents();
+    return CB({ allotted: true });
+  } else {
+    fetch('https://www.monetlive.com/meteor/get-link?secret=janusoverlord')
+      .then((response) => response.json())
+      .then((response) => {
+        const data = response.data;
+        console.log(data);
+        dynamoIp = data.ip;
+        dynamoLink = 'https://www.monetlive.com';
+        socket = io(dynamoLink, {
+          query: { ID, Name, RoomId },
+          path: `/${data.route}/sock`,
+          transports: ['websocket'],
+          reconnect: true,
+        });
+        dynamoLink = data.route;
+        registerSocketEvents();
+        if (typeof data.response === 'string')
+          if (data.response.includes('No instances available.')) return CB({ allotted: false });
+        return CB({ allotted: true });
+      });
+  }
+};
+
+const registerSocketEvents = (ip) => {
+  socket.on('connect', () => console.log('Socket connected with id ', socket.id));
+
+  socket.on('error', ({ msg }) => console.log(msg));
+
   socket.on('room-audio', (res) => console.log(res));
-
-  socket.on('reconnect', (attempt) => {
-    console.warn('reconnect : ', attempt);
-  });
-
-  socket.on('reconnect_failed', (attempt) => {
-    console.warn('reconnect_failed : ', attempt);
-  });
-
-  socket.on('reconnect_error', (obj) => {
-    console.warn('reconnect_error : ', obj);
-  });
-
-  socket.on('reconnect_attempt', (attempt) => {
-    // ...
-    console.warn('Attempting to reconnect {reconnect_attempt} : ', attempt);
-  });
 
   socket.on('leave', ({ userObj }) => {
     const { uuid } = userObj;
