@@ -13,14 +13,14 @@ exports.reportPdf = async (req, res) => {
     return res.json({ code: 404, error: true, message: 'Room data not found' });
   }
   const students = sessions.filter((session) => session.proctor === 'student' && !session.uuid.includes('___'));
-  const invitedUsersLength = room.attendees.length - 1;
+  const invitedUsersLength = room.attendees.length ? room.attendees.length - 1 : 0;
   const joinedUsersLength = students.length;
   const attendance = Math.min((joinedUsersLength / invitedUsersLength) * 100, 100);
   const studentData = await getStudentData(students);
   res.json({
     code: 200,
     error: false,
-    message: '',
+    message: 'Data fetched successfully',
     data: {
       attendance,
       totalStudents: joinedUsersLength,
