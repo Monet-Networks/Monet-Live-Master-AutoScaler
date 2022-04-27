@@ -1,12 +1,13 @@
 // Stripe details
 const publishableKey = process.env.PUBLISHABLE_KEY;
 const secretKey = process.env.SECRET_KEY;
-const stripe = require("stripe")(secretKey);
-const { v4: uuid } = require("uuid");
-const Users = require("@models/user.model");
-const Plans = require("@models/plans.model");
-const PlanGroups = require("@models/planGroups.model");
+const stripe = require('stripe')(secretKey);
+const { v4: uuid } = require('uuid');
+const Users = require('@models/user.model');
+const Plans = require('@models/plans.model');
+const PlanGroups = require('@models/planGroups.model');
 const sendMail = require('@utils/sendMail');
+const { addRemainingHours } = require('../utils/users');
 
 const createCustomer = async (user) => {
   const customer = await stripe.customers.create({
@@ -49,14 +50,14 @@ exports.createPaymentIntent = async (req, res) => {
     return res.json({
       status: 404,
       error: true,
-      message: "Plan or User not found",
+      message: 'Plan or User not found',
     });
   }
-  if (plan.name === "Free Tier") {
+  if (plan.name === 'Free Tier') {
     return res.json({
       status: 400,
       error: true,
-      message: "You cannot purchase Free Tier",
+      message: 'You cannot purchase Free Tier',
     });
   }
   try {
@@ -69,7 +70,7 @@ exports.createPaymentIntent = async (req, res) => {
     const paymentIntent = await stripe.paymentIntents.create({
       customer: user.stripeId,
       receipt_email: user.email,
-      setup_future_usage: "off_session",
+      setup_future_usage: 'off_session',
       amount: planPrice.unit_amount,
       currency: planPrice.currency,
       automatic_payment_methods: {
@@ -80,16 +81,14 @@ exports.createPaymentIntent = async (req, res) => {
         mongoPlan: JSON.stringify({
           id: plan._id,
           planUid: plan.planUid,
-          groupUid: plan.planUid > 1 ? uuid() : "",
+          groupUid: plan.planUid > 1 ? uuid() : '',
           name: plan.name,
-          type: "purchased",
-          assignedBy: "",
+          type: 'purchased',
+          assignedBy: '',
           licenseCount: plan.licenseCount - 1,
           assigned: 0,
           assignee: [],
-          expiresAt: new Date(
-            new Date().setDate(new Date().getDate() + plan.expiresIn)
-          ).toString(),
+          expiresAt: new Date(new Date().setDate(new Date().getDate() + plan.expiresIn)).toString(),
         }),
         userSettings: JSON.stringify({
           waitingRoom: plan.waitingRoom,
@@ -102,7 +101,7 @@ exports.createPaymentIntent = async (req, res) => {
     res.json({
       status: 200,
       error: false,
-      message: "Payment Intent created successfully",
+      message: 'Payment Intent created successfully',
       clientSecret: paymentIntent.client_secret,
     });
   } catch (err) {
@@ -113,11 +112,9 @@ exports.createPaymentIntent = async (req, res) => {
 
 exports.userStatus = async (req, res) => {
   const { userId } = req.query;
-  const user = await Users.findById(userId);
-  const paymentIntent = await stripe.paymentIntents.retrieve(
-    user.lastPaymentIntendId
-  );
-  if (paymentIntent.status !== "succeeded") {
+  let user = await Users.findById(userId);
+  const paymentIntent = await stripe.paymentIntents.retrieve(user.lastPaymentIntendId);
+  if (paymentIntent.status !== 'succeeded') {
     return res.json({
       code: 400,
       error: true,
@@ -125,10 +122,11 @@ exports.userStatus = async (req, res) => {
       user,
     });
   }
+  user = await addRemainingHours(user);
   res.json({
     code: 200,
     error: false,
-    message: "User status with last payment receipt fetched",
+    message: 'User status with last payment receipt fetched',
     receipt: paymentIntent.charges.data[0].receipt_url,
     user,
   });
@@ -136,23 +134,15 @@ exports.userStatus = async (req, res) => {
 
 exports.paymentMethod = async (req, res) => {
   const { userId, card } = req.body;
-  const {
-    name,
-    number,
-    exp_month,
-    exp_year,
-    cvc,
-    address_country = "",
-    address_zip = "",
-  } = card;
+  const { name, number, exp_month, exp_year, cvc, address_country = '', address_zip = '' } = card;
   if (!number || !exp_month || !exp_year || !cvc) {
     return res.json({
       code: 400,
       error: true,
-      message: "Please provide all necessary details to save the card",
+      message: 'Please provide all necessary details to save the card',
     });
   }
-  const user = await Users.findById(userId);
+  let user = await Users.findById(userId);
   if (!user.stripeId) {
     const customer = await createCustomer(user);
     user.stripeId = customer.id;
@@ -186,20 +176,21 @@ exports.paymentMethod = async (req, res) => {
     };
     user.cards.push(Card);
     user.save();
+    user = await addRemainingHours(user);
     res.json({
       code: 200,
       error: false,
-      message: "Card added successfully",
+      message: 'Card added successfully',
       user,
     });
   } catch (err) {
-    console.log("Add Payment Method Error", err);
+    console.log('Add Payment Method Error', err);
     res.json({ status: 500, error: true, message: err });
   }
 };
 
 exports.handleWebhook = async (req, res) => {
-  const sig = req.headers["stripe-signature"];
+  const sig = req.headers['stripe-signature'];
   const endpointSecret = process.env.ENDPOINT_SECRET;
   let event;
 
@@ -214,14 +205,14 @@ exports.handleWebhook = async (req, res) => {
   let paymentIntent, mongoUserId, mongoPlan, paymentObject, user;
 
   switch (event.type) {
-    case "payment_intent.created":
+    case 'payment_intent.created':
       paymentIntent = event.data.object;
       mongoUserId = paymentIntent.metadata.mongoUserId;
       await Users.findByIdAndUpdate(mongoUserId, {
         lastPaymentIntendId: paymentIntent.id,
       });
       break;
-    case "payment_intent.succeeded":
+    case 'payment_intent.succeeded':
       paymentIntent = event.data.object;
       [mongoUserId, mongoPlan, paymentObject, userSettings] = [
         paymentIntent.metadata.mongoUserId,
@@ -247,37 +238,26 @@ exports.handleWebhook = async (req, res) => {
         totalHours: plan.noOfMeetingHours,
         users: [{ id: user.id, name: user.name, email: user.email }],
       });
-      sendMail(
-        "../views/successPayment.handlebars",
-        user.email,
-        "[Monet Live] Payment successful & plan upgraded",
-        {
-          Name: user.name,
-          Plan: mongoPlan.name,
-          Link: paymentIntent.charges.data[0].receipt_url,
-        }
-      );
+      sendMail('../views/successPayment.handlebars', user.email, '[Monet Live] Payment successful & plan upgraded', {
+        Name: user.name,
+        Plan: mongoPlan.name,
+        Link: paymentIntent.charges.data[0].receipt_url,
+      });
       break;
-    case "payment_intent.payment_failed":
+    case 'payment_intent.payment_failed':
       paymentIntent = event.data.object;
       [mongoUserId, mongoPlan, paymentObject] = [
         paymentIntent.metadata.mongoUserId,
         JSON.parse(paymentIntent.metadata.mongoPlan),
         createPaymentObject(paymentIntent.charges.data[0]),
       ];
-      const message =
-        paymentIntent.last_payment_error &&
-        paymentIntent.last_payment_error.message;
-      console.log("Failed:", paymentIntent.id, message);
-      user = await Users.findByIdAndUpdate(
-        mongoUserId,
-        { $push: { paymentHistory: paymentObject } },
-        { new: true }
-      );
+      const message = paymentIntent.last_payment_error && paymentIntent.last_payment_error.message;
+      console.log('Failed:', paymentIntent.id, message);
+      user = await Users.findByIdAndUpdate(mongoUserId, { $push: { paymentHistory: paymentObject } }, { new: true });
       sendMail(
-        "../views/failedPayment.handlebars",
+        '../views/failedPayment.handlebars',
         user.email,
-        "[Monet Live] Payment failed & plan could not be upgraded",
+        '[Monet Live] Payment failed & plan could not be upgraded',
         {
           Name: user.name,
           Message: message,
@@ -287,5 +267,5 @@ exports.handleWebhook = async (req, res) => {
     default:
   }
 
-  res.send("Done");
+  res.send('Done');
 };
