@@ -18,7 +18,7 @@ exports.reportPdf = async (req, res) => {
   const attendance = Math.min((joinedUsersLength / invitedUsersLength) * 100, 100);
   const studentDataPromise = getStudentData(students);
   const speakingScorePromise = getSpeakingInfo(roomid);
-  const [studentData, speakingScore] = await Promise.all[(studentDataPromise, speakingScorePromise)];
+  const [studentData, speakingScore] = await Promise.all([studentDataPromise, speakingScorePromise]);
   res.json({
     code: 200,
     error: false,
