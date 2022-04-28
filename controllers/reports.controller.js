@@ -57,7 +57,7 @@ const getSpeakingInfo = async (roomid) => {
   const room = await Rooms.findOne({ roomid });
   const { realTimeScores } = room.settings;
   const roomDuration = Math.abs(new Date(room.end.dateTime).getTime() - new Date(room.start.dateTime).getTime()) / 1000;
-  const sessionData = await Sessions.find({ roomid, speaking: 1 });
+  const sessionData = await FaceData.find({ roomid, speaking: 1 });
   const finalData = {};
   sessionData.forEach((data) => {
     const { uuid } = data;
