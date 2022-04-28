@@ -78,6 +78,7 @@ const getSpeakingInfo = async (roomid) => {
     finalData[uuid].duration = finalData[uuid].counter * realTimeScores;
     totalSpeakingDuration += finalData[uuid].duration;
   }
-  const roomSpeakingScore = (totalSpeakingDuration / roomDuration) * 100;
+  const averageSpeakingDuration = totalSpeakingDuration / Object.keys(finalData).length;
+  const roomSpeakingScore = (averageSpeakingDuration / roomDuration) * 100;
   return roomSpeakingScore;
 };
