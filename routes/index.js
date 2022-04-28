@@ -471,6 +471,39 @@ const getReport = async (data) => {
   return report;
 };
 
+admin.post('/sendAdminMosaic', async (req, res) => {
+  const { RoomId, screen } = req.body;
+  monet.debug('Send Admin Mosaic Details: ', roomEmails);
+  if (!roomEmails[RoomId]) {
+    console.log('No data in room Email dictionary');
+    return res.json({
+      code: 400,
+      error: true,
+      message: 'No data in room Email dictionary',
+    });
+  }
+  const { email, name, topic } = roomEmails[RoomId];
+  const info = await sendMail(
+    '../views/mosaic.handlebars',
+    email,
+    `[Monet Live] Recording for ${topic} is available on Monet Live`,
+    {
+      name,
+      link: screen
+        ? `https://www.monetlive.com/data/${RoomId}-final-mosaic.mp4`
+        : `https://www.monetlive.com/data/${RoomId}-mosaic.mp4`,
+      topic,
+    },
+    'anand@monetnetworks.com'
+  );
+  return res.json({
+    code: 200,
+    error: false,
+    message: 'List participate',
+    response: info.response,
+  });
+});
+
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
 };
