@@ -1593,6 +1593,10 @@ class MediaDev {
     this.initialize();
   }
 
+  static isWebrtcSupported() {
+    return navigator.mediaDevices !== undefined;
+  }
+
   get mediaStream() {
     if (this.stream) return this.stream;
     else {
@@ -1626,6 +1630,11 @@ class MediaDev {
   }
 
   initialize() {
+    if (!MediaDev.isWebrtcSupported()) {
+      const mediaErrCB =
+        typeof this.callbacks['media-error'] === 'function' ? this.callbacks['media-error'] : this.noop;
+      return mediaErrCB('WebRTC is not supported in this browser.');
+    }
     this.outAudio = null;
     this.stream = null;
     this.audio = true;
