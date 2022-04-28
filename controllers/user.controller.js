@@ -378,7 +378,8 @@ exports.updateUser = async (req, res) => {
 exports.userSettings = async (req, res) => {
   const { creator_ID: email, settings } = req.body;
   const { waitingRoom, limit } = settings;
-  const user = await UserModel.findOne({ email });
+  let user = await UserModel.findOne({ email });
+  user = await addRemainingHours(user);
   if (!user) {
     return res.json({ code: 404, error: true, message: 'User not found' });
   }
