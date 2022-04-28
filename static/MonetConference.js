@@ -424,7 +424,7 @@ class PubUser {
     const delay =
       localStorage.getItem('realTimeScore') ||
       JSON.parse(localStorage.getItem('userPlanDetails')).realTimeScores ||
-      params.matrixScore;
+      params.matrixScore || 5;
     const context = new AudioContext();
     const track = context.createMediaStreamSource(stream);
     const gainNode = context.createGain();
@@ -1702,6 +1702,7 @@ class MediaDev {
   mediaStreamInit(audio, video) {
     let aud = audio || { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
     let vid = video || { width: 160, height: 120, ratio: '4:3' };
+    console.log(`User media called with constraints : ${aud} -:- ${vid}`);
     navigator.mediaDevices
       .getUserMedia({ audio: aud, video: vid })
       .then((stream) => {
