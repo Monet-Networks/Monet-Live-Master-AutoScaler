@@ -70,8 +70,7 @@ const getSpeakingInfo = async (roomid) => {
         finalData[uuid].counter = 1;
       }
     } else {
-      finalData[uuid].data = [data];
-      finalData[uuid].counter = 1;
+      finalData[uuid] = { data: [data], counter: 1 };
     }
   });
   let totalSpeakingDuration = 0;
