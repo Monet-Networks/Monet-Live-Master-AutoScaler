@@ -16,7 +16,8 @@ exports.reportPdf = async (req, res) => {
   const invitedUsersLength = room.attendees.length ? room.attendees.length - 1 : 0;
   const joinedUsersLength = students.length;
   const attendance = Math.min((joinedUsersLength / invitedUsersLength) * 100, 100);
-  const studentData = await getStudentData(students);
+  const [studentDataPromise, speakingScorePromise] = [getStudentData(students), getSpeakingInfo(roomid)];
+  const [studentData, speakingScore] = await Promise.all[(studentDataPromise, speakingScorePromise)];
   res.json({
     code: 200,
     error: false,
@@ -24,6 +25,7 @@ exports.reportPdf = async (req, res) => {
     data: {
       attendance,
       totalStudents: joinedUsersLength,
+      speakingScore,
       overallEngagement: report.report.averageEngagement,
       students: studentData,
     },
@@ -48,4 +50,34 @@ const getStudentData = async (students) => {
       if (index === students.length - 1) resolve(Object.values(studentsData));
     });
   });
+};
+
+const getSpeakingInfo = async (roomid) => {
+  const room = await Rooms.findOne({ roomid });
+  const { realTimeScores } = room.settings;
+  const roomDuration = Math.abs(new Date(room.end.dateTime).getTime() - new Date(room.start.dateTime).getTime()) / 1000;
+  const sessionData = await Sessions.find({ roomid, speaking: 1 });
+  const finalData = {};
+  sessionData.forEach((data) => {
+    const { uuid } = data;
+    if (finalData[uuid]) {
+      if (finalData[uuid].data) {
+        finalData[uuid].data.push(data);
+        finalData[uuid].counter += 1;
+      } else {
+        finalData[uuid].data = [data];
+        finalData[uuid].counter = 1;
+      }
+    } else {
+      finalData[uuid].data = [data];
+      finalData[uuid].counter = 1;
+    }
+  });
+  let totalSpeakingDuration = 0;
+  for (let uuid in finalData) {
+    finalData[uuid].duration = finalData[uuid].counter * realTimeScores;
+    totalSpeakingDuration += finalData[uuid].duration;
+  }
+  const roomSpeakingScore = (totalSpeakingDuration / roomDuration) * 100;
+  return roomSpeakingScore;
 };
