@@ -1718,7 +1718,7 @@ class MediaDev {
         ++tries;
         const delay = (tries > 0 ? tries : 1) * 1000;
         console.log('retrying media fetch after : ', delay);
-        if (tries >= 10) {
+        if (tries <= 10) {
           setTimeout(() => {
             // if (tries <= 3) this.mediaStreamInit(true, true, tries);
             // else
