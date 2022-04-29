@@ -423,7 +423,7 @@ class PubUser {
     });
     const delay =
       localStorage.getItem('realTimeScore') ||
-      JSON.parse(localStorage.getItem('userPlanDetails')).realTimeScores ||
+      JSON.parse(localStorage.getItem('userPlanDetails'))?.realTimeScores ||
       params.matrixScore || 5;
     const context = new AudioContext();
     const track = context.createMediaStreamSource(stream);
