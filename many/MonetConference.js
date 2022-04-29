@@ -424,7 +424,8 @@ class PubUser {
     const delay =
       localStorage.getItem('realTimeScore') ||
       JSON.parse(localStorage.getItem('userPlanDetails'))?.realTimeScores ||
-      params.matrixScore || 5;
+      params.matrixScore ||
+      5;
     const context = new AudioContext();
     const track = context.createMediaStreamSource(stream);
     const gainNode = context.createGain();
@@ -559,7 +560,7 @@ class PubUser {
     const consentCB = typeof callbacks['consent'] === 'function' ? callbacks['consent'] : this.noop;
     consentCB(true);
     let displayMediaStreamConstraints = {
-      video: true, // or pass HINTS
+      video: { width: 1920, height: 1080 }, // or pass HINTS
       audio: true,
     };
     navigator.mediaDevices
