@@ -175,18 +175,14 @@ class Engine {
     const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
     const TotalCallsChange = this.state.TotalCalls !== TotalCalls;
     const TotalParticipantsChange = this.state.TotalParticipants !== TotalParticipants;
-    if (occupancyCountChanged) {
+    if (occupancyCountChanged)
       this.state.TotalOccupied = totalOccupancy;
-      monet.vdebug('The number of occupied changed. ', this.state);
-    }
-    if (TotalCallsChange) {
+  
+    if (TotalCallsChange)
       this.state.TotalCalls = TotalCalls;
-      monet.debug('The number of total calls changed. ', this.state.TotalCalls);
-    }
-    if (TotalParticipantsChange) {
+
+    if (TotalParticipantsChange)
       this.state.TotalParticipants = TotalParticipants;
-      monet.debug('The number of total users changed. ', this.state.TotalParticipants);
-    }
     /* Take tab of total no. of calls */
 
     monet.vdebug('Overall Instances : ', this.Instances);

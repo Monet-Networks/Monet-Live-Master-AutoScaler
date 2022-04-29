@@ -1623,7 +1623,7 @@ class MediaDev {
     }
   }
 
-  noop() {}
+  noop = () => {}
 
   on(event, callback) {
     this.callbacks[event] = callback;
@@ -1699,10 +1699,10 @@ class MediaDev {
     }, 3000);
   };
 
-  mediaStreamInit(audio, video) {
+  mediaStreamInit(audio, video, tries = 0) {
     let aud = audio || { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
     let vid = video || { width: 160, height: 120, ratio: '4:3' };
-    console.log(`User media called with constraints : ${aud} -:- ${vid}`);
+    console.log(`User media called with constraints :`, aud, ' -:- ', vid);
     navigator.mediaDevices
       .getUserMedia({ audio: aud, video: vid })
       .then((stream) => {
@@ -1715,6 +1715,16 @@ class MediaDev {
           typeof this.callbacks['media-error'] === 'function' ? this.callbacks['media-error'] : this.noop;
         console.log('mediastream error : ', err);
         mediaErrCB(err);
+        ++tries;
+        const delay = (tries > 0 ? tries : 1) * 1000;
+        console.log('retrying media fetch after : ', delay);
+        if (tries >= 10) {
+          setTimeout(() => {
+            // if (tries <= 3) this.mediaStreamInit(true, true, tries);
+            // else
+            this.mediaStreamInit(true, true, tries);
+          }, delay);
+        }
       });
   }
 
@@ -1738,10 +1748,8 @@ class MediaDev {
 
   deltaMedia = (label, id = null) => {
     let localChange = null;
-    if (!this.MediaDevices[label]) {
-      console.error('I do not recognize this device please help me enumerate this device.');
-      return;
-    }
+    if (!this.MediaDevices[label])
+      return console.error('I do not recognize this device please help me enumerate this device.');
     let kind;
     if (Array.isArray(this.MediaDevices[label])) {
       if (id) {
