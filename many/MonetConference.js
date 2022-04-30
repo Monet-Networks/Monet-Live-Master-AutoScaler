@@ -1718,16 +1718,16 @@ class MediaDev {
           typeof this.callbacks['media-error'] === 'function' ? this.callbacks['media-error'] : this.noop;
         console.log('mediastream error : ', err);
         mediaErrCB(err);
-        ++tries;
-        const delay = (tries > 0 ? tries : 1) * 1000;
-        console.log('retrying media fetch after : ', delay);
-        if (tries <= 10) {
-          setTimeout(() => {
-            // if (tries <= 3) this.mediaStreamInit(true, true, tries);
-            // else
-            this.mediaStreamInit(true, true, tries);
-          }, delay);
-        }
+        // ++tries;
+        // const delay = (tries > 0 ? tries : 1) * 1000;
+        // console.log('retrying media fetch after : ', delay);
+        // if (tries <= 10) {
+        //   setTimeout(() => {
+        //     // if (tries <= 3) this.mediaStreamInit(true, true, tries);
+        //     // else
+        //     this.mediaStreamInit(true, true, tries);
+        //   }, delay);
+        // }
       });
   }
 
