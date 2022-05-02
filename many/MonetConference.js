@@ -28,8 +28,8 @@ class PubUser {
     const params = new URLSearchParams(window.location.search);
     (ID = params.get('id')), (Name = params.get('name')), (RoomId = params.get('roomid'));
     console.log(`ID - Name - RoomId : ${ID} -:- ${Name} -:- ${RoomId}`);
-    if(!room_id || !uuid || !name || !user_type || !socket || !streamType || !mediaStream)
-      return console.error("PubUser contructor : invalid parameters provided to the class object. Please check what's missing", `${name} -:- ${uuid} -:- ${user_type} -:- ${socket} -:- ${streamType} -:- ${mediaStream}`);
+    if(!room_id || !uuid || !name || !user_type || !socket || !streamType)
+      return console.error("PubUser contructor : invalid parameters provided to the class object. Please check what's missing", `${name} -:- ${uuid} -:- ${user_type} -:- ${socket} -:- ${streamType}`);
     this.videoStreams = {};
     this.screen = false;
     this.callbacks = {};
