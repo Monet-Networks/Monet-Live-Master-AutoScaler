@@ -1620,9 +1620,9 @@ class MediaDev {
       }
       return mediaArray;
     } else {
-      console.error(
-        "The devices have not been enumerated. Are you sure you called the 'start()' method of the object ? "
-      );
+      // console.error(
+      //   "The devices have not been enumerated. Are you sure you called the 'start()' method of the object ? "
+      // );
     }
   }
 
