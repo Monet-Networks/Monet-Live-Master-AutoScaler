@@ -28,8 +28,11 @@ class PubUser {
     const params = new URLSearchParams(window.location.search);
     (ID = params.get('id')), (Name = params.get('name')), (RoomId = params.get('roomid'));
     console.log(`ID - Name - RoomId : ${ID} -:- ${Name} -:- ${RoomId}`);
-    if(!room_id || !uuid || !name || !user_type || !socket || !streamType)
-      return console.error("PubUser contructor : invalid parameters provided to the class object. Please check what's missing", `${name} -:- ${uuid} -:- ${user_type} -:- ${socket} -:- ${streamType}`);
+    if (!room_id || !uuid || !name || !user_type || !socket || !streamType)
+      return console.error(
+        "PubUser contructor : invalid parameters provided to the class object. Please check what's missing",
+        `${name} -:- ${uuid} -:- ${user_type} -:- ${socket} -:- ${streamType}`
+      );
     this.videoStreams = {};
     this.screen = false;
     this.callbacks = {};
@@ -424,10 +427,11 @@ class PubUser {
       get: (searchParams, prop) => searchParams.get(prop),
     });
     const delay =
-      localStorage.getItem('realTimeScore') ||
-      JSON.parse(localStorage.getItem('userPlanDetails'))?.realTimeScores ||
-      params.matrixScore ||
-      5;
+      typeof localStorage.getItem('realTimeScore') === 'number'
+        ? localStorage.getItem('realTimeScore')
+        : null || typeof JSON.parse(localStorage.getItem('userPlanDetails'))?.realTimeScores === 'number'
+        ? JSON.parse(localStorage.getItem('userPlanDetails'))?.realTimeScores
+        : null || params.matrixScore || 5;
     const context = new AudioContext();
     const track = context.createMediaStreamSource(stream);
     const gainNode = context.createGain();
@@ -1626,7 +1630,7 @@ class MediaDev {
     }
   }
 
-  noop = () => {}
+  noop = () => {};
 
   on(event, callback) {
     this.callbacks[event] = callback;
