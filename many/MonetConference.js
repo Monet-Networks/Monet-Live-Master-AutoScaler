@@ -1732,7 +1732,8 @@ class MediaDev {
   }
 
   stop = () => {
-    if (!this.stream) return;
+    console.log('Stopping mediaStream.');
+    if (!this.stream) return console.error('Error stopping stream. No stream initialized.');
     const tracks = this.stream.getTracks();
     tracks.forEach((track) => {
       console.log(track);
