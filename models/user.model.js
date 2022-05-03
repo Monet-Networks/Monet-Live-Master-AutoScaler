@@ -133,6 +133,10 @@ const UserSchema = new mongoose.Schema({
       ],
       default: [],
     },
+    expiresAt: {
+      type: Date,
+      default: new Date(new Date().setDate(new Date().getDate() + 14)),
+    },
   },
   cards: {
     type: [
