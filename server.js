@@ -19,7 +19,7 @@ const {
   updateImageId,
 } = require('@controllers/instance.controller');
 
- 
+
 const PORT = process.env.PORT || 3000;
 
 const instanceRegistrationHandle = async (req, res) => {
@@ -31,27 +31,27 @@ const instanceRegistrationHandle = async (req, res) => {
 };
 
 /* Instantiate the engine class */
-const engine = new Engine();
-engine.DBEntryFunction(getAllAutoInstances);
-engine.on('create-instance', ({ name }) => {
-  console.log('Instance creation signal with name : ', name);
-  /* Check whether this object needs to be recorded or not. */
-  IController.createInstance(name)
-    .then((data) => engine.addInternalIpImageId(data))
-    .catch((err) => console.log('An error occured while attempting to create instance. Kindly check. : ', err));
-});
+// const engine = new Engine();
+// engine.DBEntryFunction(getAllAutoInstances);
+// engine.on('create-instance', ({ name }) => {
+//   console.log('Instance creation signal with name : ', name);
+//   /* Check whether this object needs to be recorded or not. */
+//   IController.createInstance(name)
+//     .then((data) => engine.addInternalIpImageId(data))
+//     .catch((err) => console.log('An error occured while attempting to create instance. Kindly check. : ', err));
+// });
 
-engine.on('delete-instance', async (instance) => {
-  console.log(instance);
-  const awsInstanceData = await IController.deleteInstance(instance.ImageId);
-  await deleteInstance(instance.publicIP);
-  engine.deleteConfirmation(awsInstanceData);
-});
+// engine.on('delete-instance', async (instance) => {
+//   console.log(instance);
+//   const awsInstanceData = await IController.deleteInstance(instance.ImageId);
+//   await deleteInstance(instance.publicIP);
+//   engine.deleteConfirmation(awsInstanceData);
+// });
 
-engine.on('up-instance-image', async ({ ImageId, privateIP }) => {
-  const update = await updateImageId(ImageId, privateIP);
-  console.log(`The update status for ${privateIP} is `, update);
-});
+// engine.on('up-instance-image', async ({ ImageId, privateIP }) => {
+//   const update = await updateImageId(ImageId, privateIP);
+//   console.log(`The update status for ${privateIP} is `, update);
+// });
 
 const httpServer = createServer(admin);
 const io = new Server(httpServer, {
