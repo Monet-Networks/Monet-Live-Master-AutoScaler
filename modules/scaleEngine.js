@@ -73,12 +73,17 @@ class Engine {
           this.Invoker('up-instance-image', { ImageId, privateIP: Instance.privateIP });
         }
         this.Instances[InstanceIP] = {
+          protected: true,
           ImageId: ImageId || 'NaN',
           deleteIteration: 0,
           live: 0,
           ...Instance,
         };
         this.state.task = 0;
+        // remove instance protection after 15 minutes.
+        setTimeout(() => {
+          this.Instances[InstanceIP].protected = false;
+        }, 15 * 60 * 1000);
       }
     } else {
       return monet.err('The instance structure does not exists or is missing publicIP or privateIP key : ', Instance);
@@ -323,6 +328,10 @@ class Engine {
             instaObj['ImageId'] !== 'NaN'
           ) {
             /* This candidate has been selected for deletion */
+            if(instaObj.protected) {
+              monet.debug(`IP ${instaObj['publicIP']} with imageId ${instaObj['ImageId']} is protected hence skipping.`);
+              continue;
+            }
             this.deleteCandidate = instaObj;
             this.state.task = 0;
             monet.debug('Candidate for deletion selected', this.deleteCandidate);
