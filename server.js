@@ -31,7 +31,7 @@ const instanceRegistrationHandle = async (req, res) => {
 };
 
 /* Instantiate the engine class */
-const engine = new Engine();
+const engine = new Engine({ timeout: 1000 });
 engine.DBEntryFunction(getAllAutoInstances);
 engine.on('create-instance', ({ name }) => {
   console.log('Instance creation signal with name : ', name);

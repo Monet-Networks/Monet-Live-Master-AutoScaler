@@ -85,8 +85,8 @@ class Engine {
     }
   };
 
-  constructor() {
-    this.init();
+  constructor(config = {}) {
+    this.init(config);
     this.start();
   }
 
@@ -100,7 +100,8 @@ class Engine {
     this.state.phase = 0;
   };
 
-  init = () => {
+  init = (config) => {
+    if (config.timeout) this.timeout = config.timeout;
     this.reservedEvent = ['internal'];
     this.reqKeyName = 'Request';
     this.CBDict = {};
@@ -175,17 +176,14 @@ class Engine {
     const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
     const TotalCallsChange = this.state.TotalCalls !== TotalCalls;
     const TotalParticipantsChange = this.state.TotalParticipants !== TotalParticipants;
-    if (occupancyCountChanged)
-      this.state.TotalOccupied = totalOccupancy;
-  
-    if (TotalCallsChange)
-      this.state.TotalCalls = TotalCalls;
+    if (occupancyCountChanged) this.state.TotalOccupied = totalOccupancy;
 
-    if (TotalParticipantsChange)
-      this.state.TotalParticipants = TotalParticipants;
+    if (TotalCallsChange) this.state.TotalCalls = TotalCalls;
+
+    if (TotalParticipantsChange) this.state.TotalParticipants = TotalParticipants;
     /* Take tab of total no. of calls */
 
-    monet.vdebug('Overall Instances : ', this.Instances);
+    // monet.vdebug('Overall Instances : ', this.Instances);
     for (let ip of currentInstances) {
       /* Initiate if does not exist */
       if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
@@ -328,6 +326,7 @@ class Engine {
             this.deleteCandidate = instaObj;
             this.state.task = 0;
             monet.debug('Candidate for deletion selected', this.deleteCandidate);
+            break;
           } else {
             this.state.task = 0;
             monet.debug('Unable to find suitable candidate.');
@@ -341,10 +340,12 @@ class Engine {
       ) {
         if (this.Instances[this.deleteCandidate['publicIP']]) {
           // watch this instance for 5 more iterations before deleting it as it might be used in certain threshhold of time
+          // Check whether scaleOut has reached it's threshhold.
           if (this.deleteCandidate['deleteIteration'] > 5) {
-            // Check whether scaleOut has reached it's threshhold.
-            this.deleteInstance(this.deleteCandidate['publicIP']);
-            this.deleteCandidate = 'NaN';
+            // this.deleteInstance(this.deleteCandidate['publicIP']);
+            // Check whether call have any call scheduled or not and remove.
+            this.InitiateDeleteSequence();
+            // this.deleteCandidate = 'NaN';
           } else {
             ++this.deleteCandidate['deleteIteration'];
             this.state.task = 0;
@@ -441,18 +442,54 @@ class Engine {
     // this.state.phase = 0;
   };
 
+  InitiateDeleteSequence = () => {
+    // Check whether at this point there is any call on this server.
+    this.sentReq(this.deleteCandidate['publicIP'])
+      .then((r) => {
+        let response = '';
+        try {
+          response = JSON.parse(r);
+          //  this.ipSuccessHandle(response, ip);
+          console.log('Deletion sequence response for the IP', this.deleteCandidate);
+          if (response.state)
+            if (response.state.Calls === 0) this.deleteInstance(this.deleteCandidate['publicIP']);
+            else monet.err('The instance have calls running, hence not killing the server. Returning');
+          else monet.err('The instance payload is not of appropriate kind. Returning');
+        } catch (error) {
+          this.Instances[this.deleteCandidate['publicIP']][this.reqKeyName] = 'completed';
+          response = r;
+          monet.err(
+            'There is an issue with IP deletion response : ',
+            this.deleteCandidate['publicIP'],
+            ' -:- ',
+            response,
+            ' -:- ',
+            error
+          );
+        }
+        this.deleteCandidate = 'NaN';
+      })
+      .catch((e) => {
+        monet.err('error : ', e.code);
+        //  this.ipErrHandle(e.code, ip);
+        monet.err('There is an issue with IP deletion request :', e);
+        this.deleteCandidate = 'NaN';
+      });
+    // this.deleteInstance(this.deleteCandidate['publicIP']);
+  };
+
   Invoker = (event, data, timeout) => {
     if (event === 'internal') {
       switch (this.state.phase) {
         case 1:
           setTimeout(() => {
             this.stateOne(data || this.state.phaseData);
-          }, timeout || 1000 * 30);
+          }, timeout || this.timeout || 1000 * 30);
           break;
         case 2:
           setTimeout(() => {
             this.stateTwo(data || this.state.phaseData);
-          }, timeout || 1000 * 30);
+          }, timeout || this.timeout || 1000 * 30);
           break;
         default:
           monet.warn('Unknown state : ', this.state.phase, ' Shifting state to 1');
