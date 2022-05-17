@@ -506,7 +506,7 @@ admin.post('/sendAdminMosaic', async (req, res) => {
   });
 });
 
-admin.get('/v2/planDetails', async (req, res, next) => {
+admin.get('/userPlanDetails', async (req, res) => {
   const { email } = req.query;
   if (!email) {
     return res.json({
