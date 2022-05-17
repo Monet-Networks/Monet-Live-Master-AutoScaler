@@ -19,12 +19,14 @@ exports.reportPdf = async (req, res) => {
   const studentDataPromise = getStudentData(students);
   const speakingScorePromise = getSpeakingInfo(roomid);
   const [studentData, speakingScore] = await Promise.all([studentDataPromise, speakingScorePromise]);
+  const callDuration = (new Date(room.end.dateTime) - new Date(room.start.dateTime)) / 1000;
   res.json({
     code: 200,
     error: false,
     message: 'Data fetched successfully',
     data: {
       attendance,
+      callDuration,
       totalStudents: joinedUsersLength,
       speakingScore,
       overallEngagement: report.report.averageEngagement,

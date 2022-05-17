@@ -17,6 +17,6 @@ const storage = multer.diskStorage({
   },
 });
 
-const uploader = multer({ storage, limits: { fileSize: 100 * 1e6 } }).array('files', 5);
+const uploader = multer({ storage, limits: { fileSize: 100 * 1000000 } }).array('files', 5);
 
 module.exports = util.promisify(uploader);
