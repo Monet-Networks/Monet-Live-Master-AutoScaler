@@ -535,6 +535,12 @@ admin.get('/userPlanDetails', async (req, res) => {
   });
 });
 
+admin.post('/v2/getreportsList', function (req, res) {
+  roomController.V2getAllRooms(req, res).then(() => {
+    /* don't do anything */
+  });
+});
+
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
 };
