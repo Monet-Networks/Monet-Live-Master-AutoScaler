@@ -525,7 +525,7 @@ admin.get('/userPlanDetails', async (req, res) => {
   }
   userD.forEach(async (users) => {
     planobject = await plan.find({ planUid: users.plan.planUid }).lean();
-    console.log(planobject);
+
     res.json({
       code: 200,
       error: false,
