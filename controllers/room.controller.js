@@ -193,9 +193,17 @@ exports.V2getAllRooms = async function (req, res) {
       });
     if (rooms) {
       rooms.forEach((rooms) => {
-        callduration = new Date(rooms.end.dateTime) - new Date(rooms.start.dateTime);
-        data.push(callduration);
-        const data = [rooms.start, rooms.end, rooms.mosaic, rooms.roomid, rooms.summary];
+        
+        const data = [
+          { start: rooms.start },
+          { end: rooms.end },
+          { mosaic: rooms.mosaic },
+         {roomid: rooms.roomid,},
+         {summary: rooms.summary,}
+
+        ];
+        const callDuration = (new Date(room.end.dateTime) - new Date(room.start.dateTime)) / 1000;
+        data.push({callDuration:callDuration});
         res.json({
           code: 200,
           error: false,
