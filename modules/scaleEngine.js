@@ -16,6 +16,14 @@ const monet = {
  *  Instance should be created when all the instances have occupied flag on.
  */
 class Engine {
+  get State() {
+    return {
+      state: this.state,
+      instances: this.Instances,
+      InternalIpImageIdMapping: this.InternalIpImageIdMapping,
+    };
+  }
+
   DBEntryFunction = async (func) => {
     if (typeof func === 'function') {
       this.fetchDBEntry = func;
@@ -51,15 +59,23 @@ class Engine {
 
   deleteConfirmation = (delInstanceInfo) => {
     this.state.task = 0;
-    if (delInstanceInfo.instanceId)
-      monet.debug(`>>>>>>>>>>> Deleted instance ${delInstanceInfo.instanceId} >>>>>>>>>>>`);
-    else monet.err(`>>>>>>>>>>> Unable to delete the instance >>>>>>>>>>>`, delInstanceInfo);
+    monet.debug(`>>>>>>>>>>> Deleted instance >>>>>>>>>>>`, delInstanceInfo.instanceId ? delInstanceInfo.instanceId : ": Confirmed");
   };
 
   /* We will get this data sooner than the instance information */
   addInternalIpImageId = (entry) => {
-    if (entry['PrivateIpAddress'] && entry['InstanceId'])
-      this.InternalIpImageIdMapping[entry['PrivateIpAddress']] = entry;
+    monet.debug('Adding private image entry.');
+    if (entry['PrivateIpAddress'] && entry['InstanceId']) {
+      const { ImageId, InstanceId, InstanceType, KeyName, PrivateIpAddress, ClientToken } = entry;
+      this.InternalIpImageIdMapping[PrivateIpAddress] = {
+        ImageId,
+        InstanceId,
+        InstanceType,
+        KeyName,
+        PrivateIpAddress,
+        ClientToken,
+      };
+    }
   };
 
   addInstance = (Instance) => {
@@ -67,26 +83,35 @@ class Engine {
       const InstanceIP = Instance.publicIP;
       const exists = this.Instances[InstanceIP];
       if (!exists) {
-        let ImageId;
+        let ImageId = 'NaN';
         if (this.InternalIpImageIdMapping[Instance.privateIP]) {
           ImageId = this.InternalIpImageIdMapping[Instance.privateIP]['InstanceId'];
+          monet.debug(
+            `Mapping Internal private IP to public IP ${InstanceIP} : ${Instance.privateIP} with ImageId : ${ImageId}`
+          );
           this.Invoker('up-instance-image', { ImageId, privateIP: Instance.privateIP });
         }
         this.Instances[InstanceIP] = {
-          ImageId: ImageId || 'NaN',
+          protected: true,
           deleteIteration: 0,
           live: 0,
           ...Instance,
+          ImageId,
         };
+        monet.debug('Adding instance : ', this.Instances[InstanceIP]);
         this.state.task = 0;
+        // remove instance protection after 15 minutes.
+        setTimeout(() => {
+          this.Instances[InstanceIP].protected = false;
+        }, 15 * 60 * 1000);
       }
     } else {
       return monet.err('The instance structure does not exists or is missing publicIP or privateIP key : ', Instance);
     }
   };
 
-  constructor() {
-    this.init();
+  constructor(config = {}) {
+    this.init(config);
     this.start();
   }
 
@@ -100,7 +125,8 @@ class Engine {
     this.state.phase = 0;
   };
 
-  init = () => {
+  init = (config) => {
+    if (config.timeout) this.timeout = config.timeout;
     this.reservedEvent = ['internal'];
     this.reqKeyName = 'Request';
     this.CBDict = {};
@@ -175,17 +201,14 @@ class Engine {
     const occupancyCountChanged = this.state.TotalOccupancy !== totalOccupancy;
     const TotalCallsChange = this.state.TotalCalls !== TotalCalls;
     const TotalParticipantsChange = this.state.TotalParticipants !== TotalParticipants;
-    if (occupancyCountChanged)
-      this.state.TotalOccupied = totalOccupancy;
-  
-    if (TotalCallsChange)
-      this.state.TotalCalls = TotalCalls;
+    if (occupancyCountChanged) this.state.TotalOccupied = totalOccupancy;
 
-    if (TotalParticipantsChange)
-      this.state.TotalParticipants = TotalParticipants;
+    if (TotalCallsChange) this.state.TotalCalls = TotalCalls;
+
+    if (TotalParticipantsChange) this.state.TotalParticipants = TotalParticipants;
     /* Take tab of total no. of calls */
 
-    monet.vdebug('Overall Instances : ', this.Instances);
+    // monet.vdebug('Overall Instances : ', this.Instances);
     for (let ip of currentInstances) {
       /* Initiate if does not exist */
       if (!this.Instances[ip][this.reqKeyName]) this.Instances[ip][this.reqKeyName] = 'completed';
@@ -233,7 +256,7 @@ class Engine {
   /* This method shall decide whether scaling up or down is needed? */
   /* scaleUp */
   stateTwo = async (data) => {
-    monet.vdebug('The State in Two : ', this.state);
+    // monet.vdebug('State Two : ', this.state);
     /* check for engine stop signal */
     if (this.state.phase === 0) {
       this.Invoker('engine-stopped');
@@ -325,9 +348,16 @@ class Engine {
             instaObj['ImageId'] !== 'NaN'
           ) {
             /* This candidate has been selected for deletion */
+            if (instaObj.protected) {
+              monet.debug(
+                `IP ${instaObj['publicIP']} with imageId ${instaObj['ImageId']} is protected hence skipping.`
+              );
+              continue;
+            }
             this.deleteCandidate = instaObj;
             this.state.task = 0;
             monet.debug('Candidate for deletion selected', this.deleteCandidate);
+            break;
           } else {
             this.state.task = 0;
             monet.debug('Unable to find suitable candidate.');
@@ -341,10 +371,12 @@ class Engine {
       ) {
         if (this.Instances[this.deleteCandidate['publicIP']]) {
           // watch this instance for 5 more iterations before deleting it as it might be used in certain threshhold of time
+          // Check whether scaleOut has reached it's threshhold.
           if (this.deleteCandidate['deleteIteration'] > 5) {
-            // Check whether scaleOut has reached it's threshhold.
-            this.deleteInstance(this.deleteCandidate['publicIP']);
-            this.deleteCandidate = 'NaN';
+            // this.deleteInstance(this.deleteCandidate['publicIP']);
+            // Check whether call have any call scheduled or not and remove.
+            this.InitiateDeleteSequence();
+            // this.deleteCandidate = 'NaN';
           } else {
             ++this.deleteCandidate['deleteIteration'];
             this.state.task = 0;
@@ -441,18 +473,54 @@ class Engine {
     // this.state.phase = 0;
   };
 
+  InitiateDeleteSequence = () => {
+    // Check whether at this point there is any call on this server.
+    this.sentReq(this.deleteCandidate['publicIP'])
+      .then((r) => {
+        let response = '';
+        try {
+          response = JSON.parse(r);
+          //  this.ipSuccessHandle(response, ip);
+          console.log('Deletion sequence response for the IP', this.deleteCandidate);
+          if (response.state)
+            if (response.state.Calls === 0) this.deleteInstance(this.deleteCandidate['publicIP']);
+            else monet.err('The instance have calls running, hence not killing the server. Returning');
+          else monet.err('The instance payload is not of appropriate kind. Returning');
+        } catch (error) {
+          this.Instances[this.deleteCandidate['publicIP']][this.reqKeyName] = 'completed';
+          response = r;
+          monet.err(
+            'There is an issue with IP deletion response : ',
+            this.deleteCandidate['publicIP'],
+            ' -:- ',
+            response,
+            ' -:- ',
+            error
+          );
+        }
+        this.deleteCandidate = 'NaN';
+      })
+      .catch((e) => {
+        monet.err('error : ', e.code);
+        //  this.ipErrHandle(e.code, ip);
+        monet.err('There is an issue with IP deletion request :', e);
+        this.deleteCandidate = 'NaN';
+      });
+    // this.deleteInstance(this.deleteCandidate['publicIP']);
+  };
+
   Invoker = (event, data, timeout) => {
     if (event === 'internal') {
       switch (this.state.phase) {
         case 1:
           setTimeout(() => {
             this.stateOne(data || this.state.phaseData);
-          }, timeout || 1000 * 30);
+          }, timeout || this.timeout || 1000 * 30);
           break;
         case 2:
           setTimeout(() => {
             this.stateTwo(data || this.state.phaseData);
-          }, timeout || 1000 * 30);
+          }, timeout || this.timeout || 1000 * 30);
           break;
         default:
           monet.warn('Unknown state : ', this.state.phase, ' Shifting state to 1');
