@@ -26,6 +26,8 @@ const Sessions = require('@models/sessions.model');
 const admin = Router();
 const debug = require('debug');
 const FaceRouter = require('@routes/face.recognition');
+const plan = require('@models/plans.model');
+const user = require('@models/user.model');
 const monet = {
   vdebug: debug('websocket:vdebug'),
   debug: debug('websocket:debug'),
@@ -501,6 +503,41 @@ admin.post('/sendAdminMosaic', async (req, res) => {
     error: false,
     message: 'List participate',
     response: info.response,
+  });
+});
+
+admin.get('/userPlanDetails', async (req, res) => {
+  const { email } = req.query;
+  if (!email) {
+    return res.json({
+      code: 400,
+      error: true,
+      message: 'email is a required field',
+    });
+  }
+  const userD = await user.find({ email: email }).lean();
+  if (!userD) {
+    return res.json({
+      code: 404,
+      error: false,
+      message: 'user not found for the email',
+    });
+  }
+  userD.forEach(async (users) => {
+    planobject = await plan.find({ planUid: users.plan.planUid }).lean();
+
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Plan details  Found',
+      data: planobject,
+    });
+  });
+});
+
+admin.post('/v2/getreportsList', function (req, res) {
+  roomController.V2getAllRooms(req, res).then(() => {
+    /* don't do anything */
   });
 });
 

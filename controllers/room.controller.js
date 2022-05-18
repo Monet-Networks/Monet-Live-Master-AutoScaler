@@ -1,6 +1,6 @@
-const Rooms = require("@models/room.model");
-const fs = require("fs");
-const paginate = require("@utils/paginate");
+const Rooms = require('@models/room.model');
+const fs = require('fs');
+const paginate = require('@utils/paginate');
 const sendMail = require('@utils/sendMail');
 exports.getRoom = (roomId) => Rooms.findOne({ roomid: roomId });
 
@@ -8,7 +8,7 @@ exports.getAllRooms = async function (req, res) {
   try {
     const { page, limit } = req.query;
     const { email } = req.body;
-    const [start, end] = [req.body.start || "", req.body.end || ""];
+    const [start, end] = [req.body.start || '', req.body.end || ''];
     let rooms;
     if (email) {
       if (page && limit) {
@@ -19,7 +19,7 @@ exports.getAllRooms = async function (req, res) {
           start
             ? {
                 creator_ID: email,
-                "start.dateTime": {
+                'start.dateTime': {
                   $gte: new Date(start),
                   $lte: new Date(end),
                 },
@@ -33,7 +33,7 @@ exports.getAllRooms = async function (req, res) {
           return res.json({
             code: 404,
             error: true,
-            message: "No rooms found",
+            message: 'No rooms found',
           });
       }
     }
@@ -41,12 +41,12 @@ exports.getAllRooms = async function (req, res) {
       return res.json({
         code: 404,
         error: true,
-        message: "No rooms found",
+        message: 'No rooms found',
       });
     return res.json({
       code: 200,
       error: false,
-      message: "The room exists",
+      message: 'The room exists',
       response: rooms,
     });
   } catch (error) {
@@ -64,7 +64,7 @@ exports.getAdminRecordings = async (req, res) => {
   // const admin_secret = req.body.admin_secret;
   const admin_rooms = await Rooms.find({ creator_ID });
   if (admin_rooms.length !== 0) {
-    const basePath = "/mnt/efs/fs1/data/";
+    const basePath = '/mnt/efs/fs1/data/';
     const adminRecordings = [];
     for (let room_record of admin_rooms) {
       if (fs.existsSync(`${basePath}${room_record.room}-final-mosaic.mp4`))
@@ -82,14 +82,14 @@ exports.getAdminRecordings = async (req, res) => {
       return res.json({
         code: 200,
         error: false,
-        message: "recordings success",
+        message: 'recordings success',
         response: adminRecordings,
       });
     } else {
       return res.json({
         code: 404,
         error: true,
-        message: "No recordings found",
+        message: 'No recordings found',
         response: [],
       });
     }
@@ -97,7 +97,7 @@ exports.getAdminRecordings = async (req, res) => {
     return res.json({
       code: 404,
       error: true,
-      message: "no records found for the id " + creator_ID,
+      message: 'no records found for the id ' + creator_ID,
     });
   }
 };
@@ -108,12 +108,12 @@ exports.verifyObserver = async (req, res) => {
     return res.json({
       code: 400,
       error: true,
-      message: "Someone is already observing this room",
+      message: 'Someone is already observing this room',
     });
   }
   room.observing = true;
   room.save();
-  res.json({ code: 200, error: false, message: "You can observe this room" });
+  res.json({ code: 200, error: false, message: 'You can observe this room' });
 };
 exports.saveRoom = function (req, res) {
   if (!req.body.roomid) return res.json({ code: 400, error: true, message: 'Roomid not found' });
@@ -151,4 +151,73 @@ exports.saveRoom = function (req, res) {
       });
     }
   });
+};
+exports.V2getAllRooms = async function (req, res) {
+  try {
+    const { page, limit } = req.query;
+    const { email } = req.body;
+    const [start, end] = [req.body.start || '', req.body.end || ''];
+    let rooms;
+    if (email) {
+      if (page && limit) {
+        rooms = await paginate(
+          page,
+          limit,
+          Rooms,
+          start
+            ? {
+                creator_ID: email,
+                'start.dateTime': {
+                  $gte: new Date(start),
+                  $lte: new Date(end),
+                },
+              }
+            : { creator_ID: email },
+          { _id: -1 }
+        );
+      } else {
+        rooms = await Rooms.find({ creator_ID: email });
+        if (!rooms?.length)
+          return res.json({
+            code: 404,
+            error: true,
+            message: 'No rooms found',
+          });
+      }
+    }
+    if (!rooms)
+      return res.json({
+        code: 404,
+        error: true,
+        message: 'No rooms found',
+      });
+    if (rooms) {
+      rooms.forEach((rooms) => {
+        
+        const data = [
+          { start: rooms.start },
+          { end: rooms.end },
+          { mosaic: rooms.mosaic },
+         {roomid: rooms.roomid,},
+         {summary: rooms.summary,}
+
+        ];
+        const callDuration = (new Date(room.end.dateTime) - new Date(room.start.dateTime)) / 1000;
+        data.push({callDuration:callDuration});
+        res.json({
+          code: 200,
+          error: false,
+          message: 'The room exists',
+          response: data,
+        });
+      });
+    }
+  } catch (error) {
+    return res.json({
+      code: 400,
+      error: true,
+      message: 'Unable to find rooms',
+      response: error.message,
+    });
+  }
 };
