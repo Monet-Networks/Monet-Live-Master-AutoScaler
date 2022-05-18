@@ -29,7 +29,7 @@ exports.reportPdf = async (req, res) => {
       callDuration,
       totalStudents: joinedUsersLength,
       speakingScore,
-      overallEngagement: report.report.averageEngagement,
+      overallEngagement: report.report?.averageEngagement || null,
       students: studentData,
     },
   });
