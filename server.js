@@ -18,7 +18,7 @@ const {
   deleteInstance,
   updateImageId,
 } = require('@controllers/instance.controller');
-
+const { handleEngineData } = require('@utils/engineHandles');
 
 const PORT = process.env.PORT || 3000;
 
@@ -28,6 +28,10 @@ const instanceRegistrationHandle = async (req, res) => {
     console.log('Instance creation success : ', success, Object.keys(success));
     if (success) if (success.publicIP) engine.addInstance(success);
   });
+};
+
+const getEngineData = (req, res) => {
+  handleEngineData(req, res, engine);
 };
 
 /* Instantiate the engine class */
@@ -66,6 +70,7 @@ new MonetIO(io);
 admin.use(bodyParser.json({ limit: '50mb' }));
 admin.use('/test', express.static('tests'));
 admin.get('/register-instance', instanceRegistrationHandle);
+admin.get('/engine-data', getEngineData);
 
 admin.use('/', apiRoutes);
 

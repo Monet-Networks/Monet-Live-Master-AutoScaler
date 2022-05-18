@@ -16,6 +16,14 @@ const monet = {
  *  Instance should be created when all the instances have occupied flag on.
  */
 class Engine {
+  get State() {
+    return {
+      state: this.state,
+      instances: this.Instances,
+      InternalIpImageIdMapping: this.InternalIpImageIdMapping,
+    };
+  }
+
   DBEntryFunction = async (func) => {
     if (typeof func === 'function') {
       this.fetchDBEntry = func;
@@ -51,15 +59,23 @@ class Engine {
 
   deleteConfirmation = (delInstanceInfo) => {
     this.state.task = 0;
-    if (delInstanceInfo.instanceId)
-      monet.debug(`>>>>>>>>>>> Deleted instance ${delInstanceInfo.instanceId} >>>>>>>>>>>`);
-    else monet.err(`>>>>>>>>>>> Unable to delete the instance >>>>>>>>>>>`, delInstanceInfo);
+    monet.debug(`>>>>>>>>>>> Deleted instance >>>>>>>>>>>`, delInstanceInfo.instanceId ? delInstanceInfo.instanceId : ": Confirmed");
   };
 
   /* We will get this data sooner than the instance information */
   addInternalIpImageId = (entry) => {
-    if (entry['PrivateIpAddress'] && entry['InstanceId'])
-      this.InternalIpImageIdMapping[entry['PrivateIpAddress']] = entry;
+    monet.debug('Adding private image entry.');
+    if (entry['PrivateIpAddress'] && entry['InstanceId']) {
+      const { ImageId, InstanceId, InstanceType, KeyName, PrivateIpAddress, ClientToken } = entry;
+      this.InternalIpImageIdMapping[PrivateIpAddress] = {
+        ImageId,
+        InstanceId,
+        InstanceType,
+        KeyName,
+        PrivateIpAddress,
+        ClientToken,
+      };
+    }
   };
 
   addInstance = (Instance) => {
@@ -67,18 +83,22 @@ class Engine {
       const InstanceIP = Instance.publicIP;
       const exists = this.Instances[InstanceIP];
       if (!exists) {
-        let ImageId;
+        let ImageId = 'NaN';
         if (this.InternalIpImageIdMapping[Instance.privateIP]) {
           ImageId = this.InternalIpImageIdMapping[Instance.privateIP]['InstanceId'];
+          monet.debug(
+            `Mapping Internal private IP to public IP ${InstanceIP} : ${Instance.privateIP} with ImageId : ${ImageId}`
+          );
           this.Invoker('up-instance-image', { ImageId, privateIP: Instance.privateIP });
         }
         this.Instances[InstanceIP] = {
           protected: true,
-          ImageId: ImageId || 'NaN',
           deleteIteration: 0,
           live: 0,
           ...Instance,
+          ImageId,
         };
+        monet.debug('Adding instance : ', this.Instances[InstanceIP]);
         this.state.task = 0;
         // remove instance protection after 15 minutes.
         setTimeout(() => {
@@ -236,7 +256,7 @@ class Engine {
   /* This method shall decide whether scaling up or down is needed? */
   /* scaleUp */
   stateTwo = async (data) => {
-    monet.vdebug('The State in Two : ', this.state);
+    // monet.vdebug('State Two : ', this.state);
     /* check for engine stop signal */
     if (this.state.phase === 0) {
       this.Invoker('engine-stopped');
@@ -328,8 +348,10 @@ class Engine {
             instaObj['ImageId'] !== 'NaN'
           ) {
             /* This candidate has been selected for deletion */
-            if(instaObj.protected) {
-              monet.debug(`IP ${instaObj['publicIP']} with imageId ${instaObj['ImageId']} is protected hence skipping.`);
+            if (instaObj.protected) {
+              monet.debug(
+                `IP ${instaObj['publicIP']} with imageId ${instaObj['ImageId']} is protected hence skipping.`
+              );
               continue;
             }
             this.deleteCandidate = instaObj;
