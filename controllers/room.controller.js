@@ -192,7 +192,7 @@ exports.V2getAllRooms = async function (req, res) {
         message: 'No rooms found',
       });
     if (rooms) {
-      rooms.forEach((rooms) => {
+      rooms.results.forEach((rooms) => {
         const data = [
           {
             summary: rooms.summary,
