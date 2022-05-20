@@ -326,7 +326,7 @@ class Engine {
     this.state.task = 2;
     const OcuDiff = this.state.TotalInstances - this.state.TotalOccupied; // Total instances should always be greater than occupied ones
     if (OcuDiff > 1) {
-      // If scaleUp flag is true, then rule out the possibility of Scaling Out.
+      // If scaleUp flag is true, then rule out the <p></p>ossibility of Scaling Out.
       // this.state.ScaleOut = this.state.ScaleUp ? false : true;
       // if (!this.state.ScaleOut)
       /* Find Candidate
@@ -464,6 +464,7 @@ class Engine {
   /* This method is ought to delete instance entry from Instances dict and */
   deleteInstance = (IP) => {
     monet.debug(`>>>>>>>>>>> Delete signal for ${IP} >>>>>>>>>>>`);
+    if (this.Instances[IP].ImageId === 'NaN') return;
     /* delete entry from instances dictionary */
     this.Invoker('delete-instance', this.Instances[IP]);
     this.deleteCandidate = 'NaN';
