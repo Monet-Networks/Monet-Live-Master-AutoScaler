@@ -40,7 +40,7 @@ let redis;
 
 (async () => {
   redis = red.createClient({
-    url: 'redis://:monet%40615@34.220.116.222:6379',
+    url: 'redis://:monet%40615@54.245.160.54:6379',
   });
   redis.on('error', (err) => console.log('Redis Client Error', err));
   await redis.connect();
