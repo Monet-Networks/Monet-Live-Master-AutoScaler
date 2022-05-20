@@ -23,7 +23,7 @@ class AWS {
     if (name) {
       this.currentInstanceName = name;
       this.instanceParams = {
-        ImageId: 'ami-0fa6ff071cc2dea05', // 'ami-0abcf2a8b7709cc05', // 'ami-04befcb360b89e1ea', // 'ami-041f6bd9492f1e09d', // 'ami-06aaa3165c59ecdb7', // 'ami-0e891a0d9bd041cb8', // 'ami-0850e7d5dd3fda878', // 'ami-0c1c02750a1158a9b', //AMI_ID
+        ImageId: ' ami-0d550428459cce5c9', // 'ami-0fa6ff071cc2dea05', // 'ami-0abcf2a8b7709cc05', // 'ami-04befcb360b89e1ea', // 'ami-041f6bd9492f1e09d', // 'ami-06aaa3165c59ecdb7', // 'ami-0e891a0d9bd041cb8', // 'ami-0850e7d5dd3fda878', // 'ami-0c1c02750a1158a9b', //AMI_ID
         InstanceType: 't4g.micro',
         KeyName: 'gurgaon', //KEY_PAIR_NAME
         MinCount: 1,
