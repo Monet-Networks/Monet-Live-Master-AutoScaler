@@ -192,24 +192,27 @@ exports.V2getAllRooms = async function (req, res) {
         message: 'No rooms found',
       });
     if (rooms) {
-      rooms.forEach((rooms) => {
-        
-        const data = [
-          { start: rooms.start },
-          { end: rooms.end },
-          { mosaic: rooms.mosaic },
-         {roomid: rooms.roomid,},
-         {summary: rooms.summary,}
+      const rawData = [];
+      rooms.results.forEach((rooms) => {
+        const data = {
+          summary: rooms.summary,
+          mosaic: rooms.mosaic,
+          roomid: rooms.roomid,
+          start: rooms.start.dateTime,
+          end: rooms.end.dateTime,
+          attendees: rooms.attendees,
+          scheduled: rooms.scheduled,
+          callDuration: (new Date(rooms.end.dateTime) - new Date(rooms.start.dateTime)) / 1000,
+        };
 
-        ];
-        const callDuration = (new Date(room.end.dateTime) - new Date(room.start.dateTime)) / 1000;
-        data.push({callDuration:callDuration});
-        res.json({
-          code: 200,
-          error: false,
-          message: 'The room exists',
-          response: data,
-        });
+        rawData.push(data);
+      });
+
+      res.json({
+        code: 200,
+        error: false,
+        message: 'The room exists',
+        response: rawData,
       });
     }
   } catch (error) {

@@ -1,5 +1,5 @@
 // Load required packages
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 // Define our Company schema
 const roomSchema = new mongoose.Schema({
@@ -7,21 +7,26 @@ const roomSchema = new mongoose.Schema({
   creator_ID: { type: String, required: true },
   source: {
     type: String,
-    enum: ["google", "outlook", "monet"],
-    default: "monet",
+    enum: ['google', 'outlook', 'monet'],
+    default: 'monet',
+  },
+  scheduled: {
+    type: Boolean,
+    default: false,
+    required: true,
   },
   sourceId: { type: String },
   name: {
     type: String,
-    default: "-",
+    default: '-',
   },
   room: {
     type: String,
-    default: "0",
+    default: '0',
   },
   roomid: {
     type: String,
-    default: "0",
+    default: '0',
   },
   alive: {
     type: Number,
@@ -30,7 +35,7 @@ const roomSchema = new mongoose.Schema({
   },
   summary: {
     type: String,
-    default: "-",
+    default: '-',
   },
   start: {
     dateTime: {
@@ -68,11 +73,11 @@ const roomSchema = new mongoose.Schema({
   },
   observerEmail: {
     type: String,
-    default: "",
+    default: '',
   },
   observerLink: {
     type: String,
-    default: "",
+    default: '',
   },
   observing: {
     type: Boolean,
@@ -87,15 +92,36 @@ const roomSchema = new mongoose.Schema({
     },
     default: { waitingRoom: true, screenShare: true, chat: true, limit: 10 },
   },
+  mosaic: {
+    status: { type: Boolean, default: false },
+    created_on: {
+      type: String,
+      default() {
+        if (this.mosaic.status === true) return new Date();
+        else return 'NaN';
+      },
+    },
+    path: {
+      type: String,
+      default() {
+        if (this.mosaic.status === true)
+          if (fs.existsSync(`${basePath}${this.roomid}-final-mosaic.mp4`))
+            return `${basePath}${this.roomid}-final-mosaic.mp4`;
+          else if (fs.existsSync(`${basePath}${this.roomid}-mosaic.mp4`)) return `${basePath}${this.roomid}-mosaic.mp4`;
+          else return 'error';
+        else return 'NaN';
+      },
+    },
+  },
   grp: {
     type: String,
-    default: "",
+    default: '',
   },
   instance: {
     type: String,
-    default: "",
+    default: '',
   },
 });
 
 // Export the Mongoose model
-module.exports = mongoose.model("rooms", roomSchema, "rooms");
+module.exports = mongoose.model('rooms', roomSchema, 'rooms');
