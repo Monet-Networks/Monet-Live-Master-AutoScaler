@@ -9,6 +9,7 @@
     "start:dev": "nodemon"
   },
   "_moduleAliases": {
+    "@server": "./server",
     "@root": ".",
     "@utils": "./utils",
     "@modules": "./modules",

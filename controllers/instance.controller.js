@@ -1,6 +1,7 @@
 const Instance = require('@models/instance.model');
 const ErrorHandler = require('@utils/ErrorHandler');
 const SuccessHandler = require('@utils/SuccessHandler');
+const MasterCollection = require('@modules/MasterCollection');
 
 exports.getInstances = async () => {
   const instanceIps = await Instance.find({ type: 'auto' }, 'publicIP');
@@ -73,7 +74,10 @@ exports.getInstance = async (req, res) => {
     );
   const getFreeInstance = await Instance.find({ type: 'auto', occupied: false }, 'InstanceRoute publicIP').lean(); // false || true -> CPU usage or network load?
   if (getFreeInstance.length !== 0) {
-    const instance = getFreeInstance.pop();
+    let instance = getFreeInstance.pop();
+    if (MasterCollection.engine)
+      console.log('Checking for deleted instance : ', MasterCollection.engine.deleteCandidate);
+    if (MasterCollection.engine.deleteCandidate.publicIP === instance.publicIP) instance = getFreeInstance.pop();
     return new SuccessHandler(res, 200, 'success', {
       route: instance.InstanceRoute,
       ip: instance.publicIP,

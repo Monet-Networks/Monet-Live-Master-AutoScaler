@@ -12,6 +12,7 @@ const Engine = require('@modules/scaleEngine');
 const AWSConfiguration = require('@modules/awsConfig');
 const IController = new AWSConfiguration();
 const MonetIO = require('@modules/websockets');
+const MasterCollection = require('@modules/MasterCollection');
 const {
   getAllAutoInstances,
   createOneInstance,
@@ -35,7 +36,7 @@ const getEngineData = (req, res) => {
 };
 
 /* Instantiate the engine class */
-const engine = new Engine({ timeout: 1000 });
+const engine = MasterCollection.engine = new Engine({ timeout: 1000 });
 engine.DBEntryFunction(getAllAutoInstances);
 engine.on('create-instance', ({ name }) => {
   console.log('Instance creation signal with name : ', name);
@@ -74,4 +75,4 @@ admin.get('/engine-data', getEngineData);
 
 admin.use('/', apiRoutes);
 
-httpServer.listen(PORT, () => log(`[Server OK]`));
+httpServer.listen(PORT, () => log(`[Server OK] : Port ${PORT}`));
