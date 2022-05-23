@@ -543,7 +543,7 @@ admin.post('/v2/getreportsList', function (req, res) {
   });
 });
 
-admin.get('authentication', (req, res) => {
+admin.get('/authentication', (req, res) => {
   try{
     const token = req.body;
 
