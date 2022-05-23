@@ -29,7 +29,7 @@ const FaceRouter = require('@routes/face.recognition');
 const plan = require('@models/plans.model');
 const user = require('@models/user.model');
 const auth = require('@utils/auth');
-const RemainingHours = require('@utils/users')
+const RemainingHours = require('@utils/users');
 const monet = {
   vdebug: debug('websocket:vdebug'),
   debug: debug('websocket:debug'),
@@ -543,28 +543,30 @@ admin.post('/v2/getreportsList', function (req, res) {
   });
 });
 
-admin.get('/authentication', (req, res) => {
-  try{
+admin.get('/authentication', async (req, res) => {
+  try {
     const token = req.body;
 
-  const users = await auth.authenticate(token, u);
- const remainingHours =  RemainingHours.addRemainingHours(user);
- const userPlan =  await plan.find({ planUid: users.plan.planUid });
+    const users = await auth.authenticate(token, u);
+    const remainingHours = RemainingHours.addRemainingHours(user);
+    const userPlan = await plan.find({ planUid: users.plan.planUid });
 
-
-   res.json({
+    res.json({
       code: 200,
       error: false,
       message: ' details  Found',
-      data: user,remainingHours,userPlan,
+      data: user,
+      remainingHours,
+      userPlan,
     });
-  }catch (err) {
+  } catch (err) {
     response.json({
       code: 400,
       error: true,
       message: 'token not found',
       response: err,
-    });}
+    });
+  }
 });
 
 const durationCalculator = (start, end) => {
