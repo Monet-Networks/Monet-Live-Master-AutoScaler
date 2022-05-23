@@ -81,7 +81,7 @@ exports.createPaymentIntent = async (req, res) => {
         mongoPlan: JSON.stringify({
           id: plan._id,
           planUid: plan.planUid,
-          groupUid: plan.planUid > 1 ? uuid() : '',
+          groupUid: plan.planUid > 0 ? uuid() : '',
           name: plan.name,
           type: 'purchased',
           assignedBy: '',
