@@ -144,7 +144,7 @@ exports.registerInvitedUser = async (req, res) => {
     }
   });
   assignor.save();
-  user = await addRemainingHours(user);
+  user = await addRemainingHours(user._doc);
   return res.json({
     code: 200,
     error: false,
@@ -191,7 +191,7 @@ exports.login = async (req, res) => {
     }
   });
   existingUser.save();
-  existingUser = await addRemainingHours(existingUser);
+  existingUser = await addRemainingHours(existingUser._doc);
   return res.json({
     code: 200,
     error: false,
@@ -365,7 +365,7 @@ exports.updateUser = async (req, res) => {
     let { ID } = req.body;
     let user = await UserModel.findOneAndUpdate({ ID }, req.body, { new: true });
     if (user) {
-      user = await addRemainingHours(user);
+      user = await addRemainingHours(user._doc);
       res.json({ code: 200, error: false, message: 'User details updated', data: user });
     } else if (!user) {
       res.json({ code: 404, error: true, message: 'User not found' });
@@ -379,7 +379,7 @@ exports.userSettings = async (req, res) => {
   const { creator_ID: email, settings } = req.body;
   const { waitingRoom, limit } = settings;
   let user = await UserModel.findOne({ email });
-  user = await addRemainingHours(user);
+  user = await addRemainingHours(user._doc);
   if (!user) {
     return res.json({ code: 404, error: true, message: 'User not found' });
   }
@@ -552,7 +552,7 @@ const google = async (req, res, assigneeEmail = '', additionalFields = {}) => {
 /* Google's Authentication Controller */
 exports.googleAuth = async (req, res) => {
   let user = await google(req, res);
-  user = await addRemainingHours(user);
+  user = await addRemainingHours(user._doc);
   res.json({
     error: false,
     message: 'Authentication successful',
@@ -604,7 +604,7 @@ const microsoft = async (req, res, assigneeEmail = '', additionalFields = {}) =>
 /* Microsoft's Authentication Controller */
 exports.microsoftAuth = async (req, res) => {
   let user = await microsoft(req, res);
-  user = await addRemainingHours(user);
+  user = await addRemainingHours(user._doc);
   res.json({
     error: false,
     message: 'Authentication successful',
