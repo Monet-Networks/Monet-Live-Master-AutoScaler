@@ -545,7 +545,7 @@ admin.post('/v2/getreportsList', function (req, res) {
 
 admin.post('/authentication', async (req, res) => {
   try {
-    const token = req.body;
+    const { token } = req.body;
     const users = await auth.authenticate(token, true);
     const remainingHours = await RemainingHours.addRemainingHours(user);
     const userPlan = await plan.find({ planUid: users.plan.planUid });
