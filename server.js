@@ -71,7 +71,7 @@ new MonetIO(io);
 admin.use(
   express.json({
     verify: (req, res, buf) => {
-      if (req.url == '/many/api/webhooks') {
+      if (req.url == '/webhooks') {
         req.rawBody = buf;
       }
     },
