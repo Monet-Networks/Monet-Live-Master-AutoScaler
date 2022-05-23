@@ -546,16 +546,15 @@ admin.post('/v2/getreportsList', function (req, res) {
 admin.post('/authentication', async (req, res) => {
   try {
     const { token } = req.body;
-    const users = await auth.authenticate(token, true);
+    const user = await auth.authenticate(token, true);
     const remainingHours = await RemainingHours.addRemainingHours(user);
-    const userPlan = await plan.find({ planUid: users.plan.planUid });
+    const userPlan = await plan.find({ planUid: user.plan.planUid });
 
     res.json({
       code: 200,
       error: false,
       message: ' details  Found',
-      data: user,
-      remainingHours,
+      data: remainingHours,
       userPlan,
     });
   } catch (err) {
