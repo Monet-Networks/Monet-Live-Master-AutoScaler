@@ -552,7 +552,7 @@ const google = async (req, res, assigneeEmail = '', additionalFields = {}) => {
 /* Google's Authentication Controller */
 exports.googleAuth = async (req, res) => {
   let user = await google(req, res);
-  user = await addRemainingHours(user._doc);
+  user = await addRemainingHours(user);
   res.json({
     error: false,
     message: 'Authentication successful',
@@ -604,7 +604,7 @@ const microsoft = async (req, res, assigneeEmail = '', additionalFields = {}) =>
 /* Microsoft's Authentication Controller */
 exports.microsoftAuth = async (req, res) => {
   let user = await microsoft(req, res);
-  user = await addRemainingHours(user._doc);
+  user = await addRemainingHours(user);
   res.json({
     error: false,
     message: 'Authentication successful',
