@@ -36,7 +36,7 @@ const getEngineData = (req, res) => {
 };
 
 /* Instantiate the engine class */
-const engine = MasterCollection.engine = new Engine({ timeout: 1000 });
+const engine = (MasterCollection.engine = new Engine({ timeout: 1000 }));
 engine.DBEntryFunction(getAllAutoInstances);
 engine.on('create-instance', ({ name }) => {
   console.log('Instance creation signal with name : ', name);
@@ -68,6 +68,15 @@ const io = new Server(httpServer, {
 new db();
 new MonetIO(io);
 
+app.use(
+  express.json({
+    verify: (req, res, buf) => {
+      if (req.url == '/many/api/webhooks') {
+        req.rawBody = buf;
+      }
+    },
+  })
+);
 admin.use(bodyParser.json({ limit: '50mb' }));
 admin.use('/test', express.static('tests'));
 admin.get('/register-instance', instanceRegistrationHandle);
