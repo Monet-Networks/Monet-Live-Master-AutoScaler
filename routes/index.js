@@ -560,7 +560,7 @@ admin.get('/authentication', async (req, res) => {
       userPlan,
     });
   } catch (err) {
-    response.json({
+    res.json({
       code: 400,
       error: true,
       message: 'token not found',
