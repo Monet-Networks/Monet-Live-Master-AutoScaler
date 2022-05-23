@@ -543,7 +543,7 @@ admin.post('/v2/getreportsList', function (req, res) {
   });
 });
 
-admin.get('/authentication', async (req, res) => {
+admin.post('/authentication', async (req, res) => {
   try {
     const token = req.body;
 
