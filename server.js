@@ -68,7 +68,7 @@ const io = new Server(httpServer, {
 new db();
 new MonetIO(io);
 
-app.use(
+admin.use(
   express.json({
     verify: (req, res, buf) => {
       if (req.url == '/many/api/webhooks') {
