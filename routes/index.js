@@ -548,7 +548,7 @@ admin.get('/authentication', async (req, res) => {
     const token = req.body;
 
     const users = await auth.authenticate(token, u);
-    const remainingHours = RemainingHours.addRemainingHours(user);
+    const remainingHours = await RemainingHours.addRemainingHours(user);
     const userPlan = await plan.find({ planUid: users.plan.planUid });
 
     res.json({
