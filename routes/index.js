@@ -547,8 +547,26 @@ admin.post('/authentication', async (req, res) => {
   try {
     const { token } = req.body;
     const user = await auth.authenticate(token, true);
+    if (!user) {
+      res.json({
+        code: 400,
+        message: 'invalid token',
+      });
+    }
     const remainingHours = await RemainingHours.addRemainingHours(user);
+    if (!remainingHours) {
+      res.json({
+        code: 400,
+        message: 'user not authenticated',
+      });
+    }
     const userPlan = await plan.find({ planUid: user.plan.planUid });
+    if (!userPlan) {
+      res.json({
+        code: 400,
+        message: 'plan object not found',
+      });
+    }
 
     res.json({
       code: 200,
