@@ -28,6 +28,8 @@ const debug = require('debug');
 const FaceRouter = require('@routes/face.recognition');
 const plan = require('@models/plans.model');
 const user = require('@models/user.model');
+const auth = require('@utils/auth');
+const RemainingHours = require('@utils/users');
 const monet = {
   vdebug: debug('websocket:vdebug'),
   debug: debug('websocket:debug'),
@@ -294,6 +296,8 @@ admin.put('/updateSetting', userController.userSettings);
 
 admin.get('/getPlanGroupDetails', planGroupsController.getPlanGroupDetails);
 
+admin.post('/register-user', userController.registerUser);
+
 admin.post('/sendAdminEmail', async function (req, res) {
   const { Admin: email, Name, Attendees, Link, Date, Duration, Summary: Topic, RoomId } = req.body;
   roomEmails[RoomId] = { email, name: Name, topic: Topic };
@@ -539,6 +543,42 @@ admin.post('/v2/getreportsList', function (req, res) {
   roomController.V2getAllRooms(req, res).then(() => {
     /* don't do anything */
   });
+});
+
+admin.post('/auth/authentication', async (req, res) => {
+  try {
+    const { token } = req.body;
+    let user = await auth.authenticate(token, true);
+    if (!user) {
+      return res.json({
+        code: 401,
+        error: true,
+        message: 'Invalid token or token expired',
+      });
+    }
+    user = await RemainingHours.addRemainingHours(user);
+    const userPlan = await plan.find({ planUid: user.plan.planUid });
+    if (!userPlan) {
+      return res.json({
+        code: 400,
+        error: true,
+        message: 'Invalid request please try again',
+      });
+    }
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Details found',
+      data: { user, userPlan },
+    });
+  } catch (err) {
+    res.json({
+      code: 400,
+      error: true,
+      message: 'Something went wrong',
+      response: err,
+    });
+  }
 });
 
 const durationCalculator = (start, end) => {

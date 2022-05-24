@@ -101,6 +101,10 @@ const UserSchema = new mongoose.Schema({
       type: Number,
       default: 0,
     },
+    groupUid: {
+      type: String,
+      default: '',
+    },
     name: {
       type: String,
       default: 'Free Tier',
