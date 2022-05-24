@@ -119,7 +119,10 @@ exports.saveRoom = function (req, res) {
   if (!req.body.roomid) return res.json({ code: 400, error: true, message: 'Roomid not found' });
   const { roomid, summary, start, observerEmail, observerLink, scheduled } = req.body;
   /* Handling object in attendees key of the body */
-  if (scheduled) req.body.attendees = req.body.attendees.map((e) => e.email);
+  if (scheduled)
+    req.body.attendees = req.body.attendees.map((e) => {
+      if (e) return e.email;
+    });
   Rooms.updateOne({ roomid }, req.body, async (error, success) => {
     if (error) {
       console.log('Room Error : ', error);
