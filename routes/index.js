@@ -296,6 +296,8 @@ admin.put('/updateSetting', userController.userSettings);
 
 admin.get('/getPlanGroupDetails', planGroupsController.getPlanGroupDetails);
 
+admin.post('/register-user', userController.registerUser);
+
 admin.post('/sendAdminEmail', async function (req, res) {
   const { Admin: email, Name, Attendees, Link, Date, Duration, Summary: Topic, RoomId } = req.body;
   roomEmails[RoomId] = { email, name: Name, topic: Topic };
