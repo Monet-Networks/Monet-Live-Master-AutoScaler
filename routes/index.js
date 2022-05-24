@@ -543,43 +543,37 @@ admin.post('/v2/getreportsList', function (req, res) {
   });
 });
 
-admin.post('/authentication', async (req, res) => {
+admin.post('/auth/authentication', async (req, res) => {
   try {
     const { token } = req.body;
-    const user = await auth.authenticate(token, true);
+    let user = await auth.authenticate(token, true);
     if (!user) {
-      res.json({
-        code: 400,
-        message: 'invalid token',
+      return res.json({
+        code: 401,
+        error: true,
+        message: 'Invalid token or token expired',
       });
     }
-    const remainingHours = await RemainingHours.addRemainingHours(user);
-    if (!remainingHours) {
-      res.json({
-        code: 400,
-        message: 'user not authenticated',
-      });
-    }
+    user = await RemainingHours.addRemainingHours(user);
     const userPlan = await plan.find({ planUid: user.plan.planUid });
     if (!userPlan) {
-      res.json({
+      return res.json({
         code: 400,
-        message: 'plan object not found',
+        error: true,
+        message: 'Invalid request please try again',
       });
     }
-
     res.json({
       code: 200,
       error: false,
-      message: ' details  Found',
-      data: remainingHours,
-      userPlan,
+      message: 'Details found',
+      data: { user, userPlan },
     });
   } catch (err) {
     res.json({
       code: 400,
       error: true,
-      message: 'token not found',
+      message: 'Something went wrong',
       response: err,
     });
   }
