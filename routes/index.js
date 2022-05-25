@@ -48,6 +48,8 @@ let redis;
   await redis.connect();
 })();
 
+admin.delete('/room/:id', (req, res) => roomController.delete(req, res));
+
 admin.get('/reset-engine-state', (req, res) => {
   if (req.query.secret === 'monet@43324') {
     engine.resetState();

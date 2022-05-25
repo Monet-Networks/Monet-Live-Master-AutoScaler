@@ -58,6 +58,23 @@ exports.getAllRooms = async function (req, res) {
     });
   }
 };
+
+exports.delete = async function (req, res) {
+  const result = await Rooms.deleteOne({ sourceId: req.params.id });
+  if (result.deletedCount === 1)
+    return res.json({
+      code: 200,
+      error: true,
+      message: 'room deleted',
+    });
+  else
+    res.json({
+      code: 400,
+      error: true,
+      message: 'unable to delete room',
+    });
+};
+
 exports.getAdminRecordings = async (req, res) => {
   const creator_ID = req.body.admin_id;
   // use secret to authenticate the admin
