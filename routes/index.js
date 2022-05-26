@@ -92,7 +92,7 @@ admin.post('/inviteRoom', saveRoom);
 admin.get('/getInviteRoom', async (req, res) => {
   let room;
   const roomid = req.query.roomid;
-  if (roomid) room = await getRoom();
+  if (roomid) room = await getRoom(roomid);
   if (room)
     return res.json({
       code: 201,
