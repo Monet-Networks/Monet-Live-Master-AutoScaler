@@ -135,7 +135,7 @@ exports.verifyObserver = async (req, res) => {
 exports.saveRoom = function (req, res) {
   if (!req.body.roomid) return res.json({ code: 400, error: true, message: 'Roomid not found' });
   const { roomid, summary, start, observerEmail, observerLink, scheduled } = req.body;
-  if (!roomid || !summary || !start || !scheduled) {
+  if (!roomid || !summary || !start) {
     res.json({
       code: 404,
       error: true,
