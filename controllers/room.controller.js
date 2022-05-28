@@ -135,14 +135,10 @@ exports.verifyObserver = async (req, res) => {
 exports.saveRoom = function (req, res) {
   if (!req.body.roomid) return res.json({ code: 400, error: true, message: 'Roomid not found' });
   const { roomid, summary, start, observerEmail, observerLink, scheduled } = req.body;
-  if (!roomid || !summary || !start) {
-    res.json({
-      code: 404,
-      error: true,
-      message: 'Missing mandatory attribute(s)',
-    });
-    return;
-  }
+  const interpretedStart = start || {
+    dateTime: new Date(),
+    timeZone: 'Asia/Calcutta',
+  };
   /* Handling object in attendees key of the body */
   if (scheduled)
     req.body.attendees = req.body.attendees.map((e) => {
@@ -162,7 +158,7 @@ exports.saveRoom = function (req, res) {
           '../views/observerInvite.handlebars',
           observerEmail,
           `[Monet Live] You are invited to observe meeting named: ${summary}`,
-          { Name: summary, Link: observerLink, Time: new Date(start.dateTime).toGMTString() }
+          { Name: summary, Link: observerLink, Time: new Date(interpretedStart.dateTime).toGMTString() }
         );
         return res.json({
           code: 201,
