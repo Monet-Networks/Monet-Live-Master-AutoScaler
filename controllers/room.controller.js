@@ -139,7 +139,7 @@ exports.saveRoom = function (req, res) {
     res.json({
       code: 404,
       error: true,
-      message: "Missing mandatory attrribute(s)"
+      message: "Missing mandatory attribute(s)"
     })
     return;
   }
