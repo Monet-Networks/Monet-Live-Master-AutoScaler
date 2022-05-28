@@ -11,6 +11,7 @@ const axios = require('axios');
 const { authenticate, generateToken } = require('@utils/auth');
 const sendMail = require('@utils/sendMail.js');
 const { verifyToken, decodeToken } = require('@utils/token');
+const { v4: uuid } = require('uuid');
 const { addRemainingHours } = require('../utils/users');
 
 exports.registerUser = async (req, res) => {
@@ -30,6 +31,14 @@ exports.registerUser = async (req, res) => {
       user = await UserModel.findOneAndUpdate({ email }, { password: hashedPassword }, { new: true });
     } else {
       user = await UserModel.create({ ID, name, email, password: hashedPassword });
+      const planGroup = await PlanGroups.create({
+        uid: uuid(),
+        leftHours: 2,
+        usedHours: 0,
+        totalHours: 2,
+        users: { name: user.name, email: user.email },
+      });
+      user.plan.groupUid = planGroup.uid;
     }
     user.token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE,
@@ -540,6 +549,14 @@ const google = async (req, res, assigneeEmail = '', additionalFields = {}) => {
     ).lean();
   } else {
     user = await UserModel.create({ email, name, avatar: picture, ID: sub, source: 'google', ...additionalFields });
+    const planGroup = await PlanGroups.create({
+      uid: uuid(),
+      leftHours: 2,
+      usedHours: 0,
+      totalHours: 2,
+      users: { name: user.name, email: user.email },
+    });
+    user.plan.groupUid = planGroup.uid;
   }
   if (!(await authenticate(user.token))) {
     const token = generateToken(user._id);
@@ -592,6 +609,14 @@ const microsoft = async (req, res, assigneeEmail = '', additionalFields = {}) =>
     ).lean();
   } else {
     user = await UserModel.create({ email, name, avatar, ID: microsoftId, source: 'microsoft', ...additionalFields });
+    const planGroup = await PlanGroups.create({
+      uid: uuid(),
+      leftHours: 2,
+      usedHours: 0,
+      totalHours: 2,
+      users: { name: user.name, email: user.email },
+    });
+    user.plan.groupUid = planGroup.uid;
   }
   if (!(await authenticate(user.token))) {
     const token = generateToken(user._id);
