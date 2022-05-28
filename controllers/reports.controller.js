@@ -4,35 +4,43 @@ const FaceData = require('@models/faceData.model');
 const Sessions = require('@models/sessions.model');
 
 exports.reportPdf = async (req, res) => {
-  const { roomid } = req.query;
-  const roomPromise = Rooms.findOne({ roomid });
-  const sessionsPromise = Sessions.find({ roomid });
-  const reportPromise = Reports.findOne({ roomid });
-  const [room, sessions, report] = await Promise.all([roomPromise, sessionsPromise, reportPromise]);
-  if (!room || !sessions || !report) {
-    return res.json({ code: 404, error: true, message: 'Room data not found' });
+  try {
+    const { roomid } = req.query;
+    const roomPromise = Rooms.findOne({ roomid });
+    const sessionsPromise = Sessions.find({ roomid });
+    const reportPromise = Reports.findOne({ roomid });
+    const [room, sessions, report] = await Promise.all([roomPromise, sessionsPromise, reportPromise]);
+    if (!room || !sessions || !report) {
+      return res.json({ code: 404, error: true, message: 'Room data not found' });
+    }
+    const students = sessions.filter((session) => session.proctor === 'student' && !session.uuid.includes('___'));
+    const invitedUsersLength = room.attendees.length ? room.attendees.length - 1 : 0;
+    const joinedUsersLength = students.length;
+    const attendance = Math.min((joinedUsersLength / invitedUsersLength) * 100, 100);
+    const studentDataPromise = getStudentData(students);
+    const speakingScorePromise = getSpeakingInfo(roomid);
+    const [studentData, speakingScore] = await Promise.all([studentDataPromise, speakingScorePromise]);
+    const callDuration = (new Date(room.end.dateTime) - new Date(room.start.dateTime)) / 1000;
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Data fetched successfully',
+      data: {
+        attendance,
+        callDuration,
+        totalStudents: joinedUsersLength,
+        speakingScore,
+        overallEngagement: report.report?.averageEngagement || null,
+        students: studentData,
+      },
+    });
+  } catch (err) {
+    res.json({
+      code: 500,
+      error: true,
+      message: err,
+    });
   }
-  const students = sessions.filter((session) => session.proctor === 'student' && !session.uuid.includes('___'));
-  const invitedUsersLength = room.attendees.length ? room.attendees.length - 1 : 0;
-  const joinedUsersLength = students.length;
-  const attendance = Math.min((joinedUsersLength / invitedUsersLength) * 100, 100);
-  const studentDataPromise = getStudentData(students);
-  const speakingScorePromise = getSpeakingInfo(roomid);
-  const [studentData, speakingScore] = await Promise.all([studentDataPromise, speakingScorePromise]);
-  const callDuration = (new Date(room.end.dateTime) - new Date(room.start.dateTime)) / 1000;
-  res.json({
-    code: 200,
-    error: false,
-    message: 'Data fetched successfully',
-    data: {
-      attendance,
-      callDuration,
-      totalStudents: joinedUsersLength,
-      speakingScore,
-      overallEngagement: report.report?.averageEngagement || null,
-      students: studentData,
-    },
-  });
 };
 
 const getStudentData = async (students) => {
