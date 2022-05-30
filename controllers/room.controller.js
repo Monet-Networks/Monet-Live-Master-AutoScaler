@@ -176,6 +176,63 @@ exports.saveRoom = function (req, res) {
     }
   });
 };
+
+exports.getAllScheduleRooms = async function (req, res) {
+  try {
+    const { page, limit } = req.query;
+    const { email } = req.body;
+    const { source } = req.body;
+    const [start, end] = [req.body.start || '', req.body.end || ''];
+    let rooms;
+    if (email) {
+      if (page && limit) {
+        rooms = await paginate(
+          page,
+          limit,
+          Rooms,
+          start
+            ? {
+                creator_ID: email,
+                source: source,
+                'start.dateTime': {
+                  $gte: new Date(start),
+                  $lte: new Date(end),
+                },
+              }
+            : { creator_ID: email, source: source },
+          { _id: -1 }
+        );
+      } else {
+        rooms = await Rooms.find({ creator_ID: email, source: source });
+        if (!rooms?.length)
+          return res.json({
+            code: 404,
+            error: true,
+            message: 'No rooms found',
+          });
+      }
+    }
+    if (!rooms)
+      return res.json({
+        code: 404,
+        error: true,
+        message: 'No rooms found',
+      });
+    return res.json({
+      code: 200,
+      error: false,
+      message: 'The room exists',
+      response: rooms,
+    });
+  } catch (error) {
+    return res.json({
+      code: 400,
+      error: true,
+      message: 'Unable to find rooms',
+      response: error.message,
+    });
+  }
+};
 exports.V2getAllRooms = async function (req, res) {
   try {
     const { page, limit } = req.query;

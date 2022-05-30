@@ -114,6 +114,12 @@ admin.post('/getAllInviteRooms', function (req, res) {
   });
 });
 
+admin.post('/getAllScheduleInviteRooms', function (req, res) {
+  roomController.getAllScheduleRooms(req, res).then(() => {
+    /* don't do anything */
+  });
+});
+
 admin.get('/getReportData', async (req, res) => {
   const { roomid } = req.query;
   const report = redis.get(`report:${roomid}`);
