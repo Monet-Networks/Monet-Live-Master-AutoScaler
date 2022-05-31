@@ -194,16 +194,17 @@ exports.getAllScheduleRooms = async function (req, res) {
             ? {
                 creator_ID: email,
                 source: source,
+                scheduled: true,
                 'start.dateTime': {
                   $gte: new Date(start),
                   $lte: new Date(end),
                 },
               }
-            : { creator_ID: email, source: source },
+            : { creator_ID: email, source: source, scheduled: true },
           { _id: -1 }
         );
       } else {
-        rooms = await Rooms.find({ creator_ID: email, source: source });
+        rooms = await Rooms.find({ creator_ID: email, source: source, scheduled: true });
         if (!rooms?.length)
           return res.json({
             code: 404,
