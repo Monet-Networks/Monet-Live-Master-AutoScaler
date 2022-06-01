@@ -589,6 +589,8 @@ admin.post('/auth/authentication', async (req, res) => {
   }
 });
 
+admin.post('/register-invited-user', userController.registerInvitedUser);
+
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
 };
