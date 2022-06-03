@@ -30,6 +30,7 @@ const plan = require('@models/plans.model');
 const user = require('@models/user.model');
 const auth = require('@utils/auth');
 const RemainingHours = require('@utils/users');
+const assignments = require('@models/assignments.model');
 const monet = {
   vdebug: debug('websocket:vdebug'),
   debug: debug('websocket:debug'),
@@ -578,6 +579,52 @@ admin.post('/auth/authentication', async (req, res) => {
       error: false,
       message: 'Details found',
       data: { user, userPlan },
+    });
+  } catch (err) {
+    res.json({
+      code: 400,
+      error: true,
+      message: 'Something went wrong',
+      response: err,
+    });
+  }
+});
+admin.get('/assignmentscore', async (req, res) => {
+  try {
+    const { roomid } = req.query;
+    let assque = [];
+    let subque = [];
+    let rightPoints = 0;
+    let wrongPoints = 0;
+    const submission = await assignments.find({ roomId: roomid }).lean();
+    submission.forEach((assignments) => {
+      assignments.submissions.forEach((submissions) => {
+        subque.push(submissions.answer);
+      });
+
+      assignments.questions.forEach((questions) => {
+        assque.push(questions.answer);
+      });
+      let i = 0;
+      assque.forEach((items) => {
+        if (items === subque[i]) {
+          rightPoints += 1;
+          i += 1;
+        } else {
+          wrongPoints += 1;
+          i += 1;
+        }
+      });
+    });
+
+    const totalQuestions = rightPoints + wrongPoints;
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Assignments Points ',
+      totalQuestions,
+      rightPoints,
+      wrongPoints,
     });
   } catch (err) {
     res.json({
