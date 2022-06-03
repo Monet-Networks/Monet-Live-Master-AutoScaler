@@ -258,7 +258,10 @@ exports.V2getAllRooms = async function (req, res) {
           { _id: -1 }
         );
       } else {
-        rooms = await Rooms.find({ creator_ID: email }{_id:0,observerLink:0 , settings:0,room:0,observing:0, grp:0, instance:0});
+        rooms = await Rooms.find(
+          { creator_ID: email },
+          { _id: 0, observerLink: 0, settings: 0, room: 0, observing: 0, grp: 0, instance: 0 }
+        );
         if (!rooms?.length)
           return res.json({
             code: 404,
