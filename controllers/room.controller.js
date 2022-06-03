@@ -25,6 +25,7 @@ exports.getAllRooms = async function (req, res) {
                 },
               }
             : { creator_ID: email },
+          {},
           { _id: -1 }
         );
       } else {
