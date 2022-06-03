@@ -30,7 +30,7 @@ const plan = require('@models/plans.model');
 const user = require('@models/user.model');
 const auth = require('@utils/auth');
 const RemainingHours = require('@utils/users');
-const assignments = require('@models/assignments.model');
+const assignments = require('@models/assignment.model');
 const monet = {
   vdebug: debug('websocket:vdebug'),
   debug: debug('websocket:debug'),
