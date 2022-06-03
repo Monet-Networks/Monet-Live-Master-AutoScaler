@@ -294,7 +294,7 @@ exports.V2getAllRooms = async function (req, res) {
         code: 200,
         error: false,
         message: 'The room exists',
-        response: rawData,
+        response: {rooms,...rawData},
       });
     }
   } catch (error) {
