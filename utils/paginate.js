@@ -1,4 +1,4 @@
-const paginate = async (page, limit, model, filter = {}, sort = {}) => {
+const paginate = async (page, limit, model, filter = {}, projection = {}, sort = {}) => {
   page = Math.abs(parseInt(page));
   limit = Math.abs(parseInt(limit));
   if (page < 1) {
@@ -20,7 +20,7 @@ const paginate = async (page, limit, model, filter = {}, sort = {}) => {
   };
 
   try {
-    result.results = await model.find(filter).sort(sort).limit(limit).skip(startIndex).exec();
+    result.results = await model.find(filter, projection).sort(sort).limit(limit).skip(startIndex).exec();
     if (!result.results.length) {
       return null;
     }

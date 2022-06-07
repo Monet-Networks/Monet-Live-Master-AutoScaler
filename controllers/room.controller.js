@@ -25,6 +25,7 @@ exports.getAllRooms = async function (req, res) {
                 },
               }
             : { creator_ID: email },
+          {},
           { _id: -1 }
         );
       } else {
@@ -236,7 +237,7 @@ exports.getAllScheduleRooms = async function (req, res) {
 };
 exports.V2getAllRooms = async function (req, res) {
   try {
-    const { page, limit } = req.query;
+    const { page, limit, alive } = req.query;
     const { email } = req.body;
     const [start, end] = [req.body.start || '', req.body.end || ''];
     let rooms;
@@ -254,11 +255,15 @@ exports.V2getAllRooms = async function (req, res) {
                   $lte: new Date(end),
                 },
               }
-            : { creator_ID: email },
+            : { creator_ID: email, ...(alive && { alive: alive }) },
+          { _id: 0, observerLink: 0, settings: 0, room: 0, observing: 0, grp: 0, instance: 0 },
           { _id: -1 }
         );
       } else {
-        rooms = await Rooms.find({ creator_ID: email });
+        rooms = await Rooms.find(
+          { creator_ID: email, ...(alive && { alive: alive }) },
+          { _id: 0, observerLink: 0, settings: 0, room: 0, observing: 0, grp: 0, instance: 0 }
+        );
         if (!rooms?.length)
           return res.json({
             code: 404,
@@ -273,30 +278,12 @@ exports.V2getAllRooms = async function (req, res) {
         error: true,
         message: 'No rooms found',
       });
-    if (rooms) {
-      const rawData = [];
-      rooms.results.forEach((rooms) => {
-        const data = {
-          summary: rooms.summary,
-          mosaic: rooms.mosaic,
-          roomid: rooms.roomid,
-          start: rooms.start.dateTime,
-          end: rooms.end.dateTime,
-          attendees: rooms.attendees,
-          scheduled: rooms.scheduled,
-          callDuration: (new Date(rooms.end.dateTime) - new Date(rooms.start.dateTime)) / 1000,
-        };
-
-        rawData.push(data);
-      });
-
-      res.json({
-        code: 200,
-        error: false,
-        message: 'The room exists',
-        response: rawData,
-      });
-    }
+    return res.json({
+      code: 200,
+      error: false,
+      message: 'The room exists',
+      response: rooms,
+    });
   } catch (error) {
     return res.json({
       code: 400,

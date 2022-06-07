@@ -30,7 +30,7 @@ const roomSchema = new mongoose.Schema({
   },
   alive: {
     type: Number,
-    enum: [0, 1],
+    enum: [0, 1, 2],
     default: 1,
   },
   summary: {
