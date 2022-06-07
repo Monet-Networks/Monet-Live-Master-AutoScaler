@@ -237,7 +237,7 @@ exports.getAllScheduleRooms = async function (req, res) {
 };
 exports.V2getAllRooms = async function (req, res) {
   try {
-    const { page, limit } = req.query;
+    const { page, limit, alive } = req.query;
     const { email } = req.body;
     const [start, end] = [req.body.start || '', req.body.end || ''];
     let rooms;
@@ -255,13 +255,13 @@ exports.V2getAllRooms = async function (req, res) {
                   $lte: new Date(end),
                 },
               }
-            : { creator_ID: email },
+            : { creator_ID: email, alive: alive },
           { _id: 0, observerLink: 0, settings: 0, room: 0, observing: 0, grp: 0, instance: 0 },
           { _id: -1 }
         );
       } else {
         rooms = await Rooms.find(
-          { creator_ID: email },
+          { creator_ID: email, alive: alive },
           { _id: 0, observerLink: 0, settings: 0, room: 0, observing: 0, grp: 0, instance: 0 }
         );
         if (!rooms?.length)
