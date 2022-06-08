@@ -618,6 +618,22 @@ admin.get('/assignmentscore', async (req, res) => {
     });
 
     const totalQuestions = rightPoints + wrongPoints;
+
+    let data = [];
+    const submision = await assignments.findOne({ roomId: roomid }, { submissions: 1, _id: 0 }).lean();
+    const attempStudents = await Sessions.find(
+      { roomid: roomid, proctor: 'student' },
+      { name: 1, uuid: 1, _id: 0 }
+    ).lean();
+
+    attempStudents.forEach((item) => {
+      submision.submissions.forEach((submission) => {
+        if (submission.uuid === item.uuid) {
+          const rawdata = { ...submission, ...item };
+          data.push(rawdata);
+        }
+      });
+    });
     res.json({
       code: 200,
       error: false,
@@ -625,6 +641,7 @@ admin.get('/assignmentscore', async (req, res) => {
       totalQuestions,
       rightPoints,
       wrongPoints,
+      data,
     });
   } catch (err) {
     res.json({
