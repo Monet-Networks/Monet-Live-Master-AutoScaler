@@ -601,8 +601,7 @@ admin.get('/assignmentscore', async (req, res) => {
       { roomid: roomid, proctor: 'student' },
       { name: 1, uuid: 1, _id: 0 }
     ).lean();
-    const title = submision.title;
-    score.push({ title });
+
     attempStudents.forEach((item, index) => {
       let rightanswer = 0;
       let wronganswer = 0;
@@ -623,7 +622,9 @@ admin.get('/assignmentscore', async (req, res) => {
       const rawscore = { ...item, rightanswer, wronganswer, totalQuestion };
       participants.push(rawscore);
     });
-    score.push({ participants });
+    const title = submision.title;
+    score.push({ title, participants });
+    // score.push({ participants });
     res.json({
       code: 200,
       error: false,
