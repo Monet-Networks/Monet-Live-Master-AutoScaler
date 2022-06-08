@@ -601,7 +601,7 @@ admin.get('/assignmentscore', async (req, res) => {
       { name: 1, uuid: 1, _id: 0 }
     ).lean();
     const title = submision.title;
-    score.push({ title });
+    score.push([{ title }]);
     attempStudents.forEach((item, index) => {
       let rightanswer = 0;
       let wronganswer = 0;
