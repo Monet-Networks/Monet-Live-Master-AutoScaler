@@ -623,7 +623,7 @@ admin.get('/assignmentscore', async (req, res) => {
       const rawscore = { ...item, rightanswer, wronganswer, totalQuestion };
       participants.push(rawscore);
     });
-    score.push(participants);
+    score.push({ participants });
     res.json({
       code: 200,
       error: false,
