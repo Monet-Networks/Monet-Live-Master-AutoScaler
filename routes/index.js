@@ -592,56 +592,40 @@ admin.post('/auth/authentication', async (req, res) => {
 admin.get('/assignmentscore', async (req, res) => {
   try {
     const { roomid } = req.query;
-    let assque = [];
-    let subque = [];
-    let rightPoints = 0;
-    let wrongPoints = 0;
-    const submission = await assignments.find({ roomId: roomid }).lean();
-    submission.forEach((assignments) => {
-      assignments.submissions.forEach((submissions) => {
-        subque.push(submissions.answer);
-      });
+    // let data = [];
+    let score = [];
 
-      assignments.questions.forEach((questions) => {
-        assque.push(questions.answer);
-      });
-      let i = 0;
-      assque.forEach((items) => {
-        if (items === subque[i]) {
-          rightPoints += 1;
-          i += 1;
-        } else {
-          wrongPoints += 1;
-          i += 1;
-        }
-      });
-    });
-
-    const totalQuestions = rightPoints + wrongPoints;
-
-    let data = [];
     const submision = await assignments.findOne({ roomId: roomid }, { submissions: 1, _id: 0 }).lean();
     const attempStudents = await Sessions.find(
       { roomid: roomid, proctor: 'student' },
       { name: 1, uuid: 1, _id: 0 }
     ).lean();
 
-    attempStudents.forEach((item) => {
+    attempStudents.forEach((item, index) => {
+      let rightanswer = 0;
+      let wronganswer = 0;
       submision.submissions.forEach((submission) => {
         if (submission.uuid === item.uuid) {
-          const rawdata = { ...submission, ...item };
-          data.push(rawdata);
+          if (submission.correct === true) {
+            rightanswer += 1;
+            // const rawdata = { ...submission, ...item };
+            // data.push(rawdata);
+          } else if (submission.correct === false) {
+            wronganswer += 1;
+            // const rawdata = { ...submission, ...item };
+            // data.push(rawdata);
+          }
         }
       });
+      const totalQuestion = rightanswer + wronganswer;
+      const rawscore = { ...item, rightanswer, wronganswer, totalQuestion };
+      score.push(rawscore);
     });
     res.json({
       code: 200,
       error: false,
-      message: 'Assignments Points ',
-      totalQuestions,
-      rightPoints,
-      wrongPoints,
-      data,
+      message: 'Assignments Score ',
+      score,
     });
   } catch (err) {
     res.json({
