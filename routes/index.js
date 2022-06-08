@@ -595,7 +595,7 @@ admin.get('/assignmentscore', async (req, res) => {
     // let data = [];
     let score = [];
 
-    const submision = await assignments.findOne({ roomId: roomid }, { submissions: 1, _id: 0 }).lean();
+    const submision = await assignments.findOne({ roomId: roomid }, { submissions: 1, title: 1, _id: 0 }).lean();
     const attempStudents = await Sessions.find(
       { roomid: roomid, proctor: 'student' },
       { name: 1, uuid: 1, _id: 0 }
