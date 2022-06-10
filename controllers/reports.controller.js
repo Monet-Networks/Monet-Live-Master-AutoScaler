@@ -6,9 +6,9 @@ const Sessions = require('@models/sessions.model');
 exports.reportPdf = async (req, res) => {
   try {
     const { roomid } = req.query;
-    const roomPromise = Rooms.findOne({ roomid });
-    const sessionsPromise = Sessions.find({ roomid });
-    const reportPromise = Reports.findOne({ roomid });
+    const roomPromise = Rooms.findOne({ roomid }).lean();
+    const sessionsPromise = Sessions.find({ roomid }).lean();
+    const reportPromise = Reports.findOne({ roomid }).lean();
     const [room, sessions, report] = await Promise.all([roomPromise, sessionsPromise, reportPromise]);
     if (!room || !sessions || !report) {
       return res.json({ code: 404, error: true, message: 'Room data not found' });
@@ -49,7 +49,7 @@ const getStudentData = async (students) => {
     const faceDataPromise = [];
     students.forEach((student) => {
       studentsData[student.uuid] = { name: student.name, uuid: student.uuid };
-      faceDataPromise.push(FaceData.find({ roomid: student.roomid, uuid: student.uuid }));
+      faceDataPromise.push(FaceData.find({ roomid: student.roomid, uuid: student.uuid }).lean());
     });
     const pData = await Promise.all(faceDataPromise);
     pData.forEach(async (studentFD, index) => {
