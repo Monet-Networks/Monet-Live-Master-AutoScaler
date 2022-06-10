@@ -1,95 +1,31 @@
-const Rooms = require('@models/room.model');
 const Reports = require('@models/reports.model');
-const FaceData = require('@models/faceData.model');
-const Sessions = require('@models/sessions.model');
+const genPdf = require('../utils/genPdf');
 
-exports.reportPdf = async (req, res) => {
-  try {
-    const { roomid } = req.query;
-    const roomPromise = Rooms.findOne({ roomid }).lean();
-    const sessionsPromise = Sessions.find({ roomid }).lean();
-    const reportPromise = Reports.findOne({ roomid }).lean();
-    const [room, sessions, report] = await Promise.all([roomPromise, sessionsPromise, reportPromise]);
-    if (!room || !sessions || !report) {
-      return res.json({ code: 404, error: true, message: 'Room data not found' });
-    }
-    const students = sessions.filter((session) => session.proctor === 'student' && !session.uuid.includes('___'));
-    const invitedUsersLength = room.attendees.length ? room.attendees.length - 1 : 0;
-    const joinedUsersLength = students.length;
-    const attendance = Math.min((joinedUsersLength / invitedUsersLength) * 100, 100);
-    const studentDataPromise = getStudentData(students);
-    const speakingScorePromise = getSpeakingInfo(roomid);
-    const [studentData, speakingScore] = await Promise.all([studentDataPromise, speakingScorePromise]);
-    const callDuration = (new Date(room.end.dateTime) - new Date(room.start.dateTime)) / 1000;
-    res.json({
+exports.reportPdf = async (req, res, redis) => {
+  const { roomid } = req.query;
+  const report = await Reports.findOne({ roomid });
+  if (report.pdf) {
+    return res.json({
       code: 200,
       error: false,
-      message: 'Data fetched successfully',
-      data: {
-        attendance,
-        callDuration,
-        totalStudents: joinedUsersLength,
-        speakingScore,
-        overallEngagement: report.report?.averageEngagement || null,
-        students: studentData,
-      },
+      message: 'PDF data already exists',
+      report: report.pdf,
     });
-  } catch (err) {
-    res.json({
+  }
+  const pdf = await genPdf(roomid, redis);
+  if (!pdf) {
+    return res.json({
       code: 500,
       error: true,
-      message: err,
+      message: `Could not generate PDF data for roomid: ${roomid}. Please check`,
+    });
+  } else {
+    Reports.findOneAndUpdate({ roomid }, { pdf });
+    return res.json({
+      code: 200,
+      error: false,
+      message: 'Report PDF data generated successfully',
+      data: pdf,
     });
   }
-};
-
-const getStudentData = async (students) => {
-  return new Promise(async (resolve) => {
-    const studentsData = {};
-    const faceDataPromise = [];
-    students.forEach((student) => {
-      studentsData[student.uuid] = { name: student.name, uuid: student.uuid };
-      faceDataPromise.push(FaceData.find({ roomid: student.roomid, uuid: student.uuid }).lean());
-    });
-    const pData = await Promise.all(faceDataPromise);
-    pData.forEach(async (studentFD, index) => {
-      if (studentFD.length === 0) return;
-      let totalEngagement = 0;
-      let averageEngagement;
-      studentFD.forEach((data) => (totalEngagement += data.engagement));
-      averageEngagement = totalEngagement / studentFD.length;
-      studentsData[studentFD[0].uuid].averageEngagement = averageEngagement;
-      if (index === students.length - 1) resolve(Object.values(studentsData));
-    });
-  });
-};
-
-const getSpeakingInfo = async (roomid) => {
-  const room = await Rooms.findOne({ roomid }).lean();
-  const { realTimeScores } = room.settings;
-  const roomDuration = Math.abs(new Date(room.end.dateTime).getTime() - new Date(room.start.dateTime).getTime()) / 1000;
-  const sessionData = await FaceData.find({ roomid, speaking: 1 }).lean();
-  const finalData = {};
-  sessionData.forEach((data) => {
-    const { uuid } = data;
-    if (finalData[uuid]) {
-      if (finalData[uuid].data) {
-        finalData[uuid].data.push(data);
-        finalData[uuid].counter += 1;
-      } else {
-        finalData[uuid].data = [data];
-        finalData[uuid].counter = 1;
-      }
-    } else {
-      finalData[uuid] = { data: [data], counter: 1 };
-    }
-  });
-  let totalSpeakingDuration = 0;
-  for (let uuid in finalData) {
-    finalData[uuid].duration = finalData[uuid].counter * realTimeScores;
-    totalSpeakingDuration += finalData[uuid].duration;
-  }
-  const averageSpeakingDuration = totalSpeakingDuration / Object.keys(finalData).length;
-  const roomSpeakingScore = (averageSpeakingDuration / roomDuration) * 100;
-  return roomSpeakingScore;
 };

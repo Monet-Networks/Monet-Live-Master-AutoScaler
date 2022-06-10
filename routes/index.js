@@ -223,7 +223,40 @@ admin.post('/generateReport', async (req, res) => {
     });
 });
 
-admin.get('/report-pdf', reportsController.reportPdf);
+admin.get('/getPdfData', async (req, res) => {
+  const { roomid } = req.query;
+  const report = redis.get(`pdf:${roomid}`);
+  if (report === '1') {
+    return res.json({
+      code: 202,
+      error: false,
+      message: 'PDF data is generating',
+    });
+  } else {
+    try {
+      const report = await Reports.findOne({ roomid });
+      if (!report || !report.pdf) {
+        return res.json({
+          code: 404,
+          error: true,
+          message: 'Report data not found',
+        });
+      } else {
+        res.json({
+          code: 200,
+          error: false,
+          message: 'PDF data found',
+          pdf: report.pdf,
+        });
+      }
+    } catch (error) {
+      console.log('getPdfData error', error);
+      res.json({ code: 500, error: true, message: error });
+    }
+  }
+});
+
+admin.get('/generatePdfData', (req, res) => reportsController.reportPdf(req, res, redis));
 
 admin.get('/my-meetings', async (req, res) => {
   const { creator_ID, timeline } = req.query;
@@ -592,7 +625,6 @@ admin.post('/auth/authentication', async (req, res) => {
 });
 admin.get('/assignmentscore', async (req, res) => {
   try {
-   
     const { roomid } = req.query;
 
     let score = [];
