@@ -31,7 +31,7 @@ const user = require('@models/user.model');
 const auth = require('@utils/auth');
 const RemainingHours = require('@utils/users');
 const assignments = require('@models/assignment.model');
-const requestIp = require('request-ip');
+
 const monet = {
   vdebug: debug('websocket:vdebug'),
   debug: debug('websocket:debug'),
@@ -592,8 +592,7 @@ admin.post('/auth/authentication', async (req, res) => {
 });
 admin.get('/assignmentscore', async (req, res) => {
   try {
-    const ip = requestIp.getClientIp(req);
-    console.log(ip);
+   
     const { roomid } = req.query;
 
     let score = [];
