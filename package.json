@@ -52,6 +52,7 @@
     "multer": "^1.4.4",
     "nodemailer": "^6.7.3",
     "redis": "^4.0.3",
+    "request-ip": "^2.2.0",
     "rm": "^0.1.8",
     "sanitize-filename": "^1.6.3",
     "socket.io": "^4.4.1",
