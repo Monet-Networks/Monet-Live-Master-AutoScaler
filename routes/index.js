@@ -592,39 +592,45 @@ admin.post('/auth/authentication', async (req, res) => {
 admin.get('/assignmentscore', async (req, res) => {
   try {
     const { roomid } = req.query;
-    // let data = [];
-    let score = [];
-    let participants = [];
 
-    const submision = await assignments.findOne({ roomId: roomid }, { submissions: 1, title: 1, _id: 0 }).lean();
+    let score = [];
+
+    let rawAssigmentCount = [];
+    // let data = [];
     const attempStudents = await Sessions.find(
       { roomid: roomid, proctor: 'student' },
       { name: 1, uuid: 1, _id: 0 }
     ).lean();
 
-    attempStudents.forEach((item, index) => {
-      let rightanswer = 0;
-      let wronganswer = 0;
-      submision.submissions.forEach((submission) => {
-        if (submission.uuid === item.uuid) {
-          if (submission.correct === true) {
-            rightanswer += 1;
-            // const rawdata = { ...submission, ...item };
-            // data.push(rawdata);
-          } else if (submission.correct === false) {
-            wronganswer += 1;
-            // const rawdata = { ...submission, ...item };
-            // data.push(rawdata);
-          }
-        }
-      });
-      const totalQuestion = rightanswer + wronganswer;
-      const rawscore = { ...item, rightanswer, wronganswer, totalQuestion };
-      participants.push(rawscore);
+    const assigmentCount = await assignments.find({ roomId: roomid });
+
+    assigmentCount.forEach((item) => {
+      const submision = assignments.findById(item.id, { submissions: 1, title: 1, _id: 0 }).lean();
+
+      rawAssigmentCount.push(submision);
     });
-    const title = submision.title;
-    score.push({ title, participants });
-    // score.push({ participants });
+    const assigmentCountData = await Promise.all(rawAssigmentCount);
+    assigmentCountData.forEach((submision) => {
+      let participants = [];
+      attempStudents.forEach((item, index) => {
+        let rightanswer = 0;
+        let wronganswer = 0;
+        submision.submissions.forEach((submission) => {
+          if (submission.uuid === item.uuid) {
+            if (submission.correct === true) {
+              rightanswer += 1;
+            } else if (submission.correct === false) {
+              wronganswer += 1;
+            }
+          }
+        });
+        const totalQuestion = rightanswer + wronganswer;
+        const rawscore = { ...item, rightanswer, wronganswer, totalQuestion };
+        participants.push(rawscore);
+      });
+      const title = submision.title;
+      score.push({ title, participants });
+    });
     res.json({
       code: 200,
       error: false,
