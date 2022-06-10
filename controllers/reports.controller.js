@@ -53,6 +53,7 @@ const getStudentData = async (students) => {
     });
     const pData = await Promise.all(faceDataPromise);
     pData.forEach(async (studentFD, index) => {
+      if (studentFD.length === 0) return;
       let totalEngagement = 0;
       let averageEngagement;
       studentFD.forEach((data) => (totalEngagement += data.engagement));
