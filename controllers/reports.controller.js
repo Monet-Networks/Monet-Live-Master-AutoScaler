@@ -2,7 +2,7 @@ const Reports = require('@models/reports.model');
 const genPdf = require('../utils/genPdf');
 
 exports.reportPdf = async (req, res, redis) => {
-  const { roomid } = req.query;
+  const { roomid, creator_ID } = req.query;
   const report = await Reports.findOne({ roomid });
   if (report && report.pdf) {
     return res.json({
@@ -12,7 +12,7 @@ exports.reportPdf = async (req, res, redis) => {
       report: report.pdf,
     });
   }
-  const pdf = await genPdf(roomid, redis);
+  const pdf = await genPdf(roomid, creator_ID, redis);
   if (!pdf) {
     return res.json({
       code: 500,

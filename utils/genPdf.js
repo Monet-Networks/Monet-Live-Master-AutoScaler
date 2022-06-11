@@ -3,7 +3,7 @@ const Reports = require('@models/reports.model');
 const FaceData = require('@models/faceData.model');
 const Sessions = require('@models/sessions.model');
 
-const genPdf = async (roomid, redis) => {
+const genPdf = async (roomid, creator_ID, redis) => {
   try {
     console.log(`Generating PDF data for ${roomid}`);
     redis.set(`pdf:${roomid}`, 1, () => console.log('Flag for PDF set in Redis'));
@@ -33,7 +33,7 @@ const genPdf = async (roomid, redis) => {
       overallEngagement: report?.report?.averageEngagement || null,
       students: studentData,
     };
-    Reports.findOneAndUpdate({ roomid }, { pdf });
+    Reports.findOneAndUpdate({ roomid }, { pdf, creator_ID }, { upsert: true });
     return pdf;
   } catch (err) {
     console.log('Generate report PDF error', err);

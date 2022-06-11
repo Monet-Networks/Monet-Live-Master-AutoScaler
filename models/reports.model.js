@@ -13,11 +13,11 @@ const reportSchema = mongoose.Schema({
   },
   pieData: {
     type: [],
-    required: true,
+    default: [],
   },
   overallEngagement: {
     type: [],
-    required: true,
+    default: [],
   },
   pdf: {
     type: {},
