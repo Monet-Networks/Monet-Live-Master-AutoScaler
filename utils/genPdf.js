@@ -1,18 +1,18 @@
-const Rooms = require('@models/room.model');
+const Rooms = require('@models/rooms.model');
 const Reports = require('@models/reports.model');
 const FaceData = require('@models/faceData.model');
 const Sessions = require('@models/sessions.model');
 
 const genPdf = async (roomid, redis) => {
   try {
-    console.log(`Generating PDF data fom ${roomid}`);
+    console.log(`Generating PDF data for ${roomid}`);
     redis.set(`pdf:${roomid}`, 1, () => console.log('Flag for PDF set in Redis'));
     const roomPromise = Rooms.findOne({ roomid }).lean();
     const sessionsPromise = Sessions.find({ roomid }).lean();
     const reportPromise = Reports.findOne({ roomid }).lean();
     const [room, sessions, report] = await Promise.all([roomPromise, sessionsPromise, reportPromise]);
-    if (!room || !sessions || !report) {
-      return res.json({ code: 404, error: true, message: 'Room data not found' });
+    if (!room || !sessions) {
+      return undefined;
     }
     const students = sessions.filter((session) => session.proctor === 'student' && !session.uuid.includes('___'));
     const invitedUsersLength = room.attendees.length ? room.attendees.length - 1 : 0;
@@ -30,7 +30,7 @@ const genPdf = async (roomid, redis) => {
       callDuration,
       totalStudents: joinedUsersLength,
       speakingScore,
-      overallEngagement: report.report?.averageEngagement || null,
+      overallEngagement: report?.report?.averageEngagement || null,
       students: studentData,
     };
     Reports.findOneAndUpdate({ roomid }, { pdf });

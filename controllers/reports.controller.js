@@ -4,7 +4,7 @@ const genPdf = require('../utils/genPdf');
 exports.reportPdf = async (req, res, redis) => {
   const { roomid } = req.query;
   const report = await Reports.findOne({ roomid });
-  if (report.pdf) {
+  if (report && report.pdf) {
     return res.json({
       code: 200,
       error: false,
