@@ -1,4 +1,4 @@
-const Rooms = require('@models/rooms.model');
+const Rooms = require('@models/room.model');
 const Reports = require('@models/reports.model');
 const FaceData = require('@models/faceData.model');
 const Sessions = require('@models/sessions.model');
