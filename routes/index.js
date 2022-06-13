@@ -19,7 +19,8 @@ const fdController = require('@controllers/faceData.controller');
 const Reports = require('@models/reports.model');
 const Rooms = require('@models/room.model');
 const CreateConfiguration = require('@modules/createConfig');
-const { Router } = require('express');
+const express = require('express'),
+  { Router } = require('express');
 const sendMail = require('@utils/sendMail');
 const roomEmails = {};
 const Sessions = require('@models/sessions.model');
@@ -472,7 +473,7 @@ admin.get('/avg-engagement-req', async function (req, res) {
   }
 });
 
-admin.use('/face', FaceRouter);
+admin.use('/face', express.bodyParser({ limit: '5mb' }), FaceRouter);
 
 const getReport = async (data) => {
   const report = [];
