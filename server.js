@@ -2,7 +2,6 @@ require('module-alias/register');
 require('dotenv').config();
 const apiRoutes = require('@routes');
 const express = require('express');
-const bodyParser = require('body-parser');
 const admin = express();
 const { createServer } = require('http');
 const { Server } = require('socket.io');
@@ -77,7 +76,7 @@ admin.use(
     },
   })
 );
-admin.use(bodyParser.json({ limit: '50mb' }));
+admin.use(express.json({ limit: '50mb' }));
 admin.use('/test', express.static('tests'));
 admin.get('/register-instance', instanceRegistrationHandle);
 admin.get('/engine-data', getEngineData);
