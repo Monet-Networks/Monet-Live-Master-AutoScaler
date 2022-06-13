@@ -77,8 +77,7 @@ admin.use(
     },
   })
 );
-admin.use(express.json({ limit: '50mb' }));
-admin.use(express.urlencoded({ limit: '50mb' }));
+admin.use(express.rawBody({ limit: '50mb' }));
 admin.use(bodyParser.json({ limit: '50mb' }));
 admin.use('/test', express.static('tests'));
 admin.get('/register-instance', instanceRegistrationHandle);
