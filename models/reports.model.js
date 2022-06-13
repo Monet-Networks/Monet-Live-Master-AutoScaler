@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
-// const index = require('async');
 
-// collection or table -> What type of data.
 const reportSchema = mongoose.Schema({
   roomid: {
     type: String,
@@ -15,11 +13,15 @@ const reportSchema = mongoose.Schema({
   },
   pieData: {
     type: [],
-    required: true,
+    default: [],
   },
   overallEngagement: {
     type: [],
-    required: true,
+    default: [],
+  },
+  pdf: {
+    type: {},
+    default: null,
   },
   report: {
     type: {},

@@ -31,6 +31,7 @@ const user = require('@models/user.model');
 const auth = require('@utils/auth');
 const RemainingHours = require('@utils/users');
 const assignments = require('@models/assignment.model');
+
 const monet = {
   vdebug: debug('websocket:vdebug'),
   debug: debug('websocket:debug'),
@@ -222,7 +223,40 @@ admin.post('/generateReport', async (req, res) => {
     });
 });
 
-admin.get('/report-pdf', reportsController.reportPdf);
+admin.get('/getPdfData', async (req, res) => {
+  const { roomid } = req.query;
+  const report = redis.get(`pdf:${roomid}`);
+  if (report === '1') {
+    return res.json({
+      code: 202,
+      error: false,
+      message: 'PDF data is generating',
+    });
+  } else {
+    try {
+      const report = await Reports.findOne({ roomid });
+      if (!report || !report.pdf) {
+        return res.json({
+          code: 404,
+          error: true,
+          message: 'Report data not found',
+        });
+      } else {
+        res.json({
+          code: 200,
+          error: false,
+          message: 'PDF data found',
+          pdf: report.pdf,
+        });
+      }
+    } catch (error) {
+      console.log('getPdfData error', error);
+      res.json({ code: 500, error: true, message: error });
+    }
+  }
+});
+
+admin.get('/generatePdfData', (req, res) => reportsController.reportPdf(req, res, redis));
 
 admin.get('/my-meetings', async (req, res) => {
   const { creator_ID, timeline } = req.query;
@@ -592,39 +626,45 @@ admin.post('/auth/authentication', async (req, res) => {
 admin.get('/assignmentscore', async (req, res) => {
   try {
     const { roomid } = req.query;
-    // let data = [];
-    let score = [];
-    let participants = [];
 
-    const submision = await assignments.findOne({ roomId: roomid }, { submissions: 1, title: 1, _id: 0 }).lean();
+    let score = [];
+
+    let rawAssigmentCount = [];
+    // let data = [];
     const attempStudents = await Sessions.find(
       { roomid: roomid, proctor: 'student' },
       { name: 1, uuid: 1, _id: 0 }
     ).lean();
 
-    attempStudents.forEach((item, index) => {
-      let rightanswer = 0;
-      let wronganswer = 0;
-      submision.submissions.forEach((submission) => {
-        if (submission.uuid === item.uuid) {
-          if (submission.correct === true) {
-            rightanswer += 1;
-            // const rawdata = { ...submission, ...item };
-            // data.push(rawdata);
-          } else if (submission.correct === false) {
-            wronganswer += 1;
-            // const rawdata = { ...submission, ...item };
-            // data.push(rawdata);
-          }
-        }
-      });
-      const totalQuestion = rightanswer + wronganswer;
-      const rawscore = { ...item, rightanswer, wronganswer, totalQuestion };
-      participants.push(rawscore);
+    const assigmentCount = await assignments.find({ roomId: roomid });
+
+    assigmentCount.forEach((item) => {
+      const submision = assignments.findById(item.id, { submissions: 1, title: 1, _id: 0 }).lean();
+
+      rawAssigmentCount.push(submision);
     });
-    const title = submision.title;
-    score.push({ title, participants });
-    // score.push({ participants });
+    const assigmentCountData = await Promise.all(rawAssigmentCount);
+    assigmentCountData.forEach((submision) => {
+      let participants = [];
+      attempStudents.forEach((item, index) => {
+        let rightanswer = 0;
+        let wronganswer = 0;
+        submision.submissions.forEach((submission) => {
+          if (submission.uuid === item.uuid) {
+            if (submission.correct === true) {
+              rightanswer += 1;
+            } else if (submission.correct === false) {
+              wronganswer += 1;
+            }
+          }
+        });
+        const totalQuestion = rightanswer + wronganswer;
+        const rawscore = { ...item, rightanswer, wronganswer, totalQuestion };
+        participants.push(rawscore);
+      });
+      const title = submision.title;
+      score.push({ title, participants });
+    });
     res.json({
       code: 200,
       error: false,
