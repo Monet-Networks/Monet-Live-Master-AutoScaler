@@ -274,7 +274,7 @@ exports.V2getAllRooms = async function (req, res) {
     }
     if (!rooms)
       return res.json({
-        code: 404,
+        code: 200,
         error: true,
         message: 'No rooms found',
       });
