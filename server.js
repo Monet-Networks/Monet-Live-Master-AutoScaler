@@ -67,6 +67,7 @@ const io = new Server(httpServer, {
 new db();
 new MonetIO(io);
 
+admin.use(express.bodyParser({ limit: '50mb' }));
 admin.use(
   express.json({
     verify: (req, res, buf) => {
@@ -76,7 +77,6 @@ admin.use(
     },
   })
 );
-admin.use(express.json({ limit: '50mb' }));
 admin.use('/test', express.static('tests'));
 admin.get('/register-instance', instanceRegistrationHandle);
 admin.get('/engine-data', getEngineData);
