@@ -473,7 +473,7 @@ admin.get('/avg-engagement-req', async function (req, res) {
   }
 });
 
-admin.use('/face', bodyParser.apply({ limit: '5mb' }), FaceRouter);
+admin.use('/face', FaceRouter);
 
 const getReport = async (data) => {
   const report = [];
