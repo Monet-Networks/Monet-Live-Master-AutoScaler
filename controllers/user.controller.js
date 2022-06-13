@@ -446,6 +446,11 @@ exports.getUser = async (response) => {
   return result;
 };
 
+exports.GetUser = async ({ ID }) => {
+  let result = await UserModel.findOne({ ID });
+  return result;
+};
+
 exports.isEmpty = async (roomId) => {
   const count = await UserModel.where({ roomid: roomId }).countDocuments();
   // noinspection JSIncompatibleTypesComparison
