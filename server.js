@@ -7,6 +7,7 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const { log } = require('console');
 const db = require('@modules/db');
+const bodyParser = require('body-parser');
 const Engine = require('@modules/scaleEngine');
 const AWSConfiguration = require('@modules/awsConfig');
 const IController = new AWSConfiguration();
@@ -67,7 +68,7 @@ const io = new Server(httpServer, {
 new db();
 new MonetIO(io);
 
-admin.use(express.bodyParser({ limit: '50mb' }));
+admin.use(bodyParser({ limit: '50mb' }));
 admin.use(
   express.json({
     verify: (req, res, buf) => {
