@@ -20,7 +20,7 @@ exports.reportPdf = async (req, res, redis) => {
       message: `Could not generate PDF data for roomid: ${roomid}. Please check`,
     });
   } else {
-    Reports.findOneAndUpdate({ roomid }, { pdf });
+    Reports.findOneAndUpdate({ roomid }, { pdf, creator_ID }, { upsert: true, new: true });
     return res.json({
       code: 200,
       error: false,
