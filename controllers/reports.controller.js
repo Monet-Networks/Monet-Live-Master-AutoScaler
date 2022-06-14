@@ -25,7 +25,7 @@ exports.reportPdf = async (req, res, redis) => {
       code: 200,
       error: false,
       message: 'Report PDF data generated successfully',
-      data: pdf,
+      report: pdf,
     });
   }
 };
