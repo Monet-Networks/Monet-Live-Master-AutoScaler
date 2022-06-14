@@ -21,11 +21,11 @@ const reportSchema = mongoose.Schema({
   },
   pdf: {
     type: {},
-    default: null,
+    default: {},
   },
   report: {
     type: {},
-    default: null,
+    default: {},
   },
 });
 
