@@ -288,18 +288,17 @@ admin.get('/my-meetings', async (req, res) => {
     }
   });
   const meetings = userRooms.length;
-  let overallAverageEngagement = 0;
-  let overallAverageMood = 0;
+
   let overallEngagement = 0;
   let overallMood = 0;
   reports.forEach(({ report }) => {
     if (report) {
       overallEngagement += report.averageEngagement;
       overallMood += report.averageMood;
-      let overallAverageEngagement = overallEngagement / reports.length;
-      let overallAverageMood = overallMood / reports.length;
     }
   });
+  let overallAverageEngagement = overallEngagement / reports.length;
+  let overallAverageMood = overallMood / reports.length;
   res.json({
     code: 200,
     error: false,
