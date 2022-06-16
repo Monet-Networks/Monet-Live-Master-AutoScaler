@@ -273,11 +273,7 @@ admin.get('/my-meetings', async (req, res) => {
           new Date(new Date().setHours(0, 0, 0, 0).valueOf() - 29 * 24 * 60 * 60 * 1000),
           new Date(new Date().setHours(23, 59, 59, 999)),
         ];
-  const reportsData = Reports.find({
-    creator_ID,
-    'start.dateTime': { $gte: new Date(start) },
-    'end.dateTime': { $lte: new Date(end) },
-  });
+  const reportsData = Reports.find({ creator_ID });
   const userRoomsData = Rooms.find({
     creator_ID,
     'start.dateTime': { $gte: new Date(start) },
