@@ -572,7 +572,7 @@ admin.get('/userPlanDetails', async (req, res) => {
       message: 'user not found for the email',
     });
   }
-  console.log(userD);
+
 
   planobject = await plan.find({ planUid: userD.plan.planUid }).lean();
 
