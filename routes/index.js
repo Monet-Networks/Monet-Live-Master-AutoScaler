@@ -573,10 +573,8 @@ admin.get('/userPlanDetails', async (req, res) => {
     });
   }
   console.log(userD);
-  userD.forEach(async (users) => {
-    console.log(users);
-    planobject = await plan.find({ planUid: users.plan.planUid }).lean();
-  });
+
+  planobject = await plan.find({ planUid: userD.plan.planUid }).lean();
 
   res.json({
     code: 200,
