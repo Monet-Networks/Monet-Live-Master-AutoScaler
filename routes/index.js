@@ -288,6 +288,8 @@ admin.get('/my-meetings', async (req, res) => {
     }
   });
   const meetings = userRooms.length;
+  let overallAverageEngagement = 0;
+  let overallAverageMood = 0;
   let overallEngagement = 0;
   let overallMood = 0;
   reports.forEach(({ report }) => {
