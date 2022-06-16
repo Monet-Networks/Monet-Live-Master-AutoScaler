@@ -564,7 +564,7 @@ admin.get('/userPlanDetails', async (req, res) => {
       message: 'email is a required field',
     });
   }
-  const userD = await user.find({ email: email }).lean();
+  const userD = await user.findOne({ email: email }).lean();
   if (!userD) {
     return res.json({
       code: 404,
@@ -572,19 +572,18 @@ admin.get('/userPlanDetails', async (req, res) => {
       message: 'user not found for the email',
     });
   }
+  console.log(userD);
+  userD.forEach(async (users) => {
+    console.log(users);
+    planobject = await plan.find({ planUid: users.plan.planUid }).lean();
+  });
 
-  if (userD) {
-    userD.forEach(async (users) => {
-      planobject = await plan.find({ planUid: users.plan.planUid }).lean();
-    });
-
-    res.json({
-      code: 200,
-      error: false,
-      message: 'Plan details  Found',
-      data: planobject,
-    });
-  }
+  res.json({
+    code: 200,
+    error: false,
+    message: 'Plan details  Found',
+    data: planobject,
+  });
 });
 
 admin.post('/v2/getreportsList', function (req, res) {
