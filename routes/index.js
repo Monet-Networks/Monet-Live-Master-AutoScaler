@@ -556,6 +556,7 @@ admin.post('/sendAdminMosaic', async (req, res) => {
 
 admin.get('/userPlanDetails', async (req, res) => {
   const { email } = req.query;
+  let planobject;
   if (!email) {
     return res.json({
       code: 400,
@@ -573,13 +574,13 @@ admin.get('/userPlanDetails', async (req, res) => {
   }
   userD.forEach(async (users) => {
     planobject = await plan.find({ planUid: users.plan.planUid }).lean();
-    
-    res.json({
-      code: 200,
-      error: false,
-      message: 'Plan details  Found',
-      data: planobject,
-    });
+  });
+
+  res.json({
+    code: 200,
+    error: false,
+    message: 'Plan details  Found',
+    data: planobject,
   });
 });
 
