@@ -572,8 +572,8 @@ admin.get('/userPlanDetails', async (req, res) => {
     });
   }
   userD.forEach(async (users) => {
-    object = await plan.find({ planUid: users.plan.planUid }).lean();
-    const planobject = Promise.all([object]);
+    planobject = await plan.find({ planUid: users.plan.planUid }).lean();
+    
     res.json({
       code: 200,
       error: false,
