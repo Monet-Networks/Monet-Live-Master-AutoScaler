@@ -572,16 +572,19 @@ admin.get('/userPlanDetails', async (req, res) => {
       message: 'user not found for the email',
     });
   }
-  userD.forEach(async (users) => {
-    planobject = await plan.find({ planUid: users.plan.planUid }).lean();
-  });
 
-  res.json({
-    code: 200,
-    error: false,
-    message: 'Plan details  Found',
-    data: planobject,
-  });
+  if (userD) {
+    userD.forEach(async (users) => {
+      planobject = await plan.find({ planUid: users.plan.planUid }).lean();
+    });
+
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Plan details  Found',
+      data: planobject,
+    });
+  }
 });
 
 admin.post('/v2/getreportsList', function (req, res) {
