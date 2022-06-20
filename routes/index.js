@@ -343,6 +343,10 @@ admin.get('/getPlanGroupDetails', planGroupsController.getPlanGroupDetails);
 
 admin.post('/register-user', userController.registerUser);
 
+admin.put('/forget-password', userController.forgetPassword);
+
+admin.put('/reset-password/:token', userController.resetPassword);
+
 admin.post('/sendAdminEmail', async function (req, res) {
   const { Admin: email, Name, Attendees, Link, Date, Duration, Summary: Topic, RoomId } = req.body;
   roomEmails[RoomId] = { email, name: Name, topic: Topic };
