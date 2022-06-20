@@ -28,7 +28,8 @@ exports.registerUser = async (req, res) => {
     let user;
     const hashedPassword = await bcrypt.hash(password, 10);
     if (await checkExistence(email)) {
-      user = await UserModel.findOneAndUpdate({ email }, { password: hashedPassword }, { new: true });
+      // user = await UserModel.findOneAndUpdate({ email }, { password: hashedPassword }, { new: true });
+      return res.json({ error: true, status: 400, message: 'User already exists.' });
     } else {
       user = await UserModel.create({ ID, name, email, password: hashedPassword });
       const planGroup = await PlanGroups.create({
