@@ -43,12 +43,21 @@ exports.registerUser = async (req, res) => {
     user.token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE,
     });
+
+    const info = await sendMail(
+      '../views/welcomeUser.Handlebars',
+      email,
+       ` [Monet Live] Welcome to Monet Live`,
+      { name },
+      'anand@monetnetworks.com'
+    );
     user.save();
     return res.json({
       code: 200,
       error: false,
       message: 'User Registered Successfully.',
       user,
+      response: info.response,
     });
   } else {
     return res
