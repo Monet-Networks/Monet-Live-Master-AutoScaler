@@ -45,7 +45,7 @@ exports.registerUser = async (req, res) => {
     });
 
     const info = await sendMail(
-      '../views/welcomeUser.Handlebars',
+      '../views/welcomeUser.handlebars',
       email,
        ` [Monet Live] Welcome to Monet Live`,
       { name },
