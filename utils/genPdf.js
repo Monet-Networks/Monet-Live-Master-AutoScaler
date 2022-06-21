@@ -33,9 +33,7 @@ const genPdf = async (roomid, creator_ID, redis) => {
       overallEngagement: report?.report?.averageEngagement || null,
       students: studentData,
     };
-    Reports.findOneAndUpdate({ roomid }, { pdf, creator_ID }, { upsert: true, new: true }).then((data) =>
-      console.log('New report document', data)
-    );
+    Reports.findOneAndUpdate({ roomid }, { pdf, creator_ID }, { upsert: true, new: true }).then();
     return pdf;
   } catch (err) {
     console.log('Generate report PDF error', err);
