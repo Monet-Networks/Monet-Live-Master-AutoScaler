@@ -754,6 +754,24 @@ admin.delete('/deletecard', async (req, res) => {
   });
 });
 
+app.get('/cardsDetails', async (req, res) => {
+  const { email } = req.query;
+  const card = await user.findOne({ email: email }, { cards: 1, _id: 0 }).lean();
+  if (card) {
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Cards Detials',
+      cards: card.cards,
+    });
+  } else {
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Cards Detials not found',
+    });
+  }
+});
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
 };
