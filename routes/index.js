@@ -754,7 +754,7 @@ admin.delete('/deletecard', async (req, res) => {
   });
 });
 
-app.get('/cardsDetails', async (req, res) => {
+admin.get('/cardsDetails', async (req, res) => {
   const { email } = req.query;
   const card = await user.findOne({ email: email }, { cards: 1, _id: 0 }).lean();
   if (card) {
