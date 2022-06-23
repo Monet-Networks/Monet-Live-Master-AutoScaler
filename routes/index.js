@@ -32,6 +32,8 @@ const user = require('@models/user.model');
 const auth = require('@utils/auth');
 const RemainingHours = require('@utils/users');
 const assignments = require('@models/assignment.model');
+const plangrp = require('@models/planGroups.model');
+const notification = require('@models/notification.model');
 
 const monet = {
   vdebug: debug('websocket:vdebug'),
@@ -688,6 +690,52 @@ admin.get('/assignmentscore', async (req, res) => {
 });
 
 admin.post('/register-invited-user', userController.registerInvitedUser);
+
+admin.get('/notification', async (req, res) => {
+  const { email } = req.query;
+  const reportsData = await user.findOne({ email: email }, { plan: 1 }).lean();
+  const usergroup = await plangrp.findOne({ uid: reportsData.plan.groupUid }).lean();
+
+  const date1 = new Date(reportsData.plan.expiresAt);
+  const date2 = new Date(Date.now());
+  const days = Math.round((date1.getTime() - date2.getTime()) / (1000 * 3600 * 24));
+  let data = [];
+  if (days < 4 || usergroup.leftHours <= 1) {
+    switch (true) {
+      case usergroup.leftHours <= 1 && usergroup.leftHours > 0:
+        data.push(`Total remaining hours: ${usergroup.leftHours}hr. Please upgrade your plan`);
+        break;
+      case usergroup.leftHours <= 0:
+        data.push(`You consumed your Total ${usergroup.totalHours} hours. Please upgrade your plan`);
+        break;
+    }
+    switch (true) {
+      case days < 4 && days > 0:
+        data.push(`Your plan will expire in ${days} days. Please upgrade your plan`);
+        break;
+      case days <= 0:
+        data.push(`You plan expired. Please upgrade your plan`);
+    }
+    const message = await Promise.all(data);
+    const messageStore = await notification.create({
+      email: email,
+      message: message,
+    });
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Notfication',
+      data: message,
+    });
+  } else {
+    res.json({
+      code: 200,
+      error: false,
+      message: ' No Notfication',
+      data: [],
+    });
+  }
+});
 
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
