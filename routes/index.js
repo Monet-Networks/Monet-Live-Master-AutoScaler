@@ -737,6 +737,23 @@ admin.get('/notification', async (req, res) => {
   }
 });
 
+admin.delete('/deletecard', async (req, res) => {
+  const { id, email } = req.query;
+  const userDe = await user.findOne({ email: email });
+  userDe.cards.filter((r, i) => {
+    if (r._id.toString() === id) {
+      userDe.cards.splice(i, 1);
+    }
+  });
+  await userDe.save();
+
+  res.json({
+    code: 200,
+    error: false,
+    message: 'Card deleted successfully',
+  });
+});
+
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
 };
