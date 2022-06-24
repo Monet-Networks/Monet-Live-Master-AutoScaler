@@ -786,19 +786,27 @@ admin.put('/markasread', async (req, res) => {
 
 admin.delete('/deletecard', async (req, res) => {
   const { id, email } = req.query;
-  const userDe = await user.findOne({ email: email });
-  userDe.cards.filter((r, i) => {
-    if (r._id.toString() === id) {
-      userDe.cards.splice(i, 1);
-    }
-  });
-  await userDe.save();
+  if (id && email) {
+    const userDe = await user.findOne({ email: email });
+    userDe.cards.filter((r, i) => {
+      if (r._id.toString() === id) {
+        userDe.cards.splice(i, 1);
+      }
+    });
+    await userDe.save();
 
-  res.json({
-    code: 200,
-    error: false,
-    message: 'Card deleted successfully',
-  });
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Card deleted successfully',
+    });
+  } else {
+    res.json({
+      code: 400,
+      error: true,
+      message: 'something went wrong  ',
+    });
+  }
 });
 
 admin.get('/cardsDetails', async (req, res) => {
