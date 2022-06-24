@@ -788,18 +788,25 @@ admin.delete('/deletecard', async (req, res) => {
   const { id, email } = req.query;
   if (id && email) {
     const userDe = await user.findOne({ email: email });
-    userDe.cards.filter((r, i) => {
-      if (r._id.toString() === id) {
-        userDe.cards.splice(i, 1);
-      }
-    });
-    await userDe.save();
-
-    res.json({
-      code: 200,
-      error: false,
-      message: 'Card deleted successfully',
-    });
+    if (userDe) {
+      userDe.cards.filter((r, i) => {
+        if (r._id.toString() === id) {
+          userDe.cards.splice(i, 1);
+        }
+      });
+      await userDe.save();
+      res.json({
+        code: 200,
+        error: false,
+        message: 'Card deleted successfully',
+      });
+    } else {
+      res.json({
+        code: 200,
+        error: false,
+        message: 'User Details not found ',
+      });
+    }
   } else {
     res.json({
       code: 400,
