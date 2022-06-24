@@ -39,11 +39,11 @@ const getEngineData = (req, res) => {
 const engine = (MasterCollection.engine = new Engine({ timeout: 1000 }));
 engine.DBEntryFunction(getAllAutoInstances);
 engine.on('create-instance', ({ name }) => {
-  // console.log('Instance creation signal with name : ', name);
+  console.log('Instance creation signal with name : ', name);
   /* Check whether this object needs to be recorded or not. */
-  // IController.createInstance(name)
-  //   .then((data) => engine.addInternalIpImageId(data))
-  //   .catch((err) => console.log('An error occured while attempting to create instance. Kindly check. : ', err));
+  IController.createInstance(name)
+    .then((data) => engine.addInternalIpImageId(data))
+    .catch((err) => console.log('An error occured while attempting to create instance. Kindly check. : ', err));
 });
 
 engine.on('delete-instance', async (instance) => {
@@ -68,6 +68,7 @@ const io = new Server(httpServer, {
 new db();
 new MonetIO(io);
 
+admin.use(bodyParser({ limit: '50mb' }));
 admin.use(
   express.json({
     verify: (req, res, buf) => {
@@ -77,7 +78,6 @@ admin.use(
     },
   })
 );
-admin.use(bodyParser({ limit: '50mb' }));
 admin.use('/test', express.static('tests'));
 admin.get('/register-instance', instanceRegistrationHandle);
 admin.get('/engine-data', getEngineData);
