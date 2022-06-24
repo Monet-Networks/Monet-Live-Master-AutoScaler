@@ -28,7 +28,8 @@ exports.registerUser = async (req, res) => {
     let user;
     const hashedPassword = await bcrypt.hash(password, 10);
     if (await checkExistence(email)) {
-      user = await UserModel.findOneAndUpdate({ email }, { password: hashedPassword }, { new: true });
+      // user = await UserModel.findOneAndUpdate({ email }, { password: hashedPassword }, { new: true });
+      return res.json({ error: true, status: 400, message: 'User already exists.' });
     } else {
       user = await UserModel.create({ ID, name, email, password: hashedPassword });
       const planGroup = await PlanGroups.create({
@@ -43,12 +44,21 @@ exports.registerUser = async (req, res) => {
     user.token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE,
     });
+
+    const info = await sendMail(
+      '../views/welcomeUser.handlebars',
+      email,
+      `[Monet Live] Welcome to Monet Live`,
+      { Name: name },
+      'anand@monetnetworks.com'
+    );
     user.save();
     return res.json({
       code: 200,
       error: false,
       message: 'User Registered Successfully.',
       user,
+      response: info.response,
     });
   } else {
     return res

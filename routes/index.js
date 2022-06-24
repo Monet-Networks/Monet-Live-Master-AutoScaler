@@ -32,6 +32,8 @@ const user = require('@models/user.model');
 const auth = require('@utils/auth');
 const RemainingHours = require('@utils/users');
 const assignments = require('@models/assignment.model');
+const plangrp = require('@models/planGroups.model');
+const notification = require('@models/notification.model');
 
 const monet = {
   vdebug: debug('websocket:vdebug'),
@@ -288,6 +290,7 @@ admin.get('/my-meetings', async (req, res) => {
     }
   });
   const meetings = userRooms.length;
+
   let overallEngagement = 0;
   let overallMood = 0;
   reports.forEach(({ report }) => {
@@ -341,6 +344,10 @@ admin.put('/updateSetting', userController.userSettings);
 admin.get('/getPlanGroupDetails', planGroupsController.getPlanGroupDetails);
 
 admin.post('/register-user', userController.registerUser);
+
+admin.put('/forget-password', userController.forgetPassword);
+
+admin.put('/reset-password/:token', userController.resetPassword);
 
 admin.post('/sendAdminEmail', async function (req, res) {
   const { Admin: email, Name, Attendees, Link, Date, Duration, Summary: Topic, RoomId } = req.body;
@@ -556,6 +563,7 @@ admin.post('/sendAdminMosaic', async (req, res) => {
 
 admin.get('/userPlanDetails', async (req, res) => {
   const { email } = req.query;
+  let planobject;
   if (!email) {
     return res.json({
       code: 400,
@@ -563,7 +571,7 @@ admin.get('/userPlanDetails', async (req, res) => {
       message: 'email is a required field',
     });
   }
-  const userD = await user.find({ email: email }).lean();
+  const userD = await user.findOne({ email: email }).lean();
   if (!userD) {
     return res.json({
       code: 404,
@@ -571,15 +579,14 @@ admin.get('/userPlanDetails', async (req, res) => {
       message: 'user not found for the email',
     });
   }
-  userD.forEach(async (users) => {
-    planobject = await plan.find({ planUid: users.plan.planUid }).lean();
 
-    res.json({
-      code: 200,
-      error: false,
-      message: 'Plan details  Found',
-      data: planobject,
-    });
+  planobject = await plan.find({ planUid: userD.plan.planUid }).lean();
+
+  res.json({
+    code: 200,
+    error: false,
+    message: 'Plan details  Found',
+    data: planobject,
   });
 });
 
@@ -684,6 +691,149 @@ admin.get('/assignmentscore', async (req, res) => {
 
 admin.post('/register-invited-user', userController.registerInvitedUser);
 
+admin.get('/notification', async (req, res) => {
+  const { email } = req.query;
+  const reportsData = await user.findOne({ email: email }, { plan: 1 }).lean();
+  const usergroup = await plangrp.findOne({ uid: reportsData.plan.groupUid }).lean();
+
+  const date1 = new Date(reportsData.plan.expiresAt);
+  const date2 = new Date(Date.now());
+  const days = Math.round((date1.getTime() - date2.getTime()) / (1000 * 3600 * 24));
+  let data = [];
+  if (days < 4 || usergroup.leftHours <= 1) {
+    switch (true) {
+      case usergroup.leftHours <= 1 && usergroup.leftHours > 0:
+        data.push(`Total remaining hours: ${usergroup.leftHours}hr. Please upgrade your plan`);
+        break;
+      case usergroup.leftHours <= 0:
+        data.push(`You consumed your Total ${usergroup.totalHours} hours. Please upgrade your plan`);
+        break;
+    }
+    switch (true) {
+      case days < 4 && days > 0:
+        data.push(`Your plan will expire in ${days} days. Please upgrade your plan`);
+        break;
+      case days <= 0:
+        data.push(`You plan expired. Please upgrade your plan`);
+    }
+    const message = await Promise.all(data);
+    const messageStore = await notification.create({
+      email: email,
+      message: message,
+    });
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Notfication',
+      data: message,
+    });
+  } else {
+    res.json({
+      code: 200,
+      error: false,
+      message: ' No Notfication',
+      data: [],
+    });
+  }
+});
+
+admin.get('/notificationDetails', async (req, res) => {
+  const { email } = req.query;
+
+  const message = await notification.find({ email: email, read: false }, { message: 1 }).lean();
+  if (message) {
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Notfication',
+      data: message,
+    });
+  } else {
+    res.json({
+      code: 200,
+      error: false,
+      message: ' No Notfication',
+      data: [],
+    });
+  }
+});
+
+admin.put('/markasread', async (req, res) => {
+  const { id, email } = req.query;
+  if (id) {
+    await notification.findOneAndUpdate({ _id: id }, { read: true });
+
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Notfication read successfully',
+    });
+  } else if (email) {
+    await notification.updateMany({ email: email }, { read: true });
+    res.json({
+      code: 200,
+      error: false,
+      message: 'All Notfication read successfully',
+    });
+  } else {
+    res.json({
+      code: 400,
+      error: true,
+      message: 'id required',
+    });
+  }
+});
+
+admin.delete('/deletecard', async (req, res) => {
+  const { id, email } = req.query;
+  if (id && email) {
+    const userDe = await user.findOne({ email: email });
+    if (userDe) {
+      userDe.cards.filter((r, i) => {
+        if (r._id.toString() === id) {
+          userDe.cards.splice(i, 1);
+        }
+      });
+      await userDe.save();
+      res.json({
+        code: 200,
+        error: false,
+        message: 'Card deleted successfully',
+      });
+    } else {
+      res.json({
+        code: 200,
+        error: false,
+        message: 'User Details not found ',
+      });
+    }
+  } else {
+    res.json({
+      code: 400,
+      error: true,
+      message: 'something went wrong  ',
+    });
+  }
+});
+
+admin.get('/cardsDetails', async (req, res) => {
+  const { email } = req.query;
+  const card = await user.findOne({ email: email }, { cards: 1, _id: 0 }).lean();
+  if (card) {
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Cards Detials',
+      cards: card.cards,
+    });
+  } else {
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Cards Detials not found',
+    });
+  }
+});
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
 };
