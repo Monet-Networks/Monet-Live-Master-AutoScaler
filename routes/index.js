@@ -760,13 +760,21 @@ admin.get('/notificationDetails', async (req, res) => {
 
 admin.put('/markasread', async (req, res) => {
   const { id } = req.query;
-  await notification.findOneAndUpdate({ _id: id }, { read: true });
+  if (id) {
+    await notification.findOneAndUpdate({ _id: id }, { read: true });
 
-  res.json({
-    code: 200,
-    error: false,
-    message: 'Notfication read successfully',
-  });
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Notfication read successfully',
+    });
+  } else {
+    res.json({
+      code: 400,
+      error: true,
+      message: 'id required',
+    });
+  }
 });
 
 admin.delete('/deletecard', async (req, res) => {
