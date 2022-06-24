@@ -737,6 +737,29 @@ admin.get('/notification', async (req, res) => {
   }
 });
 
+admin.get('/notificationDetails', async (req, res) => {
+  const { email } = req.query;
+
+  const message = await notification.find({ email: email, read: false }, { message: 1 }).lean();
+  res.json({
+    code: 200,
+    error: false,
+    message: 'Notfication',
+    message,
+  });
+});
+
+admin.put('/markasread', async (req, res) => {
+  const { id } = req.query;
+  await notification.findOneAndUpdate({ _id: id }, { read: true });
+
+  res.json({
+    code: 200,
+    error: false,
+    message: 'Notfication read successfully',
+  });
+});
+
 admin.delete('/deletecard', async (req, res) => {
   const { id, email } = req.query;
   const userDe = await user.findOne({ email: email });
