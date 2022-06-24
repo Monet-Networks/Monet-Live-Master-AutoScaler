@@ -741,12 +741,21 @@ admin.get('/notificationDetails', async (req, res) => {
   const { email } = req.query;
 
   const message = await notification.find({ email: email, read: false }, { message: 1 }).lean();
-  res.json({
-    code: 200,
-    error: false,
-    message: 'Notfication',
-    message,
-  });
+  if (message) {
+    res.json({
+      code: 200,
+      error: false,
+      message: 'Notfication',
+      data: message,
+    });
+  } else {
+    res.json({
+      code: 200,
+      error: false,
+      message: ' No Notfication',
+      data: [],
+    });
+  }
 });
 
 admin.put('/markasread', async (req, res) => {
