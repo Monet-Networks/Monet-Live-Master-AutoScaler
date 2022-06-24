@@ -68,7 +68,7 @@ const io = new Server(httpServer, {
 new db();
 new MonetIO(io);
 
-admin.use(bodyParser({ limit: '50mb' }));
+// admin.use(bodyParser({ limit: '50mb' }));
 admin.use(
   express.json({
     verify: (req, res, buf) => {
