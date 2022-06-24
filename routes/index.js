@@ -759,7 +759,7 @@ admin.get('/notificationDetails', async (req, res) => {
 });
 
 admin.put('/markasread', async (req, res) => {
-  const { id } = req.query;
+  const { id, email } = req.query;
   if (id) {
     await notification.findOneAndUpdate({ _id: id }, { read: true });
 
@@ -767,6 +767,13 @@ admin.put('/markasread', async (req, res) => {
       code: 200,
       error: false,
       message: 'Notfication read successfully',
+    });
+  } else if (email) {
+    await notification.updateMany({ email: email }, { read: true });
+    res.json({
+      code: 200,
+      error: false,
+      message: 'All Notfication read successfully',
     });
   } else {
     res.json({
