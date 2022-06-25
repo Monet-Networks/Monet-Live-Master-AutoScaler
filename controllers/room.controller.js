@@ -208,9 +208,10 @@ exports.getAllScheduleRooms = async function (req, res) {
         rooms = await Rooms.find({ creator_ID: email, source: source, scheduled: true });
         if (!rooms?.length)
           return res.json({
-            code: 404,
-            error: true,
+            code: 200,
+            error: false,
             message: 'No rooms found',
+            response: rooms,
           });
       }
     }
