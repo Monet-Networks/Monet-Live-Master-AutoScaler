@@ -639,9 +639,9 @@ admin.get('/assignmentscore', async (req, res) => {
 
     let rawAssigmentCount = [];
     // let data = [];
-    const attempStudents = await Sessions.find({ roomid: roomid, proctor: 'student' }, { name: 1, uuid: 1, _id: 0 })
-      .lean()
-      .filter((item) => !item.uid.includes('___'));
+    const attempStudents = await (
+      await Sessions.find({ roomid: roomid, proctor: 'student' }, { name: 1, uuid: 1, _id: 0 }).lean()
+    ).filter((item) => !item.uid.includes('___'));
 
     const assigmentCount = await assignments.find({ roomId: roomid });
 
