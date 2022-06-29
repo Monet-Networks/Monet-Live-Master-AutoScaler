@@ -579,7 +579,7 @@ admin.get('/userPlanDetails', async (req, res) => {
       message: 'user not found for the email',
     });
   }
-  expired = userD.plan.type;
+  const expired = userD.plan.type;
   planobject = await plan.find({ planUid: userD.plan.planUid }).lean();
 
   res.json({
