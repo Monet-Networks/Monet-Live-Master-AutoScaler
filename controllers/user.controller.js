@@ -200,7 +200,7 @@ exports.login = async (req, res) => {
   existingUser.token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
-  if (existingUser.plan.expiresAt && new Date(existingUser.plan.expiresAt) >= Date.now()) {
+  if (existingUser.plan.expiresAt && new Date(existingUser.plan.expiresAt) <= Date.now()) {
     existingUser.plan.type = 'expired';
   }
   existingUser.plan.assignees.forEach((user) => {
