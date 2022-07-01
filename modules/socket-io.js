@@ -22,7 +22,7 @@ io.on('connection', (socket) => {
   });
 });
 
-httpServer.listen(3000);
+// httpServer.listen(3000);
 async function notify(email) {
   const reportsData = await user.findOne({ email: email }, { plan: 1 }).lean();
   if (reportsData) {
