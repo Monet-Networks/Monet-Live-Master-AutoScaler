@@ -4,7 +4,7 @@ const { Server } = require('socket.io');
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, {});
+const io = new Server(httpServer, { path: '/aashish' });
 const user = require('@models/user.model');
 const plangrp = require('@models/planGroups.model');
 const notification = require('@models/notification.model');
@@ -22,7 +22,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// httpServer.listen(3000);
+httpServer.listen(3500);
 async function notify(email) {
   const reportsData = await user.findOne({ email: email }, { plan: 1 }).lean();
   if (reportsData) {
