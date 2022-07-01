@@ -17,13 +17,13 @@ io.on('connection', (socket) => {
     if (!email) {
       socket.emit('error', 'email not provided');
     } else {
-      notification(email);
+      notify(email);
     }
   });
 });
 
 httpServer.listen(3000);
-async function notification(email) {
+async function notify(email) {
   const reportsData = await user.findOne({ email: email }, { plan: 1 }).lean();
   if (reportsData) {
     const usergroup = await plangrp.findOne({ uid: reportsData.plan.groupUid }).lean();
