@@ -1,4 +1,5 @@
 require('module-alias/register');
+require('@modules/socket-io');
 require('dotenv').config();
 const apiRoutes = require('@routes');
 const express = require('express');
