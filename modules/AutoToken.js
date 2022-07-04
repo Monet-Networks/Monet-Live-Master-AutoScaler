@@ -78,7 +78,7 @@ class AutoToken {
 
   genToken = () => {
     let resData = '';
-    // const path = this.pathMod.join(__dirname, '..', './data/tokenLog.json');
+    const path = this.pathMod.join(__dirname, '..', './data/tokenLog.json');
     const request = this.fetch.request(this.options, (response) => {
       response.on('data', (data) => {
         resData += data;
