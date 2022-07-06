@@ -247,7 +247,7 @@ exports.V2getAllRooms = async function (req, res) {
         rooms = await paginate(
           page,
           limit,
-          Rooms,
+          Rooms, 
           start
             ? {
                 creator_ID: email,

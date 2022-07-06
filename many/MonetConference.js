@@ -255,10 +255,10 @@ class PubUser {
       let info = msg['payload'];
       let webrtcCB = typeof callbacks['webrtc'] == 'function' ? callbacks['webrtc'] : noop;
       webrtcCB(info);
-      if (info.status === 'down') {
-        console.log('WebRTC is down. hanging up');
+      // if (info.status === 'down') {
+      //   console.log('WebRTC is down. hanging up');
         // hangup(info.stream);
-      }
+      
     });
     socket.on('join', ({ msg }) => {
       const info = msg['payload'];
