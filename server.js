@@ -72,12 +72,12 @@ io.on('connection', (socket) => {
   socket.emit('hello', 'world');
   socket.on('notify', async (data) => {
     console.log(data);
-    // const { email } = data;
-    // if (!email) {
-    //   socket.emit('error', 'email not provided');
-    // } else {
-    //   notify(email);
-    // }
+    const { email } = data;
+    if (!email) {
+      socket.emit('error', 'email not provided');
+    } else {
+      notify(email);
+    }
   });
 });
 
