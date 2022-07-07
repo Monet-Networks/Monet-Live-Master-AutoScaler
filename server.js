@@ -70,7 +70,7 @@ const io = new Server(httpServer, {
 new db();
 io.on('connection', (socket) => {
   socket.emit('hello', 'world');
-  socket.emit(notification, async (data) => {
+  socket.emit(notify, async (data) => {
     const { email } = data;
     if (!email) {
       socket.emit('error', 'email not provided');
