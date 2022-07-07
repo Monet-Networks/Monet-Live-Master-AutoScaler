@@ -76,7 +76,7 @@ io.on('connection', (socket) => {
     if (!email) {
       socket.emit('error', 'email not provided');
     } else {
-      notify.notify(email);
+      notify.notify(email, socket);
     }
   });
 });
