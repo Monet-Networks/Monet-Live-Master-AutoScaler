@@ -67,7 +67,10 @@ const io = new Server(httpServer, {
 });
 
 new db();
-new MonetIO(io);
+io.on('connection', (socket) => {
+  socket.emit('hello', 'world');
+});
+// new MonetIO(io);
 
 // admin.use(bodyParser({ limit: '50mb' }));
 admin.use(
