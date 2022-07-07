@@ -28,12 +28,20 @@ exports.notify = async function (email, socket) {
           data.push(`You plan expired. Please upgrade your plan`);
       }
       const message = await Promise.all(data);
-      const checkNotifications = await notification.find({ email: email, type: plan, message: data }).lean();
+      var nowDate = new Date();
+      var date = nowDate.getFullYear() + '/' + (nowDate.getMonth() + 1) + '/' + nowDate.getDate();
+      const checkNotifications = await notification
+        .find({ email: email, type: plan, message: data, date: date })
+        .lean();
+
       if (!checkNotifications.length) {
+        var nowDateI = new Date();
+        var dateI = nowDateI.getFullYear() + '/' + (nowDateI.getMonth() + 1) + '/' + nowDateI.getDate();
         await notification.create({
           email: email,
           message: message,
           type: plan,
+          date: dateI,
         });
       }
       const checkNotificationsDb = await notification
