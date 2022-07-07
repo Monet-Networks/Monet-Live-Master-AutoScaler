@@ -1,28 +1,8 @@
-const express = require('express');
-const { createServer } = require('http');
-const { Server } = require('socket.io');
-
-const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, { path: '/aashish' });
 const user = require('@models/user.model');
 const plangrp = require('@models/planGroups.model');
 const notification = require('@models/notification.model');
 
-io.on('connection', (socket) => {
-  socket.emit('hello', 'world');
-
-  socket.emit(notification, async (data) => {
-    const { email } = data;
-    if (!email) {
-      socket.emit('error', 'email not provided');
-    } else {
-      notify(email);
-    }
-  });
-});
-
-async function notify(email) {
+exports.notify = async function (email) {
   const reportsData = await user.findOne({ email: email }, { plan: 1 }).lean();
   if (reportsData) {
     const usergroup = await plangrp.findOne({ uid: reportsData.plan.groupUid }).lean();
@@ -64,5 +44,6 @@ async function notify(email) {
       socket.emit('message', 'no message');
     }
   }
-}
-httpServer.listen(3500);
+};
+
+module.exports = notify;

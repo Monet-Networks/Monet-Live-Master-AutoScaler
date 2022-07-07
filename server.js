@@ -13,6 +13,7 @@ const Engine = require('@modules/scaleEngine');
 const AWSConfiguration = require('@modules/awsConfig');
 const IController = new AWSConfiguration();
 const MonetIO = require('@modules/websockets');
+const notify = require('@modules/notification');
 const MasterCollection = require('@modules/MasterCollection');
 const {
   getAllAutoInstances,
@@ -69,6 +70,14 @@ const io = new Server(httpServer, {
 new db();
 io.on('connection', (socket) => {
   socket.emit('hello', 'world');
+  socket.emit(notification, async (data) => {
+    const { email } = data;
+    if (!email) {
+      socket.emit('error', 'email not provided');
+    } else {
+      notify(email);
+    }
+  });
 });
 // new MonetIO(io);
 
