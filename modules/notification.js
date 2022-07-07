@@ -2,7 +2,7 @@ const user = require('@models/user.model');
 const plangrp = require('@models/planGroups.model');
 const notification = require('@models/notification.model');
 
-exports.notify = async function (email) {
+exports.notify = async function (email, socket) {
   const reportsData = await user.findOne({ email: email }, { plan: 1 }).lean();
   if (reportsData) {
     const usergroup = await plangrp.findOne({ uid: reportsData.plan.groupUid }).lean();
