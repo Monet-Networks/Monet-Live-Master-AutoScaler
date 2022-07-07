@@ -70,15 +70,16 @@ const io = new Server(httpServer, {
 new db();
 io.on('connection', (socket) => {
   socket.emit('hello', 'world');
+  socket.on('notify', async (data) => {
+    const { email } = data;
+    if (!email) {
+      socket.emit('error', 'email not provided');
+    } else {
+      notify(email);
+    }
+  });
 });
-io.on('notify', async (data) => {
-  const { email } = data;
-  if (!email) {
-    socket.emit('error', 'email not provided');
-  } else {
-    notify(email);
-  }
-});
+
 // new MonetIO(io);
 
 // admin.use(bodyParser({ limit: '50mb' }));
