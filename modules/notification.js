@@ -45,5 +45,3 @@ exports.notify = async function (email) {
     }
   }
 };
-
-module.exports = notify;
