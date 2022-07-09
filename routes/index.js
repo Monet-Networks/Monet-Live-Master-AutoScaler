@@ -34,6 +34,8 @@ const RemainingHours = require('@utils/users');
 const assignments = require('@models/assignment.model');
 const plangrp = require('@models/planGroups.model');
 const notification = require('@models/notification.model');
+const country_state = require('@models/countrystate.model');
+const country = require('@models/country.model');
 
 const monet = {
   vdebug: debug('websocket:vdebug'),
@@ -842,6 +844,26 @@ admin.get('/cardsDetails', async (req, res) => {
       message: 'Cards Detials not found',
     });
   }
+});
+admin.get('/country', async (req, res) => {
+  const country_list = await country.find({}).lean();
+
+  res.json({
+    code: 200,
+    error: false,
+    message: 'country_list',
+    data: country_list,
+  });
+});
+admin.get('/countryState', async (req, res) => {
+  const { id } = req.query;
+  const countryStatelist = await country_state.find({ country_id: id }).lean();
+  res.json({
+    code: 200,
+    error: false,
+    message: 'country_list',
+    data: countryStatelist,
+  });
 });
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
