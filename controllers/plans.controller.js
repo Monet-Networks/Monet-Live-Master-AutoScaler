@@ -13,7 +13,7 @@ exports.getPlan = async (req, res) => {
 };
 
 exports.getAllPlans = async (req, res) => {
-  const plans = await Plans.find();
+  const plans = await Plans.find({});
   if (!plans.length) {
     return res.json({ code: 404, error: false, message: "There are no plans" });
   }
