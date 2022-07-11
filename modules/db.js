@@ -4,7 +4,7 @@ class initDB {
   constructor() {
     mongoose
       .connect(
-        'mongodb://admin:MonET%40v34nMK@54.70.129.69:27017/?authSource=admin&readPreference=primary&directConnection=true&ssl=false',
+        'mongodb://admin:MonET%40v34nMK@54.70.129.69:27017/exams_db?authSource=admin&readPreference=primary&directConnection=true&ssl=false',
         {
           user: 'admin',
           pass: 'MonET@v34nMK',
