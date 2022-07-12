@@ -1656,6 +1656,11 @@ class MediaDev {
     //   facingMode: 'user',
     //   resizeMode: 'crop-and-scale',
     // };
+    if(this.stream) {
+      let newStreamCB = typeof this.callbacks['media'] === 'function' ? this.callbacks['media'] : this.noop;
+      newStreamCB(stream);
+      return;
+    }
     if (video && audio) {
       this.mediaStreamInit(null, video);
       this.enumerate();
