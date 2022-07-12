@@ -12,7 +12,7 @@ const notificationschema = new mongoose.Schema({
     type: {},
     default: [],
   },
-  type: { type: String },
-  date: {},
+  // type: { type: String },
+  // date: {},
 });
 module.exports = mongoose.model('notification', notificationschema);
