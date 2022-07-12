@@ -257,8 +257,7 @@ class PubUser {
       webrtcCB(info);
       // if (info.status === 'down') {
       //   console.log('WebRTC is down. hanging up');
-        // hangup(info.stream);
-
+      // hangup(info.stream);
     });
     socket.on('join', ({ msg }) => {
       const info = msg['payload'];
@@ -1457,6 +1456,10 @@ class StateSubscription {
     const sub = this.subStreams[mid];
     const feed = this.feedStreams[sub.feed_id];
     // let uuid = this.pubID_uuid[sub.feed_id];
+    if (!this.feedStreams[sub.feed_id]) {
+      console.log(`There is no ${sub.feed_id} in.`, this.feedStreams);
+      return;
+    }
     const uuid = this.feedStreams[sub.feed_id]['uuid'];
     const userContext = this.feedStreams[sub.feed_id]['user_context'];
     // Don't need to create an element for own published stream
@@ -1484,7 +1487,7 @@ class StateSubscription {
             if (mst) mst.stop();
           }
         } catch (e) {}
-     }
+      }
       delete this.remoteTracks[mid];
       delete this.slots[mid];
       delete this.mids[slot];
@@ -1724,7 +1727,7 @@ class MediaDev {
     if (!this.stream) return console.error('Error stopping stream. No stream initialized.');
     const tracks = this.stream.getTracks();
     tracks.forEach((track) => {
-      console.log("stopping track: ",track);
+      console.log('stopping track: ', track);
       track.stop();
     });
     // this.stream = null;
