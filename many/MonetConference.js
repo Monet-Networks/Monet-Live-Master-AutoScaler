@@ -748,7 +748,7 @@ class PubUser {
             from: this.user.uuid,
             roomid: this.user.roomid,
           }),
-        3000
+        5000
       );
     });
   }
