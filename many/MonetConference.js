@@ -258,7 +258,7 @@ class PubUser {
       // if (info.status === 'down') {
       //   console.log('WebRTC is down. hanging up');
         // hangup(info.stream);
-      
+
     });
     socket.on('join', ({ msg }) => {
       const info = msg['payload'];
@@ -1208,7 +1208,7 @@ class StateSubscription {
             continue;
           }
           // Find an empty slot in the UI for each new source
-/**          if (!this.feedStreams[stream.id].slot) {
+          if (!this.feedStreams[stream.id].slot) {
             let slot;
             for (let i = 1; i < 6; i++) {
               if (!this.feeds[i]) {
@@ -1216,14 +1216,14 @@ class StateSubscription {
                 this.feeds[slot] = stream.id;
                 this.feedStreams[stream.id].slot = slot;
                 this.feedStreams[stream.id].remoteVideos = 0;
-                $('#remote' + slot)
-                  .removeClass('hide')
-                  .html(stream.display)
-                  .show();
+                // $('#remote' + slot)
+                //   .removeClass('hide')
+                //   .html(stream.display)
+                //   .show();
                 break;
               }
             }
-          } */
+          }
           subscription.push({
             feed: stream.id, // This is mandatory
             mid: stream.mid, // This is optional (all streams, if missing)
@@ -1293,7 +1293,7 @@ class StateSubscription {
               continue;
             }
             // Find an empty slot in the UI for each new source
-/**            if (!this.feedStreams[stream.id].slot) {
+            if (!this.feedStreams[stream.id].slot) {
               let slot;
               for (let i = 1; i < 6; i++) {
                 if (!this.feeds[i]) {
@@ -1301,15 +1301,14 @@ class StateSubscription {
                   this.feeds[slot] = stream.id;
                   this.feedStreams[stream.id].slot = slot;
                   this.feedStreams[stream.id].remoteVideos = 0;
-                  $('#remote' + slot)
-                    .removeClass('hide')
-                    .html(stream.display)
-                    .show();
+                  // $('#remote' + slot)
+                  //   .removeClass('hide')
+                  //   .html(stream.display)
+                  //   .show();
                   break;
                 }
               }
             }
-	   */
             subscription.push({
               feed: stream.id, // This is mandatory
               mid: stream.mid, // This is optional (all streams, if missing)
@@ -1455,10 +1454,10 @@ class StateSubscription {
   handleRemoteStreams = (track, mid, on) => {
     Janus.log('Remote track (mid=' + mid + ') ' + (on ? 'added' : 'removed') + ':', track);
     // Which publisher are we getting on this mid?
-    let sub = this.subStreams[mid];
-    let feed = this.feedStreams[sub.feed_id];
+    const sub = this.subStreams[mid];
+    const feed = this.feedStreams[sub.feed_id];
     // let uuid = this.pubID_uuid[sub.feed_id];
-    let uuid = this.feedStreams[sub.feed_id]['uuid'];
+    const uuid = this.feedStreams[sub.feed_id]['uuid'];
     const userContext = this.feedStreams[sub.feed_id]['user_context'];
     // Don't need to create an element for own published stream
     if (uuid === this.publisher_uuid) {
