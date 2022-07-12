@@ -939,7 +939,7 @@ class StateSubscription {
 
   start() {
     Janus.init({
-      debug: false,
+      debug: true,
       callback: () => {
         this.janus = new Janus({
           server: this.server,
@@ -1208,7 +1208,7 @@ class StateSubscription {
             continue;
           }
           // Find an empty slot in the UI for each new source
-          if (!this.feedStreams[stream.id].slot) {
+/**          if (!this.feedStreams[stream.id].slot) {
             let slot;
             for (let i = 1; i < 6; i++) {
               if (!this.feeds[i]) {
@@ -1223,7 +1223,7 @@ class StateSubscription {
                 break;
               }
             }
-          }
+          } */
           subscription.push({
             feed: stream.id, // This is mandatory
             mid: stream.mid, // This is optional (all streams, if missing)
@@ -1293,7 +1293,7 @@ class StateSubscription {
               continue;
             }
             // Find an empty slot in the UI for each new source
-            if (!this.feedStreams[stream.id].slot) {
+/**            if (!this.feedStreams[stream.id].slot) {
               let slot;
               for (let i = 1; i < 6; i++) {
                 if (!this.feeds[i]) {
@@ -1309,6 +1309,7 @@ class StateSubscription {
                 }
               }
             }
+	   */
             subscription.push({
               feed: stream.id, // This is mandatory
               mid: stream.mid, // This is optional (all streams, if missing)
@@ -1484,22 +1485,7 @@ class StateSubscription {
             if (mst) mst.stop();
           }
         } catch (e) {}
-      }
-      $('#remotevideo' + slot + '-' + mid).remove();
-      if (track.kind === 'video' && feed) {
-        feed.remoteVideos--;
-        if (feed.remoteVideos === 0) {
-          // No video, at least for now: show a placeholder
-          if ($('#videoremote' + slot + ' .no-video-container').length === 0) {
-            $('#videoremote' + slot).append(
-              '<div class="no-video-container">' +
-                '<i class="fa fa-video-camera fa-5 no-video-icon"></i>' +
-                '<span class="no-video-text">No remote video available</span>' +
-                '</div>'
-            );
-          }
-        }
-      }
+     }
       delete this.remoteTracks[mid];
       delete this.slots[mid];
       delete this.mids[slot];
@@ -1536,7 +1522,6 @@ class StateSubscription {
     } else {
       // New video track: create a stream out of it
       feed.remoteVideos++;
-      $('#videoremote' + slot + ' .no-video-container').remove();
       stream = new MediaStream();
       stream.addTrack(track.clone());
       this.remoteTracks[mid] = stream;
