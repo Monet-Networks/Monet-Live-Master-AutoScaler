@@ -1,10 +1,33 @@
 const redis = require('redis');
+const mongoose = require('mongoose');
 const Reports = require('../models/reports.model');
 const fdModel = require('../models/faceData.model');
 const Sessions = require('../models/sessions.model');
-const { createQuad } = require('./createQuad');
+const { createQuad } = require('../utils/createQuad');
 
-const redisCli = redis.createClient(6379, '34.220.116.222', { auth_pass: 'monet@615' }); // {auth_pass:"monet@615"} 54.218.77.251
+mongoose
+  .connect(
+    'mongodb://admin:MonET%40v34nMK@54.70.129.69:27017/exams_db?authSource=admin&readPreference=primary&directConnection=true&ssl=false',
+    {
+      user: 'admin',
+      pass: 'MonET@v34nMK',
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+    }
+  )
+  .catch((err) => console.log('DB Error', err));
+
+// const redisCli = redis.createClient(6379, '54.245.160.54', { auth_pass: 'monet@615' }); // {auth_pass:"monet@615"} 54.218.77.251
+
+redisCli = redis.createClient({
+  url: 'redis://:monet%40615@54.245.160.54:6379',
+});
+redisCli.on('error', (err) => console.log('Redis Client Error', err));
+redisCli.connect().then(() => {
+  genReport('1657627031159', 'nitinkumar2584@outlook.com').then((report) => {
+    console.log('Report data : ', report);
+  });
+});
 
 const pieReport = async (roomid) => {
   let sessions = Sessions.find({ roomid }, 'uuid name');
@@ -119,6 +142,7 @@ const genReport = async (roomid, creator_ID) => {
       redisCli.del(`report:${roomid}`, () => {
         console.log('Flag removed from Redis');
       });
+      Reports.findOneAndUpdate({ roomid }, { report }, { new: true });
       return report;
     });
   } catch (err) {
@@ -129,4 +153,4 @@ const genReport = async (roomid, creator_ID) => {
   }
 };
 
-module.exports = { pieReport, overallAverageEngagement, genReport };
+// module.exports = { pieReport, overallAverageEngagement, genReport };
