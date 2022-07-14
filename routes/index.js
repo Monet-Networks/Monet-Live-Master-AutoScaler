@@ -36,6 +36,7 @@ const plangrp = require('@models/planGroups.model');
 const notification = require('@models/notification.model');
 const country_state = require('@models/countrystate.model');
 const country = require('@models/country.model');
+const faceData = require('@models/faceData.model');
 
 const monet = {
   vdebug: debug('websocket:vdebug'),
@@ -639,12 +640,14 @@ admin.get('/assignmentscore', async (req, res) => {
     const { roomid } = req.query;
     let data = {};
     let score = [];
-    const faceData = await FaceData.find(
-      {
-        roomid: roomid,
-      },
-      { engagement: 1, mood: 1, _id: 0, uuid: 1 }
-    ).lean();
+    const faceData = await faceData
+      .find(
+        {
+          roomid: roomid,
+        },
+        { engagement: 1, mood: 1, _id: 0, uuid: 1 }
+      )
+      .lean();
     faceData.forEach((item) => {
       if (data[item.uuid]) {
         data[item.uuid].overallEngagement += item.engagement;
