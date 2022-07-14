@@ -637,11 +637,29 @@ admin.post('/auth/authentication', async (req, res) => {
 admin.get('/assignmentscore', async (req, res) => {
   try {
     const { roomid } = req.query;
-
+    let data = {};
     let score = [];
-
+    const faceData = await FaceData.find(
+      {
+        roomid: roomid,
+      },
+      { engagement: 1, mood: 1, _id: 0, uuid: 1 }
+    ).lean();
+    faceData.forEach((item) => {
+      if (data[item.uuid]) {
+        data[item.uuid].overallEngagement += item.engagement;
+        data[item.uuid].overallMood += item.mood;
+        data[item.uuid].count += 1;
+      } else {
+        data[item.uuid] = {
+          overallEngagement: item.engagement,
+          overallMood: item.mood,
+          count: 1,
+        };
+      }
+    });
     let rawAssigmentCount = [];
-    // let data = [];
+
     const attempStudents = await (
       await Sessions.find({ roomid: roomid, proctor: 'student' }, { name: 1, uuid: 1, _id: 0 }).lean()
     ).filter((item) => !item.uuid.includes('___'));
@@ -667,13 +685,41 @@ admin.get('/assignmentscore', async (req, res) => {
             }
           }
         });
+
+        const overallEngagement = data[item.uuid].overallEngagement / data[item.uuid].count;
+        const overallMood = data[item.uuid].overallMood / data[item.uuid].count;
         const totalQuestion = rightanswer + wronganswer;
-        const rawscore = { ...item, rightanswer, wronganswer, totalQuestion };
-        participants.push(rawscore);
+        if (totalQuestion === 0) {
+          const score = ' Not attempted';
+          const rawscore = {
+            ...item,
+            score,
+            totalQuestion,
+            rightanswer,
+            wronganswer,
+            overallEngagement,
+            overallMood,
+          };
+          participants.push(rawscore);
+        } else {
+          const score = (rightanswer / totalQuestion) * 100;
+          const rawscore = {
+            ...item,
+            rightanswer,
+            wronganswer,
+            totalQuestion,
+            score,
+            overallEngagement,
+            overallMood,
+          };
+          participants.push(rawscore);
+        }
       });
+
       const title = submision.title;
       score.push({ title, participants });
     });
+
     res.json({
       code: 200,
       error: false,
@@ -685,7 +731,7 @@ admin.get('/assignmentscore', async (req, res) => {
       code: 400,
       error: true,
       message: 'Something went wrong',
-      response: err,
+      response: err.message,
     });
   }
 });
