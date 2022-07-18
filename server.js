@@ -78,6 +78,8 @@ io.on('connection', (socket) => {
       notify.notify(email, socket);
     }
   });
+  socket.on('markAsread', notify.markAsRead(id, socket));
+  socket.on('markAllAsRead', notify.markAllAsRead(email, socket));
 });
 
 // new MonetIO(io);
