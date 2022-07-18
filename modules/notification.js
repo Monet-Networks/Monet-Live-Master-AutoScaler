@@ -29,7 +29,7 @@ exports.notify = async function (email, socket) {
       }
       const message = await Promise.all(data);
       const msg = message[0];
-      const checkNotifications = await notification.find({ email: email, read: false, message: message }).lean();
+      const checkNotifications = await notification.find({ email: email, read: false, message: msg }).lean();
 
       if (!checkNotifications.length) {
         await notification.create({
