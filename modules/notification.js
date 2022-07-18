@@ -37,7 +37,9 @@ exports.notify = async function (email, socket) {
           message: message,
         });
       }
-      const checkNotificationsDb = await notification.findOne({ email: email, read: false }, { message: 1 }).lean();
+      const checkNotificationsDb = await notification
+        .find({ email: email, read: false }, { message: 1, _id: 0, read: 1 })
+        .lean();
       socket.emit('message', checkNotificationsDb);
     } else {
       socket.emit('message', 'no message');
