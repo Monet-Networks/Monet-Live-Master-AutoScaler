@@ -4,6 +4,7 @@ const notification = require('@models/notification.model');
 
 exports.notify = async function (email, socket) {
   const reportsData = await user.findOne({ email: email }, { plan: 1 }).lean();
+  let noMessage = [];
   if (reportsData) {
     const usergroup = await plangrp.findOne({ uid: reportsData.plan.groupUid }).lean();
 
@@ -40,7 +41,7 @@ exports.notify = async function (email, socket) {
       const checkNotificationsDb = await notification.find({ email: email }, { message: 1, _id: 0, read: 1 }).lean();
       socket.emit('message', checkNotificationsDb);
     } else {
-      socket.emit('message', 'no message');
+      socket.emit('message', noMessage);
     }
   }
 };
