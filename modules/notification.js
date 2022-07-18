@@ -39,7 +39,7 @@ exports.notify = async function (email, socket) {
         });
       }
       const checkNotificationsDb = await notification
-        .find({ email: email, read: false }, { message: 1, _id: 0, read: 1 })
+        .find({ email: email, read: false }, { message: 1, read: 1 })
         .lean();
       socket.emit('message', checkNotificationsDb);
     } else {
