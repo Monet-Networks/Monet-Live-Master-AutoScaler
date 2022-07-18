@@ -79,8 +79,9 @@ io.on('connection', (socket) => {
     }
   });
   socket.on('markAsread', async (data) => {
-    const id = data;
-    notify.markAsRead(id, socket);
+    const { id, email } = data;
+
+    notify.markAsRead(id, email, socket);
   });
   socket.on('markAllAsRead', async (data) => {
     const email = data;
