@@ -28,8 +28,8 @@ exports.notify = async function (email, socket) {
           data.push(`You plan expired. Please upgrade your plan`);
       }
       const message = await Promise.all(data);
-      console.log(message[0]);
-      const checkNotifications = await notification.find({ email: email, read: false, message: message[0] }).lean();
+      const msg = message[0];
+      const checkNotifications = await notification.find({ email: email, read: false, message: message }).lean();
 
       if (!checkNotifications.length) {
         await notification.create({
