@@ -48,7 +48,7 @@ exports.notify = async function (email, socket) {
   }
 };
 
-exports.markAsRead = async (id, socket) => {
+exports.markAsRead = async (id, email, socket) => {
   if (id) {
     await notification.findOneAndUpdate({ _id: id }, { read: true });
     socket.emit('status', 'Notfication read successfully');
