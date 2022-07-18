@@ -820,18 +820,21 @@ admin.put('/markasread', async (req, res) => {
   const { id, email } = req.query;
   if (id) {
     await notification.findOneAndUpdate({ _id: id }, { read: true });
-
+    const message = await notification.find({ email: email, read: false }, { message: 1 }).lean();
     res.json({
       code: 200,
       error: false,
       message: 'Notfication read successfully',
+      data: message,
     });
   } else if (email) {
     await notification.updateMany({ email: email }, { read: true });
+    const message = await notification.find({ email: email, read: false }, { message: 1 }).lean();
     res.json({
       code: 200,
       error: false,
       message: 'All Notfication read successfully',
+      data: message,
     });
   } else {
     res.json({
