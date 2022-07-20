@@ -2,14 +2,23 @@ exports.wranggleQuad = async (sector, Quad, nameArray) => {
   Quad[sector].no_users = Quad[sector].users.length;
   // Array of keys
   for (const key in Quad[sector].UEA) {
+
     let low_eng = Quad[sector].UEA[key].low_eng.length ? Quad[sector].UEA[key].low_eng.reduce(redAvg) : 0;
+
     let med_eng = Quad[sector].UEA[key].med_eng.length ? Quad[sector].UEA[key].med_eng.reduce(redAvg) : 0;
+
     let hi_eng = Quad[sector].UEA[key].hi_eng.length ? Quad[sector].UEA[key].hi_eng.reduce(redAvg) : 0;
+
     let camoff_eng = Quad[sector].UEA[key].camoff_eng.length ? Quad[sector].UEA[key].camoff_eng.reduce(redAvg) : 0;
+
     let low_mo = Quad[sector].UEA[key].low_mo.length ? Quad[sector].UEA[key].low_mo.reduce(redAvg) : 0;
+
     let med_mo = Quad[sector].UEA[key].med_mo.length ? Quad[sector].UEA[key].med_mo.reduce(redAvg) : 0;
+
     let hi_mo = Quad[sector].UEA[key].hi_mo.length ? Quad[sector].UEA[key].hi_mo.reduce(redAvg) : 0;
+
     let camoff_mo = Quad[sector].UEA[key].camoff_mo.length ? Quad[sector].UEA[key].camoff_mo.reduce(redAvg) : 0;
+
     let totalLength =
       Quad[sector].UEA[key].low_eng.length +
       Quad[sector].UEA[key].med_eng.length +

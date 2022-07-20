@@ -37,6 +37,7 @@ const notification = require('@models/notification.model');
 const country_state = require('@models/countrystate.model');
 const country = require('@models/country.model');
 const FaceData = require('@models/faceData.model');
+const ReportRouter = require('./report');
 
 const monet = {
   vdebug: debug('websocket:vdebug'),
@@ -484,6 +485,8 @@ admin.get('/avg-engagement-req', async function (req, res) {
 });
 
 admin.use('/face', FaceRouter);
+
+admin.use('/report', ReportRouter);
 
 const getReport = async (data) => {
   const report = [];
