@@ -25,7 +25,7 @@ exports.notify = async function (email, socket) {
         case days < 4 && days > 0:
           data.push(`Your plan will expire in ${days} days. Please upgrade your plan`);
           break;
-        case days <= 0:
+        case currentDate.getTime() >= expireDate.getTime():
           data.push(`You plan expired. Please upgrade your plan`);
       }
       const message = await Promise.all(data);
