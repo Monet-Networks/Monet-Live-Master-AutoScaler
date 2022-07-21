@@ -14,7 +14,7 @@ class RepEngine {
   Quad = [];
   Users;
 
-  Segments = [];
+  cTSegments = [];
 
   constructor(roomId) {
     if (typeof roomId !== 'string') throw new Error('Invalid roomId');
@@ -53,9 +53,17 @@ layout :`.magenta;
      */
     // 1. we create relevant data structures.
     this.createQuads();
+    this.createSegmentedArray();
     // 2. we populate the relevant data structures with transactional data.
     for (let i = 0; i < this.len; i++) {
       this.mungePieData(this.data[i]);
+      const { createdAt, engagement, mood } = this.data[i];
+      const entry = {
+        createdAt,
+        engagement,
+        mood,
+      };
+      this.popEntry(entry, 0, this.data.length - 1);
       // console.log(this.data[i]);
     }
     // 3. we process the populated data structures and derive meaningful data.
@@ -64,8 +72,51 @@ layout :`.magenta;
 
   // ================================================================================================= Overall Engagement
 
-  mungeOverAll = () => {
+  /**
+   * @description This class populates the cTSegments array with relevant data point entries.
+   * @param {object} dp
+   * @param {number} start
+   * @param {number} end
+   * @memberof RepEngine
+   */
+  popEntry = (dp, start, end) => {
+    // Find entry in the segmented array.
+    // Binary search for the most suitable index.
+    if (typeof start !== 'number' || typeof end !== 'number' || start > end) {
+      throw new Error('missing or invalid mandatory parameter(s)', start, end);
+    }
+    let slArr = this.cTSegments.slice(start, end);
+    if (slArr.length === 1) {
+      slArr[0].dPs.push(dp);
+      return;
+    }
+    const div = Math.round(slArr.length / 2);
+    const entry = slArr[div];
+    const { stamp } = entry;
+    let newStart, newEnd;
+    console.log('Called this');
+    const stampDiff = Math.abs(dp.createdAt - stamp);
+    if (stampDiff < 1000) {
+      // Add the data point to the dp
+      entry.dPs.push(dp);
+      return;
+    } else if (dp.createdAt < stamp) {
+      newStart = start;
+      newEnd = div;
+    } else {
+      newStart = div;
+      newEnd = end;
+    }
+    if (newStart < newEnd) this.popEntry(dp, newStart, newEnd);
+  };
 
+  createSegmentedArray = () => {
+    let tmp_min = this.minDate;
+    const tmp_max = this.maxDate;
+    while (tmp_min <= tmp_max) {
+      this.cTSegments.push({ stamp: tmp_min, dPs: [] });
+      tmp_min = new Date(tmp_min.getTime() + 1000);
+    }
   };
 
   // =================================================================================================
