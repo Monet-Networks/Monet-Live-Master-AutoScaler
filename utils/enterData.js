@@ -15,7 +15,7 @@ exports.enterData = (sector, entry, Quad) => {
   }
   if (entry.webcam === 0) {
     Quad[sector].UEA[entry.uuid].camoff_eng.push(entry.engagement);
-    Quad[sector].UEA[entry.uuid].camoff_mo.push(entry.engagement);
+    Quad[sector].UEA[entry.uuid].camoff_mo.push(entry.mood);
     Quad[sector].camoff.push({
       uuid: entry.uuid,
       engagement: entry.engagement,
