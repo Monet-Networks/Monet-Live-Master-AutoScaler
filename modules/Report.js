@@ -1,10 +1,14 @@
 const fdModel = require('../models/faceData.model');
 const Session = require('../models/sessions.model');
+const Room = require('../models/room.model');
 const initDB = require('./db');
 const colors = require('colors');
+const fs = require('fs');
+const { json } = require('body-parser');
 new initDB();
 
 class RepEngine {
+  state = 'idle';
   len;
   data;
   duration;
@@ -12,19 +16,50 @@ class RepEngine {
   minDate;
   quadLength;
   Quad = [];
-  Users;
+  Users = {};
+  Room;
+  insertions = {
+    true: 0,
+    false: 0,
+  };
 
   cTSegments = [];
 
+  get report() {
+    if (fs.existsSync(`${this.RoomId}.json`))
+      return {
+        code: 200,
+        error: false,
+        response: 'Report data found',
+        data: JSON.parse(fs.readFileSync(`${this.RoomId}.json`, { encoding: 'utf8' })),
+      };
+    if (this.state === 'idle') return { code: 400, error: true, response: 'No report data generated.' };
+    else if (this.state === 'generating')
+      return {
+        code: 202,
+        error: false,
+        response: 'Report is generating.',
+      };
+  }
+
   constructor(roomId) {
+    this.state = 'generating';
     if (typeof roomId !== 'string') throw new Error('Invalid roomId');
     this.RoomId = roomId;
-    this.fetchData();
+    if (!fs.existsSync(`${this.RoomId}.json`)) this.fetchData();
   }
 
   fetchData = async () => {
-    this.User = await Session.find({ roomid: this.RoomId }, 'uuid name');
-    this.data = await fdModel.find({ roomid: this.RoomId }).sort({ createdAt: 1 }).lean();
+    const roomPromise = await Room.find({ roomid: this.RoomId });
+    const userPromise = await Session.find({ roomid: this.RoomId });
+    const fdPromise = await fdModel.find({ roomid: this.RoomId }).sort({ createdAt: 1 }).lean();
+    const [room, sessions, fd] = await Promise.all([roomPromise, userPromise, fdPromise]);
+    this.Room = room;
+    // this.Users = sessions;
+    for (const user of sessions) {
+      this.Users[user.uuid] = user;
+    }
+    this.data = fd;
     this.len = this.data.length;
     if (this.len === 0) {
       console.log(`No data recorded for the session ${this.RoomId}. Please check what went wrong.`);
@@ -56,19 +91,80 @@ layout :`.magenta;
     this.createSegmentedArray();
     // 2. we populate the relevant data structures with transactional data.
     for (let i = 0; i < this.len; i++) {
+      // Pie chart data
       this.mungePieData(this.data[i]);
-      const { createdAt, engagement, mood } = this.data[i];
+      // Gen pdf
+      this.feedGenPDFData(this.data[i]);
+      // Overall eng and mo data
+      const { uuid, createdAt, engagement, mood } = this.data[i];
       const entry = {
+        uuid,
         createdAt,
         engagement,
         mood,
       };
-      this.popEntry(entry, 0, this.data.length - 1);
+      const insertion = this.popEntry(this.cTSegments, entry, 0, this.cTSegments.length - 1);
+      if (insertion) {
+        ++this.insertions.true;
+      } else ++this.insertions.false;
       // console.log(this.data[i]);
     }
     // 3. we process the populated data structures and derive meaningful data.
     this.wranggleQuads();
+    this.wranggleSegments();
+    // console.log(this.cTSegments);
+    console.log('Processing!');
+    fs.open(`${this.RoomId}.json`, 'a', (err, fd) => {
+      if (err) console.error(err);
+      else
+        fs.write(
+          fd,
+          JSON.stringify({ inserts: this.insertions, Overall: this.cTSegments, Quad: this.Quad }),
+          (err, bytes) => {
+            if (err) {
+              console.log(err.message);
+            } else {
+              console.log(bytes + ' bytes written');
+            }
+          }
+        );
+    });
+    this.state = 'idle';
   };
+
+  // ================================================================================================= Pdf data
+
+  feedGenPDFData = (data) => {
+    const sessionEntry = this.Users[data.uuid];
+    if (!sessionEntry) return console.error('there is no session entry');
+    if (!sessionEntry.data) {
+      sessionEntry.data = [data];
+      sessionEntry.avgEng = data.engagement;
+      sessionEntry.avgMo = data.mood;
+      sessionEntry.cnt = 1;
+      return;
+    }
+    sessionEntry.data.push(data);
+    sessionEntry.avgEng += data.engagement;
+    sessionEntry.avgMo += data.mood;
+    ++sessionEntry.cnt;
+  };
+
+  mungePdfData = () => {
+    // Create a new pdf file
+    const students = [];
+    for (const key in this.Users) if (this.Users[key].proctor === 'teacher' && !key.includes('___')) students.push(key);
+    const invitedUsersLength = this.Room.attendees.length ? this.Room.attendees.length - 1 : 0;
+    const joinedUsersLength = students.length;
+    const attendance = Math.min((joinedUsersLength / invitedUsersLength) * 100, 100);
+    for (const key in this.Users) {
+      const stu = this.Users[key];
+      stu.avgEng = stu.avgEng / stu.cnt;
+      stu.avgMo = stu.avgMo / stu.cnt;
+    }
+  };
+
+  // =================================================================================================
 
   // ================================================================================================= Overall Engagement
 
@@ -79,43 +175,57 @@ layout :`.magenta;
    * @param {number} end
    * @memberof RepEngine
    */
-  popEntry = (dp, start, end) => {
+  popEntry = (arr, dp, start, end) => {
     // Find entry in the segmented array.
     // Binary search for the most suitable index.
-    if (typeof start !== 'number' || typeof end !== 'number' || start > end) {
-      throw new Error('missing or invalid mandatory parameter(s)', start, end);
+    if (start > end) {
+      // console.error('start is larger than end, invalid parameter(s)', start, end);
+      // delete dp.createdAt;
+      // if (arr[start]) arr[start].dataPoints.push(dp);
+      // else arr[end].dataPoints.push(dp);
+      let entry;
+      if (arr[start]) entry = arr[start];
+      else entry = arr[end];
+      entry.average_engagement += dp.engagement;
+      entry.average_mood += dp.mood;
+      entry.dataPoints.push(dp);
+      return false;
     }
-    let slArr = this.cTSegments.slice(start, end);
-    if (slArr.length === 1) {
-      slArr[0].dPs.push(dp);
-      return;
+    const { createdAt } = dp;
+
+    // Find the middle index
+    let mid = Math.floor((start + end) / 2);
+
+    const midArrayEl = arr[mid];
+
+    // Comparison with mid point
+    const stmpDiff = Math.abs(midArrayEl.timestamp - createdAt);
+    if (stmpDiff <= 1000) {
+      // delete dp.createdAt;
+      const entry = midArrayEl;
+      entry.average_engagement += dp.engagement;
+      entry.average_mood += dp.mood;
+      entry.dataPoints.push(dp);
+      return true;
     }
-    const div = Math.round(slArr.length / 2);
-    const entry = slArr[div];
-    const { stamp } = entry;
-    let newStart, newEnd;
-    console.log('Called this');
-    const stampDiff = Math.abs(dp.createdAt - stamp);
-    if (stampDiff < 1000) {
-      // Add the data point to the dp
-      entry.dPs.push(dp);
-      return;
-    } else if (dp.createdAt < stamp) {
-      newStart = start;
-      newEnd = div;
-    } else {
-      newStart = div;
-      newEnd = end;
-    }
-    if (newStart < newEnd) this.popEntry(dp, newStart, newEnd);
+    if (midArrayEl.timestamp > createdAt) return this.popEntry(arr, dp, start, mid - 1);
+    else return this.popEntry(arr, dp, mid + 1, end);
   };
 
   createSegmentedArray = () => {
     let tmp_min = this.minDate;
     const tmp_max = this.maxDate;
     while (tmp_min <= tmp_max) {
-      this.cTSegments.push({ stamp: tmp_min, dPs: [] });
-      tmp_min = new Date(tmp_min.getTime() + 1000);
+      this.cTSegments.push({ timestamp: tmp_min, dataPoints: [], average_engagement: 0, average_mood: 0 });
+      tmp_min = new Date(tmp_min.getTime() + 5000);
+    }
+  };
+
+  wranggleSegments = () => {
+    for (let entry of this.cTSegments) {
+      if (!entry.dataPoints.length) continue;
+      entry.average_engagement = (entry.average_engagement / entry.dataPoints.length).toFixed(2);
+      entry.average_mood = (entry.average_mood / entry.dataPoints.length).toFixed(2);
     }
   };
 
@@ -183,9 +293,9 @@ layout :`.magenta;
       camoff_mo.push(mood);
       return;
     }
-    temp[uuid].eng += engagement;
-    temp[uuid].mo += mood;
-    ++temp[uuid].len;
+    temp[uuid].eng += engagement; // Total engagement
+    temp[uuid].mo += mood; // Total mood
+    ++temp[uuid].len; // length
     // Push engagement to relevant bucket
     // if (engagement > 80) hi_eng.push(engagement);
     // else if (engagement > 60) med_eng.push(engagement);
@@ -277,7 +387,8 @@ layout :`.magenta;
         const averageEng = eng / len;
         const averageMo = mo / len;
 
-        const sessionEntry = this.User.find((r) => r.uuid === userId);
+        const sessionEntry = this.Users[userId];
+        // .find((r) => r.uuid === userId);
         const { name } = sessionEntry;
         userAverages.push({
           uuid: userId,
@@ -308,8 +419,7 @@ layout :`.magenta;
       delete Sector.temp;
       i++;
     }
-
-    console.log(Quad);
+    // console.log(Quad);
   };
 
   redSum = (acc, next) => acc + next;
@@ -317,4 +427,8 @@ layout :`.magenta;
   // =================================================================================================
 }
 
-new RepEngine('1657795180359');
+// new RepEngine('1657795180359');
+
+new RepEngine('1657624740074');
+
+// module.exports = RepEngine;
