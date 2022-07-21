@@ -918,6 +918,9 @@ admin.get('/countryState', async (req, res) => {
     data: countryStatelist,
   });
 });
+
+admin.put('/updateUser', userController.updateUser);
+
 const durationCalculator = (start, end) => {
   return (new Date(end) - new Date(start)) / 1000;
 };
